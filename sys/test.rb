@@ -24,7 +24,7 @@ class TestDueDateMovement < Minitest::Test
     FileUtils.touch(File.join(LATER_DIR, "#{@yesterday_str}.Task overdue.txt"))
     FileUtils.touch(File.join(LATER_DIR, "#{@today_str}.Task due today.txt"))
     FileUtils.touch(File.join(LATER_DIR, "#{@tomorrow_str}.Task due tomorrow.txt"))
-    FileUtils.touch(File.join(LATER_DIR, "Task no date.txt"))
+    FileUtils.touch(File.join(LATER_DIR, "Task no date.txt")) # Date-less task
 
     puts "Contents of TEST_ROOT after setup:"
     puts Dir.glob("#{TEST_ROOT}/**/*").join("\n")
@@ -59,6 +59,8 @@ class TestDueDateMovement < Minitest::Test
            "Activity log should contain a log entry for overdue task."
     assert activity_log_contents.include?("Moved #{@today_str}.Task due today.txt"),
            "Activity log should contain a log entry for due-today task."
+    refute activity_log_contents.include?("Task no date.txt"),
+           "Activity log should not contain any entry for a date-less task."
 
     # Ensure no error log was created
     refute File.exist?(ERROR_LOG), "Error log should not exist if no errors occurred."
