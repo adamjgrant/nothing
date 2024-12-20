@@ -13,9 +13,14 @@ EXTENSIONS_DIR = File.join(BASE_DIR, 'extensions')
 ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
 ERROR_LOG = File.join(SYS_DIR, 'error.log')
 
-# Ensure directories exist
+# Ensure directories exist and include a .keep file
 [ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR ].each do |dir|
-  Dir.mkdir(dir) unless Dir.exist?(dir)
+  unless Dir.exist?(dir)
+    Dir.mkdir(dir)
+  end
+  # Add a .keep file to the directory
+  keep_file = File.join(dir, '.keep')
+  FileUtils.touch(keep_file) unless File.exist?(keep_file)
 end
 
 today = Date.today
