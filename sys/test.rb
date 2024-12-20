@@ -4,74 +4,60 @@ require 'minitest/autorun'
 require 'date'
 
 class TestDueDateMovement < Minitest::Test
-  BASE_DIR = File.expand_path(File.join(__dir__, '..'))
+  TEST_ROOT = File.expand_path(File.join(__dir__, 'test'))
+  BASE_DIR = TEST_ROOT
   LATER_DIR = File.join(BASE_DIR, 'later')
-  ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
-  SYS_DIR = File.join(BASE_DIR, 'sys')
-  EXTENSIONS_DIR = File.join(BASE_DIR, 'extensions')
-  ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
-  ERROR_LOG = File.join(SYS_DIR, 'error.log')
+  ACTIVITY_LOG = File.join(BASE_DIR, 'sys', 'activity.log')
+  ERROR_LOG = File.join(BASE_DIR, 'sys', 'error.log')
 
   def setup
-    [LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR].each do |dir|
-      Dir.mkdir(dir) unless Dir.exist?(dir)
-    end
+    # Ensure the test root directory exists and is clean
+    FileUtils.rm_rf(TEST_ROOT) # Remove any existing test root directory
+    FileUtils.mkdir_p(TEST_ROOT) # Create a clean test root directory
 
-    FileUtils.rm_f(ACTIVITY_LOG)
-    FileUtils.rm_f(ERROR_LOG)
-    cleanup_test_files
-
+    # Create test task files in the 'later/' directory
     @today_str = Date.today.strftime('%Y%m%d')
     @yesterday_str = (Date.today - 1).strftime('%Y%m%d')
     @tomorrow_str = (Date.today + 1).strftime('%Y%m%d')
 
+    FileUtils.mkdir_p(LATER_DIR) # Create the 'later' directory for tasks
     FileUtils.touch(File.join(LATER_DIR, "task_overdue.#{@yesterday_str}.txt"))
     FileUtils.touch(File.join(LATER_DIR, "task_due_today.#{@today_str}.txt"))
     FileUtils.touch(File.join(LATER_DIR, "task_due_tomorrow.#{@tomorrow_str}.txt"))
     FileUtils.touch(File.join(LATER_DIR, "task_no_date.txt"))
   end
 
-  def teardown
-    cleanup_test_files
-  end
-
   def test_due_date_movement
-    Dir.chdir(BASE_DIR) do
-      system("ruby script.rb")
-    end
+    # Run the main script with the test root directory
+    system("ruby #{File.join(__dir__, '..', 'nothing.rb')} #{TEST_ROOT}")
 
-    # Check that overdue & due-today tasks moved
+    # Check that overdue and due-today tasks moved to the root directory
     assert File.exist?(File.join(BASE_DIR, "task_overdue.#{@yesterday_str}.txt")),
-           "Overdue task should have been moved."
+           "Overdue task should have been moved to the base directory."
     assert File.exist?(File.join(BASE_DIR, "task_due_today.#{@today_str}.txt")),
-           "Due-today task should have been moved."
+           "Due-today task should have been moved to the base directory."
 
-    # Tomorrow and no-date remain in later
+    # Ensure overdue and due-today tasks are no longer in 'later/'
+    refute File.exist?(File.join(LATER_DIR, "task_overdue.#{@yesterday_str}.txt")),
+           "Overdue task should no longer be in 'later'."
+    refute File.exist?(File.join(LATER_DIR, "task_due_today.#{@today_str}.txt")),
+           "Due-today task should no longer be in 'later'."
+
+    # Ensure future-dated and no-date tasks remain in 'later/'
     assert File.exist?(File.join(LATER_DIR, "task_due_tomorrow.#{@tomorrow_str}.txt")),
-           "Tomorrow’s task should still be in later."
+           "Tomorrow’s task should still be in 'later'."
     assert File.exist?(File.join(LATER_DIR, "task_no_date.txt")),
-           "No-date task should remain in later."
+           "No-date task should remain in 'later'."
 
-    # Activity log created
+    # Check activity log for entries
     assert File.exist?(ACTIVITY_LOG), "Activity log should be created."
-    # No errors
-    refute File.exist?(ERROR_LOG), "Error log should not exist if no errors."
-  end
+    activity_log_contents = File.read(ACTIVITY_LOG)
+    assert activity_log_contents.include?("Moved task_overdue.#{@yesterday_str}.txt"),
+           "Activity log should contain a log entry for overdue task."
+    assert activity_log_contents.include?("Moved task_due_today.#{@today_str}.txt"),
+           "Activity log should contain a log entry for due-today task."
 
-  private
-
-  def cleanup_test_files
-    # Remove test files from later and from BASE_DIR
-    Dir.foreach(LATER_DIR) do |f|
-      next if f == '.' || f == '..'
-      FileUtils.rm(File.join(LATER_DIR, f))
-    end
-
-    Dir.foreach(BASE_DIR) do |f|
-      next if f == '.' || f == '..' || File.directory?(File.join(BASE_DIR, f))
-      if f.start_with?('task_overdue') || f.start_with?('task_due_today')
-        FileUtils.rm(File.join(BASE_DIR, f))
-      end
-    end
+    # Ensure no error log was created
+    refute File.exist?(ERROR_LOG), "Error log should not exist if no errors occurred."
   end
 end

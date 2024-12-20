@@ -2,7 +2,10 @@
 require 'fileutils'
 require 'date'
 
-BASE_DIR = File.expand_path(File.dirname(__FILE__))
+# Set the root directory to the provided argument or default to the current directory
+root_dir = ARGV[0] || Dir.pwd
+
+BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, 'later')
 ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
 SYS_DIR = File.join(BASE_DIR, 'sys')
