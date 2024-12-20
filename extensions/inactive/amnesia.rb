@@ -37,22 +37,30 @@ Dir.foreach(BASE_DIR) do |filename|
   puts "Days old: #{days_old}" # Debugging
 
   if days_old > 3
-    # Count existing skulls in the title
-    skulls_match = filename.match(/^(💀+)/)
+    # Match and count any skull emoji (💀) at the beginning of the filename
+    skulls_match = filename.match(/^(\u{1F480}+)/)
     existing_skulls = skulls_match ? skulls_match[1].length : 0
-
-    puts "Existing skulls: #{existing_skulls}" # Debugging
-
+  
+    puts "Processing file: #{file_path}"
+    puts "Existing skulls for #{filename}: #{existing_skulls}" # Debugging
+  
     if existing_skulls < 4
       new_skulls = '💀' * (existing_skulls + 1)
-      new_filename = "#{new_skulls}#{filename.gsub(/^(💀+)/, '')}"
+      new_filename = "#{new_skulls}#{filename.gsub(/^(\u{1F480}+)/, '')}"
       puts "Renaming to: #{new_filename}" # Debugging
       File.rename(file_path, File.join(BASE_DIR, new_filename))
-    elsif existing_skulls == 4
+    elsif existing_skulls >= 4
+      # Ensure the full path to the file is used
+      archived_path = File.join(ARCHIVED_DIR, File.basename(file_path))
+      puts "Archiving file: #{file_path} to #{archived_path}" # Debugging
+  
       # Move the file to the archived directory
-      archived_path = File.join(ARCHIVED_DIR, filename)
-      puts "Archiving: #{archived_path}" # Debugging
-      FileUtils.mv(file_path, archived_path)
+      begin
+        FileUtils.mv(file_path, archived_path)
+        puts "File successfully archived: #{archived_path}" # Debugging
+      rescue => e
+        puts "Error archiving file: #{e.message}" # Debugging
+      end
     end
   end
 end
