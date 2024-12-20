@@ -36,11 +36,11 @@ def run_extensions
   end
 end
 
-def parse_yyyymmdd(str)
-  year = str[0..3].to_i
-  month = str[4..5].to_i
-  day = str[6..7].to_i
-  Date.new(year, month, day) rescue nil
+def parse_yyyymmdd_prefix(filename)
+  match = filename.match(/^(\d{8})\./)
+  return Date.strptime(match[1], '%Y%m%d') if match
+rescue ArgumentError
+  nil
 end
 
 begin
@@ -49,22 +49,17 @@ begin
   Dir.foreach(LATER_DIR) do |filename|
     next if filename == '.' || filename == '..'
 
-    # Filename format: "<task>.<YYYYMMDD>.<ext>" or "<task>.<ext>"
-    parts = filename.split('.')
-    if parts.size >= 3
-      potential_date_str = parts[-2]
-      if potential_date_str.match?(/^\d{8}$/)
-        due_date = parse_yyyymmdd(potential_date_str)
-        if due_date && due_date <= today
-          from_path = File.join(LATER_DIR, filename)
-          to_path = File.join(BASE_DIR, filename)
-          FileUtils.mv(from_path, to_path)
-          File.open(ACTIVITY_LOG, 'a') do |f|
-            f.puts "#{Time.now} Moved #{filename} from 'later' to '#{BASE_DIR}'."
-          end
-          moved_tasks = true
-        end
+    # Parse the optional date prefix
+    due_date = parse_yyyymmdd_prefix(filename)
+
+    if due_date && due_date <= today
+      from_path = File.join(LATER_DIR, filename)
+      to_path = File.join(BASE_DIR, filename)
+      FileUtils.mv(from_path, to_path)
+      File.open(ACTIVITY_LOG, 'a') do |f|
+        f.puts "#{Time.now} Moved #{filename} from 'later' to '#{BASE_DIR}'."
       end
+      moved_tasks = true
     end
   end
 
