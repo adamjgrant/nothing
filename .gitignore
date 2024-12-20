@@ -2,3 +2,6 @@ later
 archived
 *.log
 test
+*.txt
+*.md                # Ignore all .md files
+!README.md          # Re-include README.md
