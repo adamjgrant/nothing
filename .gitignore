@@ -5,4 +5,4 @@ test
 !test/nothing_test.rb
 *.txt
 *.md                # Ignore all .md files
-!README.md          # Re-include README.md
+!/README.md          # Re-include README.md
