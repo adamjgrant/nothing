@@ -43,11 +43,9 @@ setup_test_environment
 
 # Dynamically load all test files in the root and extensions/tests
 Dir.glob(File.expand_path('nothing_test.rb', __dir__)).each do |test_file|
-  puts "Requiring test file: #{test_file}" # Debugging
   require test_file
 end
 
 Dir.glob(File.join(TEST_EXTENSIONS_DIR, '**', '*_test.rb')).each do |extension_test_file|
-  puts "Requiring extension test file: #{extension_test_file}" # Debugging
   require extension_test_file
 end

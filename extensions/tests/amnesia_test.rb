@@ -3,8 +3,6 @@ require_relative '../../extensions/amnesia' # Update the relative path to `amnes
 
 class AmnesiaTest < Minitest::Test
   def setup
-    puts "Setting up test environment for AmnesiaTest"
-    
     # Create test directories and files
     @test_root = File.expand_path('../../../test', __dir__)
     FileUtils.mkdir_p(File.join(@test_root, 'archived')) # Ensure 'archived' directory exists
@@ -35,8 +33,6 @@ class AmnesiaTest < Minitest::Test
   
     File.write(@today_file, "Task content")
     FileUtils.touch(@today_file, mtime: now)
-  
-    puts "Test environment setup complete"
   end
 
   def test_three_days_old_task

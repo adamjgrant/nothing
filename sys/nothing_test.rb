@@ -6,9 +6,9 @@ class TestDueDateMovement < Minitest::Test
     system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
 
     # Verify overdue and due-today tasks were moved to the base directory
-    assert File.exist?(File.join(BASE_DIR, "#{(Date.today - 1).strftime('%Y%m%d')}.Task overdue.txt")),
+    assert File.exist?(File.join(TEST_ROOT, "#{(Date.today - 1).strftime('%Y%m%d')}.Task overdue.txt")),
            "Overdue task should have been moved to the base directory."
-    assert File.exist?(File.join(BASE_DIR, "#{Date.today.strftime('%Y%m%d')}.Task due today.txt")),
+    assert File.exist?(File.join(TEST_ROOT, "#{Date.today.strftime('%Y%m%d')}.Task due today.txt")),
            "Due-today task should have been moved to the base directory."
 
     # Verify overdue and due-today tasks are no longer in 'later/'
