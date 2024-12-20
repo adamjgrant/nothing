@@ -1,12 +1,5 @@
 # amnesia.rb
 # This extension gradually "erases" tasks over time based on their last modified date.
-# Rules:
-# 1. If the last modified date of a task file is more than 3 days old, add a skull emoji
-#    (💀) in front of the title portion of the filename (not the date in the filename).
-# 2. For each additional day, add one more skull in front of the existing skulls.
-# 3. Once a filename has four skulls (💀💀💀💀), move the task to the 'archived' directory.
-#
-# To activate this extension, move it out of the 'inactive' folder and into the 'extensions' folder.
 
 require 'fileutils'
 require 'date'
@@ -36,31 +29,32 @@ Dir.foreach(BASE_DIR) do |filename|
   puts "Last modified time: #{last_modified}" # Debugging
   puts "Days old: #{days_old}" # Debugging
 
-  if days_old > 3
-    # Match and count any skull emoji (💀) at the beginning of the filename
-    skulls_match = filename.match(/^(\u{1F480}+)/)
-    existing_skulls = skulls_match ? skulls_match[1].length : 0
-  
-    puts "Processing file: #{file_path}"
-    puts "Existing skulls for #{filename}: #{existing_skulls}" # Debugging
-  
-    if existing_skulls < 4
-      new_skulls = '💀' * (existing_skulls + 1)
-      new_filename = "#{new_skulls}#{filename.gsub(/^(\u{1F480}+)/, '')}"
-      puts "Renaming to: #{new_filename}" # Debugging
-      File.rename(file_path, File.join(BASE_DIR, new_filename))
-    elsif existing_skulls >= 4
-      # Ensure the full path to the file is used
-      archived_path = File.join(ARCHIVED_DIR, File.basename(file_path))
-      puts "Archiving file: #{file_path} to #{archived_path}" # Debugging
-  
-      # Move the file to the archived directory
-      begin
-        FileUtils.mv(file_path, archived_path)
-        puts "File successfully archived: #{archived_path}" # Debugging
-      rescue => e
-        puts "Error archiving file: #{e.message}" # Debugging
-      end
+  # Determine the number of skulls based on days_old
+  skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
+
+  if skull_count > 0
+    skulls = '💀' * [skull_count, 4].min # Cap the skull count at 4
+    base_name = filename.gsub(/^(\u{1F480}+)/, '') # Remove any existing skulls
+    new_filename = "#{skulls}#{base_name}"
+    new_file_path = File.join(BASE_DIR, new_filename)
+
+    # Rename the file with the correct number of skulls
+    if new_filename != filename
+      puts "Renaming file to: #{new_filename}" # Debugging
+      File.rename(file_path, new_file_path)
+      file_path = new_file_path # Update the file_path to reflect the rename
+    end
+  end
+
+  # Archive the file if it has reached 6 or more days old
+  if days_old >= 6
+    archived_path = File.join(ARCHIVED_DIR, File.basename(file_path))
+    puts "Archiving file: #{file_path} to #{archived_path}" # Debugging
+    begin
+      FileUtils.mv(file_path, archived_path)
+      puts "File successfully archived: #{archived_path}" # Debugging
+    rescue => e
+      puts "Error archiving file: #{e.message}" # Debugging
     end
   end
 end
