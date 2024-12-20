@@ -21,10 +21,13 @@ class TestDueDateMovement < Minitest::Test
     @tomorrow_str = (Date.today + 1).strftime('%Y%m%d')
 
     FileUtils.mkdir_p(LATER_DIR) # Create the 'later' directory for tasks
-    FileUtils.touch(File.join(LATER_DIR, "task_overdue.#{@yesterday_str}.txt"))
-    FileUtils.touch(File.join(LATER_DIR, "task_due_today.#{@today_str}.txt"))
-    FileUtils.touch(File.join(LATER_DIR, "task_due_tomorrow.#{@tomorrow_str}.txt"))
-    FileUtils.touch(File.join(LATER_DIR, "task_no_date.txt"))
+    FileUtils.touch(File.join(LATER_DIR, "#{@yesterday_str}.Task overdue.txt"))
+    FileUtils.touch(File.join(LATER_DIR, "#{@today_str}.Task due today.txt"))
+    FileUtils.touch(File.join(LATER_DIR, "#{@tomorrow_str}.Task due tomorrow.txt"))
+    FileUtils.touch(File.join(LATER_DIR, "Task no date.txt"))
+
+    puts "Contents of TEST_ROOT after setup:"
+    puts Dir.glob("#{TEST_ROOT}/**/*").join("\n")
   end
 
   def test_due_date_movement
@@ -32,29 +35,29 @@ class TestDueDateMovement < Minitest::Test
     system("ruby #{File.join(__dir__, '..', 'nothing.rb')} #{TEST_ROOT}")
 
     # Check that overdue and due-today tasks moved to the root directory
-    assert File.exist?(File.join(BASE_DIR, "task_overdue.#{@yesterday_str}.txt")),
+    assert File.exist?(File.join(BASE_DIR, "#{@yesterday_str}.Task overdue.txt")),
            "Overdue task should have been moved to the base directory."
-    assert File.exist?(File.join(BASE_DIR, "task_due_today.#{@today_str}.txt")),
+    assert File.exist?(File.join(BASE_DIR, "#{@today_str}.Task due today.txt")),
            "Due-today task should have been moved to the base directory."
 
     # Ensure overdue and due-today tasks are no longer in 'later/'
-    refute File.exist?(File.join(LATER_DIR, "task_overdue.#{@yesterday_str}.txt")),
+    refute File.exist?(File.join(LATER_DIR, "#{@yesterday_str}.Task overdue.txt")),
            "Overdue task should no longer be in 'later'."
-    refute File.exist?(File.join(LATER_DIR, "task_due_today.#{@today_str}.txt")),
+    refute File.exist?(File.join(LATER_DIR, "#{@today_str}.Task due today.txt")),
            "Due-today task should no longer be in 'later'."
 
     # Ensure future-dated and no-date tasks remain in 'later/'
-    assert File.exist?(File.join(LATER_DIR, "task_due_tomorrow.#{@tomorrow_str}.txt")),
+    assert File.exist?(File.join(LATER_DIR, "#{@tomorrow_str}.Task due tomorrow.txt")),
            "Tomorrow’s task should still be in 'later'."
-    assert File.exist?(File.join(LATER_DIR, "task_no_date.txt")),
+    assert File.exist?(File.join(LATER_DIR, "Task no date.txt")),
            "No-date task should remain in 'later'."
 
     # Check activity log for entries
     assert File.exist?(ACTIVITY_LOG), "Activity log should be created."
     activity_log_contents = File.read(ACTIVITY_LOG)
-    assert activity_log_contents.include?("Moved task_overdue.#{@yesterday_str}.txt"),
+    assert activity_log_contents.include?("Moved #{@yesterday_str}.Task overdue.txt"),
            "Activity log should contain a log entry for overdue task."
-    assert activity_log_contents.include?("Moved task_due_today.#{@today_str}.txt"),
+    assert activity_log_contents.include?("Moved #{@today_str}.Task due today.txt"),
            "Activity log should contain a log entry for due-today task."
 
     # Ensure no error log was created
