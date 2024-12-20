@@ -17,7 +17,25 @@ end
 
 today = Date.today
 
+def run_extensions
+  Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
+    begin
+      load extension_file
+      File.open(ACTIVITY_LOG, 'a') do |f|
+        f.puts "#{Time.now} Ran extension: #{File.basename(extension_file)}"
+      end
+    rescue => e
+      File.open(ERROR_LOG, 'a') do |f|
+        f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
+        f.puts e.backtrace
+      end
+    end
+  end
+end
+
 begin
+  moved_tasks = false
+
   Dir.foreach(LATER_DIR) do |filename|
     next if filename == '.' || filename == '..'
 
@@ -34,12 +52,22 @@ begin
           File.open(ACTIVITY_LOG, 'a') do |f|
             f.puts "#{Time.now} Moved #{filename} from 'later' to '#{BASE_DIR}'."
           end
+          moved_tasks = true
         end
       end
     end
   end
 
-  # After processing tasks, run any extension scripts
+  # Add log entry indicating script ran, even if no tasks were moved
+  File.open(ACTIVITY_LOG, 'a') do |f|
+    if moved_tasks
+      f.puts "#{Time.now} Script completed. Tasks were processed successfully."
+    else
+      f.puts "#{Time.now} Script completed. No tasks to process."
+    end
+  end
+
+  # Run any extension scripts
   run_extensions
 rescue => e
   File.open(ERROR_LOG, 'a') do |f|
@@ -53,20 +81,4 @@ def parse_yyyymmdd(str)
   month = str[4..5].to_i
   day = str[6..7].to_i
   Date.new(year, month, day) rescue nil
-end
-
-def run_extensions
-  Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
-    begin
-      load extension_file
-      File.open(ACTIVITY_LOG, 'a') do |f|
-        f.puts "#{Time.now} Ran extension: #{File.basename(extension_file)}"
-      end
-    rescue => e
-      File.open(ERROR_LOG, 'a') do |f|
-        f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
-        f.puts e.backtrace
-      end
-    end
-  end
 end
