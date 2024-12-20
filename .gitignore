@@ -2,6 +2,7 @@ later
 archived
 *.log
 test
+!test/nothing_test.rb
 *.txt
 *.md                # Ignore all .md files
 !README.md          # Re-include README.md
