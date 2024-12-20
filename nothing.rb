@@ -36,6 +36,13 @@ def run_extensions
   end
 end
 
+def parse_yyyymmdd(str)
+  year = str[0..3].to_i
+  month = str[4..5].to_i
+  day = str[6..7].to_i
+  Date.new(year, month, day) rescue nil
+end
+
 begin
   moved_tasks = false
 
@@ -77,11 +84,4 @@ rescue => e
     f.puts "#{Time.now} Error: #{e.message}"
     f.puts e.backtrace
   end
-end
-
-def parse_yyyymmdd(str)
-  year = str[0..3].to_i
-  month = str[4..5].to_i
-  day = str[6..7].to_i
-  Date.new(year, month, day) rescue nil
 end
