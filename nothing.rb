@@ -9,9 +9,9 @@ BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, 'later')
 ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
 SYS_DIR = File.join(BASE_DIR, 'sys')
-EXTENSIONS_DIR = File.join(BASE_DIR, 'extensions')
+EXTENSIONS_DIR = File.join(SYS_DIR, 'extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive')
-EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests') # New directory for extension tests
+EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests')
 ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
 ERROR_LOG = File.join(SYS_DIR, 'error.log')
 

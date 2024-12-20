@@ -9,9 +9,9 @@ LATER_DIR = File.join(TEST_ROOT, 'later')
 ARCHIVED_DIR = File.join(TEST_ROOT, 'archived')
 ACTIVITY_LOG = File.join(TEST_ROOT, 'sys', 'activity.log')
 ERROR_LOG = File.join(TEST_ROOT, 'sys', 'error.log')
-EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, 'extensions')
+EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, 'sys/extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_SRC_DIR, 'inactive')
-TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, 'extensions')
+TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, 'sys/extensions')
 
 def setup_test_environment
   # Completely reset the test root directory
