@@ -96,37 +96,33 @@ class TestDueDateMovement < Minitest::Test
   end
 
   def test_extensions
-    # Force load all test files before discovery
+    # Dynamically load all test files for extensions
     puts "Loading extension test files..."
     Dir.glob(File.join(EXTENSIONS_TESTS_DIR, '*.rb')).each do |test_file|
       puts "Requiring test file: #{test_file}" # Debugging
       require test_file
     end
   
-    # Discover subclasses of ExtensionTestBase
+    # Discover and run subclasses of ExtensionTestBase
     puts "Discovering subclasses of ExtensionTestBase:"
     subclasses = ObjectSpace.each_object(Class).select do |klass|
       klass < ExtensionTestBase && klass != ExtensionTestBase
     end
   
-    subclasses.each do |klass|
-      puts "Found subclass: #{klass}"
-    end
-  
     if subclasses.empty?
       puts "No subclasses of ExtensionTestBase found."
-    end
-  
-    subclasses.each do |klass|
-      puts "Running tests for subclass: #{klass}"
-      begin
-        extension_test = klass.new('test_extensions') # Pass the test method name explicitly
-        extension_test.run
-      rescue NotImplementedError => e
-        puts "ERROR: #{e.message}"
-      rescue => e
-        puts "Unexpected error while running #{klass}: #{e.message}"
-        puts e.backtrace
+    else
+      subclasses.each do |klass|
+        puts "Running tests for subclass: #{klass}"
+        begin
+          extension_test = klass.new('test_extensions') # Pass the test method name explicitly
+          extension_test.run # Run the test
+        rescue NotImplementedError => e
+          puts "ERROR: #{e.message}"
+        rescue => e
+          puts "Unexpected error while running #{klass}: #{e.message}"
+          puts e.backtrace
+        end
       end
     end
   end
