@@ -9,6 +9,8 @@
    - `archived/`: For manually archiving tasks once done (not auto-managed).  
    - `sys/`: Logs (`activity.log`, `error.log`) and test utilities.
    - `extensions/`: Ruby scripts placed here will be run after the main script finishes its task management. Initially empty.
+   - `extensions/inactive/`: Place extensions here to deactivate them.
+   - `extensions/tests/`: Store test scripts for extensions here. These tests should be written to verify the functionality of individual extensions.
 
 2. **Task File Naming:**
    Tasks can optionally start with a date in the `YYYYMMDD` format.  
@@ -25,8 +27,56 @@
    - Place `.rb` files in the `extensions/` directory to extend functionality.
    - Extensions run after the main task-moving logic.
 
-## Running the Script
+## How to Write an Extension
 
-1. To run the script:
-   ```bash
-   ruby nothing.rb
+Extensions are Ruby scripts that add custom functionality to `nothing.rb`. They run automatically after the main task-moving logic completes. Extensions can include tests to verify their functionality and must adhere to the guidelines below for consistency.
+
+### **Writing an Extension**
+1. **File Placement:**
+   - Place active extensions in the `extensions/` directory.
+   - Place inactive extensions in the `extensions/inactive/` directory to disable them temporarily.
+   - Use the `extensions/tests/` directory to store tests specific to your extension.
+
+2. **Custom Root Directory:**
+   - Extensions must accept a custom root directory as a command-line argument to ensure they can run in test environments.
+   - Use this boilerplate code to determine the root directory:
+     ```ruby
+     root_dir = ARGV[0] || Dir.pwd
+     ```
+
+3. **Extension Behavior:**
+   - Write your logic to manipulate files and directories using the root directory.
+   - Avoid modifying the core directories (`later/`, `archived/`, `sys/`) unless necessary.
+   - Log activity if your extension performs significant actions.
+
+4. **Adding Tests for Your Extension:**
+   - Create a test script in the `extensions/tests/` directory.
+   - Your test script should define a class that inherits from `ExtensionTestBase` (defined in the main test framework).
+   - Implement the `setup` method to prepare your environment and the `test_extensions` method to verify functionality.
+
+### **Example Extension Script**
+Below is a template for a simple extension:
+
+```ruby
+# my_extension_test.rb
+require_relative '../../../sys/test'
+
+class MyExtensionTest < ExtensionTestBase
+  def setup
+    super
+    puts "Setting up test environment for MyExtension"
+    # Add setup logic specific to your extension
+  end
+
+  def test_extensions
+    puts "Running tests for MyExtension"
+    # Add assertions and test logic for your extension
+  end
+end
+```
+
+Testing your extension
+
+```bash
+ruby sys/test.rb
+```

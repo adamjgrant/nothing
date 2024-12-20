@@ -10,12 +10,13 @@ LATER_DIR = File.join(BASE_DIR, 'later')
 ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
 SYS_DIR = File.join(BASE_DIR, 'sys')
 EXTENSIONS_DIR = File.join(BASE_DIR, 'extensions')
-INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive') # New directory for inactive extensions
+INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive')
+EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests') # New directory for extension tests
 ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
 ERROR_LOG = File.join(SYS_DIR, 'error.log')
 
 # Ensure directories exist and include a .keep file
-[ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR ].each do |dir|
+[ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR, EXTENSIONS_TESTS_DIR ].each do |dir|
   unless Dir.exist?(dir)
     Dir.mkdir(dir)
   end
@@ -26,15 +27,16 @@ end
 
 today = Date.today
 
-def run_extensions
-  Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
+def run_extensions(root_dir)
+  extensions_dir = File.join(root_dir, 'extensions')
+  Dir.glob(File.join(extensions_dir, '*.rb')).each do |extension_file|
     begin
-      load extension_file
-      File.open(ACTIVITY_LOG, 'a') do |f|
+      system("ruby #{extension_file} #{root_dir}")
+      File.open(File.join(root_dir, 'sys', 'activity.log'), 'a') do |f|
         f.puts "#{Time.now} Ran extension: #{File.basename(extension_file)}"
       end
     rescue => e
-      File.open(ERROR_LOG, 'a') do |f|
+      File.open(File.join(root_dir, 'sys', 'error.log'), 'a') do |f|
         f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
         f.puts e.backtrace
       end
@@ -79,7 +81,7 @@ begin
   end
 
   # Run any extension scripts
-  run_extensions
+  run_extensions(BASE_DIR)
 rescue => e
   File.open(ERROR_LOG, 'a') do |f|
     f.puts "#{Time.now} Error: #{e.message}"
