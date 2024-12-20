@@ -6,9 +6,9 @@ require 'date'
 root_dir = ARGV[0] || Dir.pwd
 
 BASE_DIR = root_dir
-LATER_DIR = File.join(BASE_DIR, 'later')
-ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
-SYS_DIR = File.join(BASE_DIR, 'sys')
+LATER_DIR = File.join(BASE_DIR, '_later')
+ARCHIVED_DIR = File.join(BASE_DIR, '_archived')
+SYS_DIR = File.join(BASE_DIR, '_sys')
 EXTENSIONS_DIR = File.join(SYS_DIR, 'extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive')
 EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests')
@@ -32,11 +32,11 @@ def run_extensions(root_dir)
   Dir.glob(File.join(extensions_dir, '*.rb')).each do |extension_file|
     begin
       system("ruby #{extension_file} #{root_dir}")
-      File.open(File.join(root_dir, 'sys', 'activity.log'), 'a') do |f|
+      File.open(File.join(root_dir, '_sys', 'activity.log'), 'a') do |f|
         f.puts "#{Time.now} Ran extension: #{File.basename(extension_file)}"
       end
     rescue => e
-      File.open(File.join(root_dir, 'sys', 'error.log'), 'a') do |f|
+      File.open(File.join(root_dir, '_sys', 'error.log'), 'a') do |f|
         f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
         f.puts e.backtrace
       end

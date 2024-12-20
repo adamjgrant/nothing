@@ -4,14 +4,14 @@ require 'date'
 
 # Test environment setup paths
 ROOT_DIR = File.expand_path('..', __dir__) # Correctly points to the root directory
-TEST_ROOT = File.join(ROOT_DIR, 'sys/test')
-LATER_DIR = File.join(TEST_ROOT, 'later')
-ARCHIVED_DIR = File.join(TEST_ROOT, 'archived')
-ACTIVITY_LOG = File.join(TEST_ROOT, 'sys', 'activity.log')
-ERROR_LOG = File.join(TEST_ROOT, 'sys', 'error.log')
-EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, 'sys/extensions')
+TEST_ROOT = File.join(ROOT_DIR, '_sys/test')
+LATER_DIR = File.join(TEST_ROOT, '_later')
+ARCHIVED_DIR = File.join(TEST_ROOT, '_archived')
+ACTIVITY_LOG = File.join(TEST_ROOT, '_sys', 'activity.log')
+ERROR_LOG = File.join(TEST_ROOT, '_sys', 'error.log')
+EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, '_sys/extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_SRC_DIR, 'inactive')
-TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, 'sys/extensions')
+TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, '_sys/extensions')
 
 def setup_test_environment
   # Completely reset the test root directory

@@ -8,7 +8,7 @@ require 'date'
 root_dir = ARGV[0] || Dir.pwd
 
 BASE_DIR = root_dir
-ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
+ARCHIVED_DIR = File.join(BASE_DIR, '_archived')
 
 # Ensure the archived directory exists
 FileUtils.mkdir_p(ARCHIVED_DIR) unless Dir.exist?(ARCHIVED_DIR)
