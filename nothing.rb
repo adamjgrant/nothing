@@ -10,11 +10,12 @@ LATER_DIR = File.join(BASE_DIR, 'later')
 ARCHIVED_DIR = File.join(BASE_DIR, 'archived')
 SYS_DIR = File.join(BASE_DIR, 'sys')
 EXTENSIONS_DIR = File.join(BASE_DIR, 'extensions')
+INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive') # New directory for inactive extensions
 ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
 ERROR_LOG = File.join(SYS_DIR, 'error.log')
 
 # Ensure directories exist and include a .keep file
-[ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR ].each do |dir|
+[ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR ].each do |dir|
   unless Dir.exist?(dir)
     Dir.mkdir(dir)
   end
