@@ -38,6 +38,13 @@ class TestDueDateMovement < Minitest::Test
       FileUtils.cp(extension_file, target_path)
     end
   
+    # Move inactive extensions to active extensions for testing
+    inactive_extensions_dir = File.join(test_extensions_dir, 'inactive')
+    Dir.glob(File.join(inactive_extensions_dir, '*.rb')).each do |inactive_extension|
+      active_extension_path = File.join(test_extensions_dir, File.basename(inactive_extension))
+      FileUtils.mv(inactive_extension, active_extension_path)
+    end
+  
     # Create test task files in the 'later/' directory
     @today_str = Date.today.strftime('%Y%m%d')
     @yesterday_str = (Date.today - 1).strftime('%Y%m%d')

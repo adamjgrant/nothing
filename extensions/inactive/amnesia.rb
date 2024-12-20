@@ -9,6 +9,7 @@
 # To activate this extension, move it out of the 'inactive' folder and into the 'extensions' folder.
 
 require 'fileutils'
+require 'date'
 
 # Accept a root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
@@ -22,29 +23,36 @@ FileUtils.mkdir_p(ARCHIVED_DIR) unless Dir.exist?(ARCHIVED_DIR)
 # Process all task files in the base directory
 Dir.foreach(BASE_DIR) do |filename|
   next if filename == '.' || filename == '..'
-  next unless filename.match?(/^\d{8}\./) || filename.match?(/^[^💀]+/) # Ensure it's a task file
+  next if filename.start_with?('.') # Skip hidden files (like `.keep`)
 
   file_path = File.join(BASE_DIR, filename)
-  next unless File.file?(file_path) # Skip directories or non-files
+  next unless File.file?(file_path) # Skip directories
 
+  # Calculate how many days old the file is
   last_modified = File.mtime(file_path)
   days_old = (Date.today - last_modified.to_date).to_i
 
-  if days_old > 3
-    title_start = filename.index('.') + 1
-    title = filename[title_start..-1]
+  puts "Processing file: #{file_path}" # Debugging
+  puts "Last modified time: #{last_modified}" # Debugging
+  puts "Days old: #{days_old}" # Debugging
 
+  if days_old > 3
     # Count existing skulls in the title
-    skulls_match = title.match(/^(💀+)/)
+    skulls_match = filename.match(/^(💀+)/)
     existing_skulls = skulls_match ? skulls_match[1].length : 0
+
+    puts "Existing skulls: #{existing_skulls}" # Debugging
 
     if existing_skulls < 4
       new_skulls = '💀' * (existing_skulls + 1)
-      new_filename = filename[0...title_start] + new_skulls + title.gsub(/^(💀+)/, '')
+      new_filename = "#{new_skulls}#{filename.gsub(/^(💀+)/, '')}"
+      puts "Renaming to: #{new_filename}" # Debugging
       File.rename(file_path, File.join(BASE_DIR, new_filename))
     elsif existing_skulls == 4
       # Move the file to the archived directory
-      FileUtils.mv(file_path, File.join(ARCHIVED_DIR, filename))
+      archived_path = File.join(ARCHIVED_DIR, filename)
+      puts "Archiving: #{archived_path}" # Debugging
+      FileUtils.mv(file_path, archived_path)
     end
   end
 end
