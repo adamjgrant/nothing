@@ -34,6 +34,5 @@ Dir.foreach(root_dir) do |filename|
 
     # Rename the file
     File.rename(file_path, new_file_path)
-    puts "Renamed #{filename} to #{new_filename}" # Debugging output
   end
 end

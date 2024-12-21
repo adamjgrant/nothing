@@ -20,7 +20,7 @@ class ConvertDayToDateTest < Minitest::Test
 
   def test_convert_today_to_date
     # Run the extension
-    extension_path = File.expand_path('../../convert_day_to_date.rb', __dir__)
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
 
     # Verify today's file is renamed correctly
