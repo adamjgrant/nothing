@@ -75,7 +75,7 @@ Dir.foreach(archived_dir) do |filename|
   file_path = File.join(archived_dir, filename)
 
   # Match files with the repetition rule format
-  if filename =~ /^(\d{8})\.(.+)\.(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
+  if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)\.(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
     date_prefix = $1
     task_name = $2
     rule = $3
@@ -113,7 +113,7 @@ Dir.foreach(root_dir) do |filename|
   file_path = File.join(root_dir, filename)
 
   # Match files with the strict repetition rule format
-  if filename =~ /^(\d{8})\.(.+)\.@(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
+  if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)\.@(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
     date_prefix = $1
     task_name = $2
     rule = $3
