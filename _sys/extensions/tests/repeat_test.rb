@@ -84,4 +84,28 @@ class RepeatingTaskTest < Minitest::Test
     expected_strict_weekday_file = File.join(@later_dir, "#{next_friday.strftime('%Y-%m-%d')}.mytask-friday-strict.@friday.txt")
     assert File.exist?(expected_strict_weekday_file), "Strict weekday repeating task for Friday was not created."
   end
+
+  def test_strict_repeating_task_with_future_base_date
+    # Calculate [5d] dynamically
+    future_date = @today + 5
+    base_date_str = future_date.strftime('%Y-%m-%d')
+    task_name = "James"
+    repeat_rule = "@1w"
+    extension = ".md"
+  
+    # Create the test file with [5d] as the base date
+    future_file = File.join(@root_dir, "#{base_date_str}.#{task_name}.#{repeat_rule}#{extension}")
+    File.write(future_file, "Test content for #{File.basename(future_file)}")
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/repeat.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Calculate the expected next file's date
+    expected_next_date = future_date + 7
+    expected_next_file = File.join(@later_dir, "#{expected_next_date.strftime('%Y-%m-%d')}.#{task_name}.#{repeat_rule}#{extension}")
+  
+    # Check if the next repeating file was created
+    assert File.exist?(expected_next_file), "Strict repeating task with future base date was not created."
+  end
 end
