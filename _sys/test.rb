@@ -3,7 +3,7 @@ require 'minitest/autorun'
 require 'date'
 
 # Test environment setup paths
-ROOT_DIR = File.expand_path('..', __dir__) # Correctly points to the root directory
+ROOT_DIR = File.expand_path('..', __dir__)
 TEST_ROOT = File.join(ROOT_DIR, '_sys/test')
 LATER_DIR = File.join(TEST_ROOT, '_later')
 ARCHIVED_DIR = File.join(TEST_ROOT, '_archived')
@@ -41,13 +41,13 @@ end
 # Set up the test environment before running any tests
 setup_test_environment
 
-# Dynamically load all test files in the root and extensions/tests, excluding inactive
-Dir.glob(File.expand_path('nothing_test.rb', __dir__)).each do |test_file|
-  require test_file
-end
+# Explicitly load `nothing_test.rb`
+nothing_test_file = File.expand_path('nothing_test.rb', __dir__)
+require nothing_test_file
 
+# Dynamically load only active _test.rb files in the extensions directory
 Dir.glob(File.join(TEST_EXTENSIONS_DIR, '**', '*_test.rb')).each do |extension_test_file|
-  # Skip any test files in the inactive directory
+  # Skip test files in the inactive directory
   next if extension_test_file.include?('/inactive/')
   
   require extension_test_file

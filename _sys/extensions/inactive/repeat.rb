@@ -91,6 +91,7 @@ Dir.foreach(archived_dir) do |filename|
     # Check if the next instance already exists in _later
     next_filename = "#{next_date.strftime('%Y%m%d')}.#{task_name}.#{rule}#{extension}"
     next_file_path = File.join(later_dir, next_filename)
+
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
@@ -128,6 +129,7 @@ Dir.foreach(root_dir) do |filename|
     # Check if the next instance already exists in _later
     next_filename = "#{next_date.strftime('%Y%m%d')}.#{task_name}.@#{rule}#{extension}"
     next_file_path = File.join(later_dir, next_filename)
+
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
