@@ -31,9 +31,6 @@ def run_extensions(root_dir)
   Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
     begin
       system("ruby #{extension_file} #{root_dir}")
-      File.open(File.join(root_dir, '_sys', 'activity.log'), 'a') do |f|
-        f.puts "#{Time.now} Ran extension: #{File.basename(extension_file)}"
-      end
     rescue => e
       File.open(File.join(root_dir, '_sys', 'error.log'), 'a') do |f|
         f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
