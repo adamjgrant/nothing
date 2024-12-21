@@ -1,5 +1,5 @@
-later
-archived
+_later
+_archived
 *.log
 test
 !test/nothing_test.rb
