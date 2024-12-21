@@ -81,7 +81,7 @@ Dir.foreach(archived_dir) do |filename|
     rule = $3
     extension = $4
 
-    current_date = Date.strptime(date_prefix, '%Y%m%d') rescue nil
+    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
     next unless current_date # Skip if the date cannot be parsed
 
     # Calculate the next date
@@ -89,7 +89,7 @@ Dir.foreach(archived_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y%m%d')}.#{task_name}.#{rule}#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
     next_file_path = File.join(later_dir, next_filename)
 
     unless File.exist?(next_file_path)
@@ -119,7 +119,7 @@ Dir.foreach(root_dir) do |filename|
     rule = $3
     extension = $4
 
-    current_date = Date.strptime(date_prefix, '%Y%m%d') rescue nil
+    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
     next unless current_date # Skip if the date cannot be parsed
 
     # Calculate the next date
@@ -127,7 +127,7 @@ Dir.foreach(root_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y%m%d')}.#{task_name}.@#{rule}#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.@#{rule}#{extension}"
     next_file_path = File.join(later_dir, next_filename)
 
     unless File.exist?(next_file_path)

@@ -55,7 +55,7 @@ directories_to_process.each do |current_dir|
              end
 
       # Construct the new filename with the date
-      new_filename = "#{date.strftime('%Y%m%d')}.#{rest_of_filename}#{extension}"
+      new_filename = "#{date.strftime('%Y-%m-%d')}.#{rest_of_filename}#{extension}"
       new_file_path = File.join(current_dir, new_filename)
 
       # Rename the file

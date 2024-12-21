@@ -37,7 +37,7 @@ Dir.foreach(root_dir) do |filename|
     extension = $3
 
     # Parse the date prefix
-    due_date = Date.strptime(date_prefix, '%Y%m%d') rescue nil
+    due_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
     next unless due_date # Skip if the date cannot be parsed
 
     # Skip files that are not past due

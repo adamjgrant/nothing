@@ -42,7 +42,7 @@ end
 
 def parse_yyyymmdd_prefix(filename)
   match = filename.match(/^(\d{8})\./)
-  return Date.strptime(match[1], '%Y%m%d') if match
+  return Date.strptime(match[1], '%Y-%m-%d') if match
 rescue ArgumentError
   nil
 end
