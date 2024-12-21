@@ -70,15 +70,6 @@ begin
     end
   end
 
-  # Add log entry indicating script ran, even if no tasks were moved
-  File.open(ACTIVITY_LOG, 'a') do |f|
-    if moved_tasks
-      f.puts "#{Time.now} Script completed. Tasks were processed successfully."
-    else
-      f.puts "#{Time.now} Script completed. No tasks to process."
-    end
-  end
-
   # Run any extension scripts
   run_extensions(BASE_DIR)
 rescue => e
