@@ -6,7 +6,6 @@ class AddOverdueEmojiTest < Minitest::Test
   def setup
     # Create a test environment
     @test_root = File.expand_path('../../../../test', __dir__)
-    FileUtils.rm_rf(@test_root) # Clear any previous test setup
     FileUtils.mkdir_p(@test_root)
 
     # Create test files

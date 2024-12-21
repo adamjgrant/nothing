@@ -4,24 +4,15 @@
 #
 # This extension processes files with a due date in their names that are past due.
 # It adds a ⚠️ emoji before the task name to indicate the task is overdue.
-# 
+# Moves overdue files to the base directory if required.
+#
 # Expected Filename Format:
 #   <YYYYMMDD>.<task name>.<extension>
-#
-# What It Does:
-# - Adds ⚠️ to the task name for files with a date earlier than today.
-# - Leaves files with today’s or future dates unchanged.
-# - Skips files that do not match the expected format.
-# - Does not add duplicate ⚠️ if the emoji is already present.
 #
 # Usage:
 #   ruby overdue.rb <root_directory>
 #   - Replace <root_directory> with the path to the directory you want to process.
 #   - If no directory is provided, the current working directory is used.
-#
-# Example:
-# - Before: 20231219.my task.md
-# - After:  20231219.⚠️my task.md
 
 require 'fileutils'
 require 'date'
@@ -61,7 +52,21 @@ Dir.foreach(root_dir) do |filename|
     new_file_path = File.join(root_dir, new_filename)
 
     # Rename the file
-    File.rename(file_path, new_file_path)
-    puts "Renamed #{filename} to #{new_filename}" # Debugging output
+    begin
+      File.rename(file_path, new_file_path)
+      puts "Renamed #{filename} to #{new_filename}" # Debugging output
+      file_path = new_file_path # Update the file path after renaming
+    rescue => e
+      puts "Error renaming file: #{e.message}" # Log errors during renaming
+    end
+
+    # Move overdue file to the base directory
+    base_directory_path = File.join(root_dir, File.basename(new_file_path))
+    begin
+      FileUtils.mv(new_file_path, base_directory_path)
+      puts "Moved overdue file: #{new_file_path} -> #{base_directory_path}"
+    rescue => e
+      puts "Error moving overdue file: #{e.message}" # Log errors during movement
+    end
   end
 end
