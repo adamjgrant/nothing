@@ -4,7 +4,7 @@ require_relative '../../extensions/amnesia' # Update the relative path to `amnes
 class AmnesiaTest < Minitest::Test
   def setup
     # Create test directories and files
-    @test_root = File.expand_path('../../../test', __dir__)
+    @test_root = File.expand_path('../../../../test', __dir__)
     FileUtils.mkdir_p(File.join(@test_root, '_archived')) # Ensure 'archived' directory exists
   
     now = Time.now
