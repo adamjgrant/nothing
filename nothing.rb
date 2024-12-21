@@ -27,6 +27,15 @@ end
 
 today = Date.today
 
+# Parse date prefix in new format YYYY-MM-DD
+def parse_yyyymmdd_prefix(filename)
+  match = filename.match(/^(\d{4}-\d{2}-\d{2})\./)
+  return Date.strptime(match[1], '%Y-%m-%d') if match
+rescue ArgumentError
+  nil
+end
+
+# Run all extensions in the extensions directory
 def run_extensions(root_dir)
   Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
     begin
@@ -38,13 +47,6 @@ def run_extensions(root_dir)
       end
     end
   end
-end
-
-def parse_yyyymmdd_prefix(filename)
-  match = filename.match(/^(\d{8})\./)
-  return Date.strptime(match[1], '%Y-%m-%d') if match
-rescue ArgumentError
-  nil
 end
 
 begin
