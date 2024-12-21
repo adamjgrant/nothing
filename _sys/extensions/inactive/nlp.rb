@@ -6,33 +6,42 @@ require 'date'
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
 
-# Process all files in the root directory
-Dir.foreach(root_dir) do |filename|
-  next if filename == '.' || filename == '..'
-  next if filename.start_with?('.') # Skip hidden files
+# Directories to process: root and _later
+directories_to_process = [root_dir, File.join(root_dir, '_later')]
 
-  file_path = File.join(root_dir, filename)
+directories_to_process.each do |current_dir|
+  # Skip if the directory doesn't exist
+  next unless Dir.exist?(current_dir)
 
-  # Skip directories, only process files
-  next unless File.file?(file_path)
+  # Process all files in the current directory
+  Dir.foreach(current_dir) do |filename|
+    next if filename == '.' || filename == '..'
+    next if filename.start_with?('.') # Skip hidden files
 
-  # Check if the filename starts with "today" or "tomorrow" (case-insensitive)
-  if filename =~ /^(today|tomorrow)\.(.+)$/i
-    prefix = $1.downcase
-    rest_of_filename = $2
+    file_path = File.join(current_dir, filename)
 
-    # Determine the appropriate date
-    date = if prefix == 'today'
-             Date.today
-           elsif prefix == 'tomorrow'
-             Date.today + 1
-           end
+    # Skip directories, only process files
+    next unless File.file?(file_path)
 
-    # Construct the new filename with the date
-    new_filename = "#{date.strftime('%Y%m%d')}.#{rest_of_filename}"
-    new_file_path = File.join(root_dir, new_filename)
+    # Check if the filename starts with "today" or "tomorrow" (case-insensitive)
+    if filename =~ /^(today|tomorrow)\.(.+)$/i
+      prefix = $1.downcase
+      rest_of_filename = $2
 
-    # Rename the file
-    File.rename(file_path, new_file_path)
+      # Determine the appropriate date
+      date = if prefix == 'today'
+               Date.today
+             elsif prefix == 'tomorrow'
+               Date.today + 1
+             end
+
+      # Construct the new filename with the date
+      new_filename = "#{date.strftime('%Y%m%d')}.#{rest_of_filename}"
+      new_file_path = File.join(current_dir, new_filename)
+
+      # Rename the file
+      File.rename(file_path, new_file_path)
+      puts "Renamed #{filename} to #{new_filename}" # Debugging output
+    end
   end
 end
