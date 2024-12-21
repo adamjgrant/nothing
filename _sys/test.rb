@@ -41,11 +41,14 @@ end
 # Set up the test environment before running any tests
 setup_test_environment
 
-# Dynamically load all test files in the root and extensions/tests
+# Dynamically load all test files in the root and extensions/tests, excluding inactive
 Dir.glob(File.expand_path('nothing_test.rb', __dir__)).each do |test_file|
   require test_file
 end
 
 Dir.glob(File.join(TEST_EXTENSIONS_DIR, '**', '*_test.rb')).each do |extension_test_file|
+  # Skip any test files in the inactive directory
+  next if extension_test_file.include?('/inactive/')
+  
   require extension_test_file
 end

@@ -25,6 +25,9 @@ Dir.foreach(BASE_DIR) do |filename|
   last_modified = File.mtime(file_path)
   days_old = (Date.today - last_modified.to_date).to_i
 
+  # Debugging: Log file processing details
+  puts "Processing file: #{filename} (Last modified: #{last_modified}, Days old: #{days_old})"
+
   # Determine the number of skulls based on days_old
   skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
 
@@ -36,6 +39,7 @@ Dir.foreach(BASE_DIR) do |filename|
 
     # Rename the file with the correct number of skulls
     if new_filename != filename
+      puts "Renaming file: #{filename} -> #{new_filename}" # Debugging: Log renaming
       File.rename(file_path, new_file_path)
       file_path = new_file_path # Update the file_path to reflect the rename
     end
@@ -45,9 +49,10 @@ Dir.foreach(BASE_DIR) do |filename|
   if days_old >= 6
     archived_path = File.join(ARCHIVED_DIR, File.basename(file_path))
     begin
+      puts "Archiving file: #{file_path} -> #{archived_path}" # Debugging: Log archiving
       FileUtils.mv(file_path, archived_path)
     rescue => e
-      puts "Error archiving file: #{e.message}" # Debugging
+      puts "Error archiving file: #{e.message}" # Debugging: Log errors
     end
   end
 end
