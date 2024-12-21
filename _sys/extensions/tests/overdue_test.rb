@@ -76,4 +76,25 @@ class AddOverdueEmojiTest < Minitest::Test
     assert File.exist?(expected_file), "The warning emoji was not removed for non-overdue task in _later."
     refute File.exist?(@non_overdue_with_emoji_in_later), "The original file with warning emoji in _later still exists."
   end
+
+  def test_remove_warning_emoji_from_future_task_in_later_with_repeating_rule
+    # Create the test file in _later
+    future_repeating_file_with_emoji = File.join(
+      @later_dir,
+      "#{(Date.today >> 1).strftime('%Y-%m-%d')}.⚠️Patrick.1d.md"
+    )
+    File.write(future_repeating_file_with_emoji, "Future repeating task with warning emoji in later content")
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Verify the warning emoji is removed for future task with repeating rule in _later
+    expected_file = File.join(
+      @later_dir,
+      "#{(Date.today >> 1).strftime('%Y-%m-%d')}.Patrick.1d.md"
+    )
+    assert File.exist?(expected_file), "The warning emoji was not removed for the future repeating task in _later."
+    refute File.exist?(future_repeating_file_with_emoji), "The original file with warning emoji in _later still exists."
+  end
 end
