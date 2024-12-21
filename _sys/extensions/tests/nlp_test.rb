@@ -45,31 +45,31 @@ class ConvertDayToDateTest < Minitest::Test
     system("ruby #{extension_path} #{@test_root}")
 
     # Verify "today" and "tomorrow" files
-    expected_today_file = File.join(@test_root, "#{Date.today.strftime('%Y%m%d')}.mow lawn.txt")
+    expected_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}.mow lawn.txt")
     assert File.exist?(expected_today_file), "The 'today' file in the main directory was not renamed correctly."
     refute File.exist?(@today_file), "The original 'today' file in the main directory still exists."
 
-    expected_tomorrow_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y%m%d')}.clean house.txt")
+    expected_tomorrow_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.clean house.txt")
     assert File.exist?(expected_tomorrow_file), "The 'tomorrow' file in the main directory was not renamed correctly."
     refute File.exist?(@tomorrow_file), "The original 'tomorrow' file in the main directory still exists."
 
     # Verify "1d" file
-    expected_one_day_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y%m%d')}.exercise.txt")
+    expected_one_day_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.exercise.txt")
     assert File.exist?(expected_one_day_file), "The '1d' file in the main directory was not renamed correctly."
     refute File.exist?(@one_day_file), "The original '1d' file in the main directory still exists."
 
     # Verify "2w" file
-    expected_two_weeks_file = File.join(@test_root, "#{(Date.today + 14).strftime('%Y%m%d')}.plan trip.txt")
+    expected_two_weeks_file = File.join(@test_root, "#{(Date.today + 14).strftime('%Y-%m-%d')}.plan trip.txt")
     assert File.exist?(expected_two_weeks_file), "The '2w' file in the main directory was not renamed correctly."
     refute File.exist?(@two_weeks_file), "The original '2w' file in the main directory still exists."
 
     # Verify "3m" file
-    expected_three_months_file = File.join(@test_root, "#{(Date.today >> 3).strftime('%Y%m%d')}.submit project.txt")
+    expected_three_months_file = File.join(@test_root, "#{(Date.today >> 3).strftime('%Y-%m-%d')}.submit project.txt")
     assert File.exist?(expected_three_months_file), "The '3m' file in the main directory was not renamed correctly."
     refute File.exist?(@three_months_file), "The original '3m' file in the main directory still exists."
 
     # Verify "1y" file
-    expected_one_year_file = File.join(@test_root, "#{(Date.today >> 12).strftime('%Y%m%d')}.renew passport.txt")
+    expected_one_year_file = File.join(@test_root, "#{(Date.today >> 12).strftime('%Y-%m-%d')}.renew passport.txt")
     assert File.exist?(expected_one_year_file), "The '1y' file in the main directory was not renamed correctly."
     refute File.exist?(@one_year_file), "The original '1y' file in the main directory still exists."
 
@@ -77,15 +77,15 @@ class ConvertDayToDateTest < Minitest::Test
     assert File.exist?(@irrelevant_file), "The irrelevant file in the main directory should remain unchanged."
 
     # Verify files in the _later directory
-    expected_later_today_file = File.join(@later_dir, "#{Date.today.strftime('%Y%m%d')}.water plants.txt")
+    expected_later_today_file = File.join(@later_dir, "#{Date.today.strftime('%Y-%m-%d')}.water plants.txt")
     assert File.exist?(expected_later_today_file), "The 'today' file in the _later directory was not renamed correctly."
     refute File.exist?(@later_today_file), "The original 'today' file in the _later directory still exists."
 
-    expected_later_tomorrow_file = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y%m%d')}.organize books.txt")
+    expected_later_tomorrow_file = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y-%m-%d')}.organize books.txt")
     assert File.exist?(expected_later_tomorrow_file), "The 'tomorrow' file in the _later directory was not renamed correctly."
     refute File.exist?(@later_tomorrow_file), "The original 'tomorrow' file in the _later directory still exists."
 
-    expected_later_two_weeks_file = File.join(@later_dir, "#{(Date.today + 14).strftime('%Y%m%d')}.meeting prep.txt")
+    expected_later_two_weeks_file = File.join(@later_dir, "#{(Date.today + 14).strftime('%Y-%m-%d')}.meeting prep.txt")
     assert File.exist?(expected_later_two_weeks_file), "The '2w' file in the _later directory was not renamed correctly."
     refute File.exist?(@later_two_weeks_file), "The original '2w' file in the _later directory still exists."
 

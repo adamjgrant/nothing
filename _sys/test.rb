@@ -28,9 +28,9 @@ def setup_test_environment
   FileUtils.rm_rf(File.join(TEST_EXTENSIONS_DIR, 'inactive'))
 
   # Create test task files in the 'later/' directory
-  today_str = Date.today.strftime('%Y%m%d')
-  yesterday_str = (Date.today - 1).strftime('%Y%m%d')
-  tomorrow_str = (Date.today + 1).strftime('%Y%m%d')
+  today_str = Date.today.strftime('%Y-%m-%d')
+  yesterday_str = (Date.today - 1).strftime('%Y-%m-%d')
+  tomorrow_str = (Date.today + 1).strftime('%Y-%m-%d')
 
   File.write(File.join(LATER_DIR, "#{yesterday_str}.Task overdue.txt"), "Overdue task")
   File.write(File.join(LATER_DIR, "#{today_str}.Task due today.txt"), "Due today task")

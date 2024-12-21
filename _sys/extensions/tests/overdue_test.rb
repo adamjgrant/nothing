@@ -9,10 +9,10 @@ class AddOverdueEmojiTest < Minitest::Test
     FileUtils.mkdir_p(@test_root)
 
     # Create test files
-    @overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y%m%d')}.my task.md")
-    @overdue_with_emoji_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y%m%d')}.⚠️my task.md")
-    @due_today_file = File.join(@test_root, "#{Date.today.strftime('%Y%m%d')}.due today task.md")
-    @future_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y%m%d')}.future task.md")
+    @overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.my task.md")
+    @overdue_with_emoji_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.⚠️my task.md")
+    @due_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}.due today task.md")
+    @future_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.future task.md")
     @non_date_file = File.join(@test_root, "Task without date.md")
 
     File.write(@overdue_file, "Overdue task content")
@@ -28,7 +28,7 @@ class AddOverdueEmojiTest < Minitest::Test
     system("ruby #{extension_path} #{@test_root}")
 
     # Verify overdue file is renamed with ⚠️ added to the task name
-    expected_overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y%m%d')}.⚠️my task.md")
+    expected_overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.⚠️my task.md")
     assert File.exist?(expected_overdue_file), "The overdue file was not renamed correctly."
     refute File.exist?(@overdue_file), "The original overdue file still exists."
 
