@@ -70,4 +70,23 @@ class TestDueDateMovement < Minitest::Test
     # Verify no error log was created
     refute File.exist?(ERROR_LOG), "Error log should not exist if no errors occurred."
   end
+
+  def test_future_date_task_moved_to_later
+    future_date = (Date.today + 3).strftime('%Y-%m-%d') # Three days in the future
+    future_task = File.join(TEST_ROOT, "#{future_date}.Future task.txt")
+  
+    # Create a file in the root directory with a future date
+    File.write(future_task, "Task content for a future task")
+  
+    # Run the script
+    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+  
+    # Verify the task is moved to '_later'
+    assert fuzzy_file_exists?(LATER_DIR, "#{future_date}.Future task.txt"),
+           "Future-dated task should have been moved to '_later'."
+  
+    # Verify the task is no longer in the root directory
+    refute fuzzy_file_exists?(TEST_ROOT, "#{future_date}.Future task.txt"),
+           "Future-dated task should no longer be in the root directory."
+  end
 end
