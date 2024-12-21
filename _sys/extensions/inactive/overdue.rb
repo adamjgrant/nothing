@@ -7,7 +7,7 @@
 # Moves overdue files to the base directory if required.
 #
 # Expected Filename Format:
-#   <YYYYMMDD>.<task name>.<extension>
+#   <YYYY-MM-DD>.<task name>.<extension>
 #
 # Usage:
 #   ruby overdue.rb <root_directory>
@@ -30,8 +30,8 @@ Dir.foreach(root_dir) do |filename|
   # Skip directories, only process files
   next unless File.file?(file_path)
 
-  # Match files with the format <YYYYMMDD>.<task name>.<extension>
-  if filename =~ /^(\d{8})\.(.+)(\..+)$/
+  # Match files with the format <YYYY-MM-DD>.<task name>.<extension>
+  if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)(\..+)$/
     date_prefix = $1
     task_name = $2
     extension = $3
