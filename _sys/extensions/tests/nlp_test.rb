@@ -92,4 +92,25 @@ class ConvertDayToDateTest < Minitest::Test
     # Verify irrelevant file remains unchanged in the _later directory
     assert File.exist?(@later_irrelevant_file), "The irrelevant file in the _later directory should remain unchanged."
   end
+
+  def test_convert_current_day_to_next_week_date
+    # Get the current day name (e.g., "Monday", "Tuesday")
+    current_day_name = Date.today.strftime('%A')
+  
+    # Create a test file dynamically named with the current day of the week
+    test_file = File.join(@test_root, "#{current_day_name}.dynamic task.txt")
+    File.write(test_file, "Task content for dynamic current day")
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Calculate the date for the next occurrence of the current day (7 days from now)
+    next_week_same_day = Date.today + 7
+  
+    # Expected file path
+    expected_file = File.join(@test_root, "#{next_week_same_day.strftime('%Y-%m-%d')}.dynamic task.txt")
+    assert File.exist?(expected_file), "The '#{current_day_name}' file was not renamed to next week's date."
+    refute File.exist?(test_file), "The original '#{current_day_name}' file still exists in the main directory."
+  end
 end
