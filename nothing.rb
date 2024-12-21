@@ -52,6 +52,7 @@ end
 begin
   moved_tasks = false
 
+  # Check tasks in _later for due tasks
   Dir.foreach(LATER_DIR) do |filename|
     next if filename == '.' || filename == '..'
 
@@ -63,7 +64,26 @@ begin
       to_path = File.join(BASE_DIR, filename)
       FileUtils.mv(from_path, to_path)
       File.open(ACTIVITY_LOG, 'a') do |f|
-        f.puts "#{Time.now} Moved #{filename} from 'later' to '#{BASE_DIR}'."
+        f.puts "#{Time.now} Moved #{filename} from '_later' to '#{BASE_DIR}'."
+      end
+      moved_tasks = true
+    end
+  end
+
+  # Check tasks in BASE_DIR for future tasks and move them to _later
+  Dir.foreach(BASE_DIR) do |filename|
+    next if filename == '.' || filename == '..'
+    next if filename.start_with?('_') # Skip special directories like _later, _archived, _sys
+
+    # Parse the optional date prefix
+    due_date = parse_yyyymmdd_prefix(filename)
+
+    if due_date && due_date > today
+      from_path = File.join(BASE_DIR, filename)
+      to_path = File.join(LATER_DIR, filename)
+      FileUtils.mv(from_path, to_path)
+      File.open(ACTIVITY_LOG, 'a') do |f|
+        f.puts "#{Time.now} Moved #{filename} from '#{BASE_DIR}' to '_later'."
       end
       moved_tasks = true
     end
