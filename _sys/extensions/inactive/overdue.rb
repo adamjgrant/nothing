@@ -3,8 +3,8 @@
 # overdue.rb
 #
 # This extension processes files with a due date in their names that are past due.
-# It adds a ⚠️ emoji before the task name to indicate the task is overdue.
-# Removes ⚠️ emoji from tasks that are not overdue.
+# It adds a « emoji before the task name to indicate the task is overdue.
+# Removes « emoji from tasks that are not overdue.
 # Moves overdue files to the base directory if required.
 #
 # Expected Filename Format:
@@ -42,25 +42,25 @@ def process_directory(directory)
       due_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
       next unless due_date # Skip if the date cannot be parsed
 
-      # Remove ⚠️ emoji from non-overdue tasks
-      if due_date >= Date.today && task_name.start_with?('⚠️')
-        new_task_name = task_name.sub(/^⚠️/, '') # Remove the ⚠️ emoji
+      # Remove « emoji from non-overdue tasks
+      if due_date >= Date.today && task_name.start_with?('«')
+        new_task_name = task_name.sub(/^«/, '') # Remove the « emoji
         new_filename = "#{date_prefix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
 
         # Rename the file
         begin
           File.rename(file_path, new_file_path)
-          puts "Removed ⚠️ from #{filename} -> #{new_filename}" # Debugging output
+          puts "Removed « from #{filename} -> #{new_filename}" # Debugging output
         rescue => e
           puts "Error renaming file: #{e.message}" # Log errors during renaming
         end
         next
       end
 
-      # Add ⚠️ emoji to overdue tasks
-      if due_date < Date.today && !task_name.start_with?('⚠️')
-        new_task_name = "⚠️#{task_name}"
+      # Add « emoji to overdue tasks
+      if due_date < Date.today && !task_name.start_with?('«')
+        new_task_name = "«#{task_name}"
         new_filename = "#{date_prefix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
 
