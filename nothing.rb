@@ -28,8 +28,7 @@ end
 today = Date.today
 
 def run_extensions(root_dir)
-  extensions_dir = File.join(root_dir, 'extensions')
-  Dir.glob(File.join(extensions_dir, '*.rb')).each do |extension_file|
+  Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
     begin
       system("ruby #{extension_file} #{root_dir}")
       File.open(File.join(root_dir, '_sys', 'activity.log'), 'a') do |f|
