@@ -43,6 +43,22 @@ class RepeatingTaskTest < Minitest::Test
       @weekly_multi_day_file, @strict_weekly_multi_day_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
+    @monthly_specific_day_file = File.join(@archived_dir, "#{(@today << 1).strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
+    @strict_monthly_specific_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-day.@1m-5.txt")
+
+    @monthly_specific_weekday_file = File.join(@archived_dir, "#{(@today << 2).strftime('%Y-%m-%d')}.task-specific-weekday.2m-2m.txt")
+    @strict_monthly_specific_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-weekday.@2m-2m.txt")
+
+    @monthly_default_first_weekday_file = File.join(@archived_dir, "#{(@today << 3).strftime('%Y-%m-%d')}.task-default-first-weekday.1m-h.txt")
+    @strict_monthly_default_first_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-h.txt")
+
+    # Write these files to simulate their presence in the appropriate directories
+    [
+    @monthly_specific_day_file, @strict_monthly_specific_day_file,
+    @monthly_specific_weekday_file, @strict_monthly_specific_weekday_file,
+    @monthly_default_first_weekday_file, @strict_monthly_default_first_weekday_file
+    ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
+
     # Run the extension once
     extension_path = File.expand_path('../../extensions/repeat.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
@@ -162,5 +178,62 @@ class RepeatingTaskTest < Minitest::Test
   
     expected_strict_friday_file = File.join(@later_dir, "#{strict_next_friday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
     assert File.exist?(expected_strict_friday_file), "Strict weekly multi-day repeating task for Friday was not created."
+  end
+
+  def test_monthly_specific_day_repeating_task
+    # Calculate the next occurrence of the 5th day two months from now
+    base_date = Date.strptime(File.basename(@monthly_specific_day_file).split('.').first, '%Y-%m-%d')
+    next_date = base_date >> 2
+    specific_day = 5
+    next_specific_day = Date.new(next_date.year, next_date.month, specific_day)
+    
+    # Expected file for default repetition
+    expected_file = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
+    assert File.exist?(expected_file), "Monthly specific day repeating task for 5th day was not created."
+  
+    # Expected file for strict repetition
+    expected_strict_file = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.task-strict-specific-day.@1m-5.txt")
+    assert File.exist?(expected_strict_file), "Strict monthly specific day repeating task for 5th day was not created."
+  end
+
+  def test_monthly_specific_weekday_repeating_task
+    # Calculate the next occurrence of the 2nd Monday two months from now
+    base_date = Date.strptime(File.basename(@monthly_specific_weekday_file).split('.').first, '%Y-%m-%d')
+    next_month = base_date >> 2
+    nth = 2
+    weekday = 1 # Monday is 1
+    next_specific_weekday = nth_weekday_of_month(next_month.year, next_month.month, nth, weekday)
+    
+    # Expected file for default repetition
+    expected_file = File.join(@later_dir, "#{next_specific_weekday.strftime('%Y-%m-%d')}.task-specific-weekday.2m-2m.txt")
+    assert File.exist?(expected_file), "Monthly specific weekday repeating task for 2nd Monday was not created."
+  
+    # Expected file for strict repetition
+    expected_strict_file = File.join(@later_dir, "#{next_specific_weekday.strftime('%Y-%m-%d')}.task-strict-specific-weekday.@2m-2m.txt")
+    assert File.exist?(expected_strict_file), "Strict monthly specific weekday repeating task for 2nd Monday was not created."
+  end
+  
+  # Helper Method for nth Weekday Calculation
+  def nth_weekday_of_month(year, month, nth, weekday)
+    first_day = Date.new(year, month, 1)
+    first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
+    first_weekday + ((nth - 1) * 7)
+  end
+
+  def test_monthly_default_first_weekday_repeating_task
+    # Calculate the next occurrence of the 1st Thursday one month from now
+    base_date = Date.strptime(File.basename(@monthly_default_first_weekday_file).split('.').first, '%Y-%m-%d')
+    next_month = base_date >> 1
+    nth = 1
+    weekday = 4 # Thursday is 4
+    next_first_weekday = nth_weekday_of_month(next_month.year, next_month.month, nth, weekday)
+    
+    # Expected file for default repetition
+    expected_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-default-first-weekday.1m-h.txt")
+    assert File.exist?(expected_file), "Default monthly first weekday repeating task was not created."
+  
+    # Expected file for strict repetition
+    expected_strict_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-h.txt")
+    assert File.exist?(expected_strict_file), "Strict monthly first weekday repeating task was not created."
   end
 end
