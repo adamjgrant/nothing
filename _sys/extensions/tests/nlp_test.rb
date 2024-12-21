@@ -113,4 +113,25 @@ class ConvertDayToDateTest < Minitest::Test
     assert File.exist?(expected_file), "The '#{current_day_name}' file was not renamed to next week's date."
     refute File.exist?(test_file), "The original '#{current_day_name}' file still exists in the main directory."
   end
+
+  def test_convert_tomorrows_day_to_date
+    # Get tomorrow's day name (e.g., "Tuesday", if today is Monday)
+    tomorrow_day_name = (Date.today + 1).strftime('%A')
+  
+    # Create a test file dynamically named with tomorrow's day of the week
+    test_file = File.join(@test_root, "#{tomorrow_day_name}.dynamic task.txt")
+    File.write(test_file, "Task content for tomorrow's day")
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Calculate tomorrow's date
+    tomorrows_date = Date.today + 1
+  
+    # Expected file path
+    expected_file = File.join(@test_root, "#{tomorrows_date.strftime('%Y-%m-%d')}.dynamic task.txt")
+    assert File.exist?(expected_file), "The '#{tomorrow_day_name}' file was not renamed to tomorrow's date."
+    refute File.exist?(test_file), "The original '#{tomorrow_day_name}' file still exists in the main directory."
+  end
 end
