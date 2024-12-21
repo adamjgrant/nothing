@@ -15,6 +15,10 @@
 #   - Replace <root_directory> with the path to the directory you want to process.
 #   - If no directory is provided, the current working directory is used.
 
+# Force UTF-8 encoding
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 require 'fileutils'
 require 'date'
 

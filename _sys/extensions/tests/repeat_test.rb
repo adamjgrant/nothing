@@ -31,6 +31,18 @@ class RepeatingTaskTest < Minitest::Test
       @weekday_repeating_file, @strict_weekday_repeating_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
+    @weekly_single_day_file = File.join(@archived_dir, "#{(@today - 7).strftime('%Y-%m-%d')}.task-monday.1w-m.txt")
+    @strict_weekly_single_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-monday.@1w-m.txt")
+
+    @weekly_multi_day_file = File.join(@archived_dir, "#{(@today - 14).strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+    @strict_weekly_multi_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
+
+    # Write test content dynamically
+    [
+      @weekly_single_day_file, @strict_weekly_single_day_file,
+      @weekly_multi_day_file, @strict_weekly_multi_day_file
+    ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
+
     # Run the extension once
     extension_path = File.expand_path('../../extensions/repeat.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
@@ -107,5 +119,48 @@ class RepeatingTaskTest < Minitest::Test
   
     # Check if the next repeating file was created
     assert File.exist?(expected_next_file), "Strict repeating task with future base date was not created."
+  end
+
+  def test_weekly_single_day_repeating_task
+    # Calculate the next occurrence of Monday
+    next_monday = @today + (1 - @today.wday + 7) # 1 represents Monday
+    expected_weekly_file = File.join(@later_dir, "#{next_monday.strftime('%Y-%m-%d')}.task-monday.1w-m.txt")
+    assert File.exist?(expected_weekly_file), "Weekly single-day repeating task for Monday was not created."
+  
+    # Calculate the next occurrence of Monday for strict format
+    strict_next_monday = @today + 7
+    expected_strict_weekly_file = File.join(@later_dir, "#{strict_next_monday.strftime('%Y-%m-%d')}.task-strict-monday.@1w-m.txt")
+    assert File.exist?(expected_strict_weekly_file), "Strict weekly single-day repeating task for Monday was not created."
+  end
+
+  def test_weekly_multi_day_repeating_task
+    # Calculate the next occurrences of Tuesday, Thursday, and Friday
+    next_tuesday = @today + (2 - @today.wday + 7) % 7
+    next_thursday = @today + (4 - @today.wday + 7) % 7
+    next_friday = @today + (5 - @today.wday + 7) % 7
+  
+    # Verify files for each day
+    expected_tuesday_file = File.join(@later_dir, "#{next_tuesday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+    assert File.exist?(expected_tuesday_file), "Weekly multi-day repeating task for Tuesday was not created."
+  
+    expected_thursday_file = File.join(@later_dir, "#{next_thursday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+    assert File.exist?(expected_thursday_file), "Weekly multi-day repeating task for Thursday was not created."
+  
+    expected_friday_file = File.join(@later_dir, "#{next_friday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+    assert File.exist?(expected_friday_file), "Weekly multi-day repeating task for Friday was not created."
+  
+    # Verify strict format for multi-day repetition
+    strict_next_tuesday = @today + 7
+    strict_next_thursday = @today + 7
+    strict_next_friday = @today + 7
+  
+    expected_strict_tuesday_file = File.join(@later_dir, "#{strict_next_tuesday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
+    assert File.exist?(expected_strict_tuesday_file), "Strict weekly multi-day repeating task for Tuesday was not created."
+  
+    expected_strict_thursday_file = File.join(@later_dir, "#{strict_next_thursday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
+    assert File.exist?(expected_strict_thursday_file), "Strict weekly multi-day repeating task for Thursday was not created."
+  
+    expected_strict_friday_file = File.join(@later_dir, "#{strict_next_friday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
+    assert File.exist?(expected_strict_friday_file), "Strict weekly multi-day repeating task for Friday was not created."
   end
 end
