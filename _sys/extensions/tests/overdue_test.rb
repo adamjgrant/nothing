@@ -15,6 +15,16 @@ class AddOverdueEmojiTest < Minitest::Test
     @future_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.future task.md")
     @non_date_file = File.join(@test_root, "Task without date.md")
 
+    # Add test case for non-overdue file with warning emoji in root
+    @non_overdue_with_emoji_in_root = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.⚠️non overdue task.md")
+    File.write(@non_overdue_with_emoji_in_root, "Non-overdue task with warning emoji content")
+
+    # Add test case for non-overdue file with warning emoji in _later
+    @later_dir = File.join(@test_root, '_later')
+    FileUtils.mkdir_p(@later_dir)
+    @non_overdue_with_emoji_in_later = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y-%m-%d')}.⚠️non overdue task in later.md")
+    File.write(@non_overdue_with_emoji_in_later, "Non-overdue task with warning emoji in later content")
+
     File.write(@overdue_file, "Overdue task content")
     File.write(@overdue_with_emoji_file, "Already tagged overdue task content")
     File.write(@due_today_file, "Due today task content")
@@ -43,5 +53,27 @@ class AddOverdueEmojiTest < Minitest::Test
 
     # Verify non-date file remains unchanged
     assert File.exist?(@non_date_file), "The non-date file should remain unchanged."
+  end
+
+  def test_remove_warning_emoji_from_non_overdue_in_root
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify the warning emoji is removed for non-overdue task in root
+    expected_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.non overdue task.md")
+    assert File.exist?(expected_file), "The warning emoji was not removed for non-overdue task in root."
+    refute File.exist?(@non_overdue_with_emoji_in_root), "The original file with warning emoji in root still exists."
+  end
+
+  def test_remove_warning_emoji_from_non_overdue_in_later
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify the warning emoji is removed for non-overdue task in _later
+    expected_file = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y-%m-%d')}.non overdue task in later.md")
+    assert File.exist?(expected_file), "The warning emoji was not removed for non-overdue task in _later."
+    refute File.exist?(@non_overdue_with_emoji_in_later), "The original file with warning emoji in _later still exists."
   end
 end
