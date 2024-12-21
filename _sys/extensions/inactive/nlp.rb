@@ -23,8 +23,12 @@ directories_to_process.each do |current_dir|
     # Skip directories, only process files
     next unless File.file?(file_path)
 
+    # Extract the base name and extension
+    base_name = File.basename(filename, '.*')
+    extension = File.extname(filename)
+
     # Check if the filename starts with "today", "tomorrow", or matches "<number><unit>" format (case-insensitive)
-    if filename =~ /^(today|tomorrow|(\d+)([dwmy]))\.(.+)$/i
+    if base_name =~ /^(today|tomorrow|(\d+)([dwmy]))\.(.+)$/i
       prefix = $1.downcase
       number = $2 ? $2.to_i : nil
       unit = $3
@@ -51,11 +55,12 @@ directories_to_process.each do |current_dir|
              end
 
       # Construct the new filename with the date
-      new_filename = "#{date.strftime('%Y%m%d')}.#{rest_of_filename}"
+      new_filename = "#{date.strftime('%Y%m%d')}.#{rest_of_filename}#{extension}"
       new_file_path = File.join(current_dir, new_filename)
 
       # Rename the file
       File.rename(file_path, new_file_path)
+      puts "Renamed #{filename} to #{new_filename}" # Debugging output
     end
   end
 end
