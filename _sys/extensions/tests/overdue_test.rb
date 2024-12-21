@@ -23,11 +23,6 @@ class AddOverdueEmojiTest < Minitest::Test
     File.write(@non_date_file, "Non-date task content")
   end
 
-  def teardown
-    # Clean up the test environment after each test
-    FileUtils.rm_rf(@test_root)
-  end
-
   def test_add_overdue_emoji
     # Run the extension
     extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)

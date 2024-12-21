@@ -26,17 +26,20 @@ class RepeatingTaskTest < Minitest::Test
     @weekday_repeating_file = File.join(@archived_dir, "20241220.mytask.monday.txt")
     @strict_weekday_repeating_file = File.join(@archived_dir, "mytask.@friday.txt")
 
+    # Ambiguous filenames
+    @non_repeating_task_file = File.join(@archived_dir, "monday.txt")
+    @non_repeating_with_date_file = File.join(@archived_dir, "20241201.3d.txt")
+    @strict_repeating_task_file = File.join(@archived_dir, "20241201.mytask.@4w.txt")
+
     # Write test content
     [
       @daily_repeating_file, @strict_daily_repeating_file,
       @weekly_repeating_file, @strict_weekly_repeating_file,
       @monthly_repeating_file, @strict_monthly_repeating_file,
-      @weekday_repeating_file, @strict_weekday_repeating_file
+      @weekday_repeating_file, @strict_weekday_repeating_file,
+      @non_repeating_task_file, @non_repeating_with_date_file,
+      @strict_repeating_task_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
-  end
-
-  def teardown
-    FileUtils.rm_rf(@test_root)
   end
 
   def test_daily_repeating_task
@@ -91,5 +94,21 @@ class RepeatingTaskTest < Minitest::Test
     next_friday = Date.parse("20241227")
     expected_strict_weekday_file = File.join(@later_dir, "#{next_friday.strftime('%Y%m%d')}.mytask.@friday.txt")
     assert File.exist?(expected_strict_weekday_file), "Strict weekday repeating task for Friday was not created."
+  end
+
+  def test_non_repeating_files
+    extension_path = File.expand_path('../../extensions/repeating.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify non-repeating task "monday.txt" remains unchanged
+    assert File.exist?(@non_repeating_task_file), "'monday.txt' should not be modified."
+
+    # Verify non-repeating task "20241201.3d.txt" remains unchanged
+    assert File.exist?(@non_repeating_with_date_file), "'20241201.3d.txt' should not be modified."
+
+    # Verify strict repeating task "20241201.mytask.@4w.txt" is processed
+    next_date = (Date.parse("20241201") + 28).strftime('%Y%m%d')
+    expected_strict_repeating_file = File.join(@later_dir, "#{next_date}.mytask.@4w.txt")
+    assert File.exist?(expected_strict_repeating_file), "'20241201.mytask.@4w.txt' should have a repeating instance created."
   end
 end
