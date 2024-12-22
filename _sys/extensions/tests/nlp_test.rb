@@ -37,6 +37,13 @@ class ConvertDayToDateTest < Minitest::Test
     File.write(@later_tomorrow_file, "Task content for tomorrow in _later")
     File.write(@later_two_weeks_file, "Task content for 2 weeks from now in _later")
     File.write(@later_irrelevant_file, "Task content for irrelevant file in _later")
+
+    # Add to the existing `setup` method
+    @directories = %w[_later _archived _push-1d _push-1w _push-rand].map do |dir|
+      path = File.join(@test_root, dir)
+      FileUtils.mkdir_p(path)
+      path
+    end
   end
 
   def test_convert_day_to_date
@@ -133,5 +140,37 @@ class ConvertDayToDateTest < Minitest::Test
     expected_file = File.join(@test_root, "#{tomorrows_date.strftime('%Y-%m-%d')}.dynamic task.txt")
     assert File.exist?(expected_file), "The '#{tomorrow_day_name}' file was not renamed to tomorrow's date."
     refute File.exist?(test_file), "The original '#{tomorrow_day_name}' file still exists in the main directory."
+  end
+
+  def test_nlp_on_multiple_directories
+    @directories.each do |dir|
+      filename = "today.mytask.txt"
+      file_path = File.join(dir, filename)
+      File.write(file_path, "Test content for #{filename}")
+  
+      system("ruby #{@nlp_extension_path} #{@test_root}")
+  
+      # Expected filename after processing
+      expected_date = Date.today.strftime('%Y-%m-%d')
+      expected_filename = "#{expected_date}.mytask.txt"
+      expected_file_path = File.join(dir, expected_filename)
+  
+      assert File.exist?(expected_file_path),
+             "File in #{dir} was not renamed correctly to #{expected_filename}."
+    end
+  end
+
+  def test_nlp_does_not_process_sys_directory
+    sys_dir = File.join(@test_root, '_sys')
+    FileUtils.mkdir_p(sys_dir)
+  
+    filename = "today.mytask.txt"
+    file_path = File.join(sys_dir, filename)
+    File.write(file_path, "Test content for #{filename}")
+  
+    system("ruby #{@nlp_extension_path} #{@test_root}")
+  
+    # File should remain unchanged in _sys
+    assert File.exist?(file_path), "File in _sys directory was incorrectly processed."
   end
 end
