@@ -60,7 +60,7 @@ directories_to_process.each do |current_dir|
 
       # Rename the file
       File.rename(file_path, new_file_path)
-      puts "Renamed #{filename} to #{new_filename}" # Debugging output
+      # puts "Renamed #{filename} to #{new_filename}" # Debugging output
     end
 
     # Logic for day names (e.g., "Monday.task.txt")
@@ -84,7 +84,7 @@ directories_to_process.each do |current_dir|
 
       # Rename the file
       File.rename(file_path, new_file_path)
-      puts "Renamed #{filename} to #{new_filename}" # Debugging output
+      # puts "Renamed #{filename} to #{new_filename}" # Debugging output
     end
   end
 end

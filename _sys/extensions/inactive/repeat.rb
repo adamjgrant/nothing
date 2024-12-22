@@ -77,7 +77,7 @@ def calculate_next_date(current_date, parsed)
     next_dates = weekdays.map do |target_weekday|
       days_ahead = (target_weekday - current_date.wday + 7) % 7
       days_ahead = 7 if days_ahead.zero? # Next week if today is the target day
-      current_date + (number * 7) + days_ahead
+      current_date + days_ahead
     end
   
     # Return the earliest next date (useful if this function needs a single date)
@@ -99,7 +99,7 @@ def calculate_next_date(current_date, parsed)
     first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
     return first_weekday + ((nth - 1) * 7) rescue nil
   else
-    puts "Invalid rule: #{rule} for task: #{task_name}. Returning nil."
+    # puts "Invalid rule: #{rule} for task: #{task_name}. Returning nil."
     return nil
   end
 end
@@ -163,19 +163,19 @@ Dir.foreach(archived_dir) do |filename|
     next_file_path = File.join(later_dir, next_filename)
 
     if File.exist?(next_file_path)
-      puts "DEBUG: #{next_filename} already exists."
+      # puts "DEBUG: #{next_filename} already exists."
     end
 
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      puts "Created repeating task: #{next_filename}"
+      # puts "Created repeating task: #{next_filename}"
     end
 
     # Rename the current file to remove the repetition rule
     renamed_file = "#{date_prefix}.#{task_name}.#{extension}"
     File.rename(file_path, File.join(archived_dir, renamed_file))
-    puts "Archived task renamed: #{renamed_file}"
+    # puts "Archived task renamed: #{renamed_file}"
   end
 end
 
@@ -210,7 +210,7 @@ Dir.foreach(root_dir) do |filename|
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      puts "Created strict repeating task: #{next_filename}"
+      # puts "Created strict repeating task: #{next_filename}"
     end
   end
 end
