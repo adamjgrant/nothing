@@ -69,23 +69,26 @@ def calculate_next_date(current_date, parsed)
     specific_day = $2.to_i
     target_month = current_date >> number
     return Date.new(target_month.year, target_month.month, specific_day) rescue nil
-  elsif rule =~ /^(\d+)w-([mtwhfs]+)$/i
+  elsif rule =~ /^(\d+)w-([mtwhfsu]+)$/i
     number = $1.to_i
-    weekdays = $2.chars.map { |day| "mtwhfs".index(day.downcase) + 1 }
+    weekdays = $2.chars.map { |day| "mtwhfsu".index(day.downcase) + 1 }
+  
+    # Use today's date for calculating next weekdays
+    today = Date.today
   
     # Calculate next dates for all specified weekdays
     next_dates = weekdays.map do |target_weekday|
-      days_ahead = (target_weekday - current_date.wday + 7) % 7
+      days_ahead = (target_weekday - today.wday + 7) % 7
       days_ahead = 7 if days_ahead.zero? # Next week if today is the target day
-      current_date + days_ahead
+      today + days_ahead
     end
   
     # Return the earliest next date (useful if this function needs a single date)
     return next_dates.min
-  elsif rule =~ /^(\d+)m-(\d)([mtwhfs])$/i
+  elsif rule =~ /^(\d+)m-(\d)([mtwhfsu])$/i
     number = $1.to_i
     nth = $2.to_i
-    weekday = "mtwhfs".index($3.downcase) + 1
+    weekday = "mtwhfsu".index($3.downcase) + 1
     target_month = current_date >> number
     first_day = Date.new(target_month.year, target_month.month, 1)
     first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
@@ -93,7 +96,7 @@ def calculate_next_date(current_date, parsed)
   elsif rule =~ /^(\d+)m-([mtwhfs])$/i
     number = $1.to_i
     nth = 1 # Default to the first occurrence
-    weekday = "mtwhfs".index($2.downcase) + 1
+    weekday = "mtwhfsu".index($2.downcase) + 1
     target_month = current_date >> number
     first_day = Date.new(target_month.year, target_month.month, 1)
     first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
