@@ -109,15 +109,17 @@ def parse_filename(filename)
   parts = filename.split('.')
 
   # Ensure there are at least two parts (name and extension)
-  return { date: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
+  return { date: nil, time: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
 
   # Extract the mandatory extension (last part)
   extension = parts.pop
 
-  # Determine if the first part is a date
-  date = nil
-  if parts.first =~ /^\d{4}-\d{2}-\d{2}$/
-    date = parts.shift # Extract the date if valid
+  # Determine if the first part contains a date and optional time
+  date, time = nil, nil
+  if parts.first =~ /^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?$/
+    date = $1
+    time = $2 # Capture time if present
+    parts.shift # Extract the date+time if valid
   end
 
   # Remaining parts: name and (optional) rule
@@ -139,7 +141,7 @@ def parse_filename(filename)
   end
 
   # Return a structured hash
-  { date: date, name: name, rule: rule, strict: strict, extension: extension }
+  { date: date, time: time, name: name, rule: rule, strict: strict, extension: extension }
 end
 
 # Process files in _archived for default repetition
@@ -166,23 +168,18 @@ Dir.foreach(archived_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}.#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
-
-    if File.exist?(next_file_path)
-      # puts "DEBUG: #{next_filename} already exists."
-    end
 
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      # puts "Created repeating task: #{next_filename}"
+      puts "Created repeating task: #{next_filename}"
     end
 
     # Rename the current file to remove the repetition rule
-    renamed_file = "#{date_prefix}.#{task_name}.#{extension}"
+    renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{extension}"
     File.rename(file_path, File.join(archived_dir, renamed_file))
-    # puts "Archived task renamed: #{renamed_file}"
   end
 end
 
@@ -211,13 +208,13 @@ Dir.foreach(root_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.@#{rule}.#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.@#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
 
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      # puts "Created strict repeating task: #{next_filename}"
+      puts "Created strict repeating task: #{next_filename}"
     end
   end
 end
