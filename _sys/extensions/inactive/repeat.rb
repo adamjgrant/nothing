@@ -82,19 +82,10 @@ def calculate_next_date(current_date, parsed)
 
     # Return the earliest next date
     return next_dates.min
-  elsif rule =~ /^(\d+)m-(\d)(su|mo|tu|we|th|fr|sa)$/i
+  elsif rule =~ /^(\d+)m-(\d*)(su|mo|tu|we|th|fr|sa)$/i
     number = $1.to_i
-    nth = $2.to_i
-    weekday = %w[su mo tu we th fr sa].index($3.downcase) + 1
-    
-    target_month = current_date >> number
-    first_day = Date.new(target_month.year, target_month.month, 1)
-    first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
-    return first_weekday + ((nth - 1) * 7) rescue nil
-  elsif rule =~ /^(\d+)m-(\d+)(su|mo|tu|we|th|fr|sa)$/i
-    number = $1.to_i
-    nth = $2.to_i
-    weekday = %w[su mo tu we th fr sa].index($3.downcase) + 1
+    nth = $2.empty? ? 1 : $2.to_i # Default to 1 if nth is missing
+    weekday = %w[su mo tu we th fr sa].index($3.downcase)
   
     target_month = current_date >> number
     first_day = Date.new(target_month.year, target_month.month, 1)

@@ -42,7 +42,7 @@ class RepeatingTaskTest < Minitest::Test
       @weekday_repeating_file, @strict_weekday_repeating_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
-    @weekly_multi_day_file = File.join(@archived_dir, "#{(@today - 14).strftime('%Y-%m-%d')}.task-multi-days.1w-tu-th-fr.txt")
+    @weekly_multi_day_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-multi-days.1w-tu-th-fr.txt")
     @strict_weekly_multi_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-tu-th-fr.txt")
 
     # Write test content dynamically
@@ -210,7 +210,7 @@ class RepeatingTaskTest < Minitest::Test
   
     # Verify that only the file for the first upcoming day is created
     expected_first_file = File.join(@later_dir, "#{first_next_day.strftime('%Y-%m-%d')}.task-multi-days.1w-tu-th-fr.txt")
-    assert File.exist?(expected_first_file), "Weekly multi-day repeating task for #{first_next_day_name.upcase} was not created."
+    assert File.exist?(expected_first_file), "Weekly multi-day repeating task for #{first_next_day_name.upcase} was not created (#{expected_first_file})."
   
     # Ensure files for other days are not created yet
     next_days.each do |day_name, date|
@@ -274,7 +274,7 @@ class RepeatingTaskTest < Minitest::Test
     
     # Expected file for default repetition
     expected_file = File.join(@later_dir, "#{next_specific_weekday.strftime('%Y-%m-%d')}.task-specific-weekday.2m-2mo.txt")
-    assert File.exist?(expected_file), "Monthly specific weekday repeating task for 2nd Monday was not created."
+    assert File.exist?(expected_file), "Monthly specific weekday repeating task for 2nd Monday was not created (#{expected_file})."
   
     # Expected file for strict repetition
     expected_strict_file = File.join(@later_dir, "#{next_specific_weekday.strftime('%Y-%m-%d')}.task-strict-specific-weekday.@2m-2mo.txt")
@@ -298,7 +298,7 @@ class RepeatingTaskTest < Minitest::Test
     
     # Expected file for default repetition
     expected_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-default-first-weekday.1m-th.txt")
-    assert File.exist?(expected_file), "Default monthly first weekday repeating task was not created."
+    assert File.exist?(expected_file), "Default monthly first weekday repeating task was not created (#{expected_file})."
   
     # Expected file for strict repetition
     expected_strict_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-th.txt")
