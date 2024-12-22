@@ -332,4 +332,48 @@ class RepeatingTaskTest < Minitest::Test
       refute File.exist?(unexpected_file), "Unexpected file created for #{sorted_days[next_days.index(date)].upcase}: #{unexpected_file}"
     end
   end
+
+  def test_repeating_task_with_optional_time
+    # Create a task file with a time value in the date prefix
+    time_task_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    File.write(time_task_file, "Test content for #{File.basename(time_task_file)}")
+    
+    # Run the extension
+    run_extension
+    
+    # Verify that the task remains untouched
+    assert File.exist?(time_task_file), "Task with time value should not be modified or processed."
+    
+    # Check that no duplicate or unexpected files were created in the _later directory
+    unexpected_file = File.join(@later_dir, "#{(@today + 1).strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    refute File.exist?(unexpected_file), "Unexpected file created for task with time value."
+  end
+
+  def test_repeating_task_with_time_created_yesterday
+    # Create a task file with a time value created yesterday
+    yesterday = @today - 1
+    time_task_file = File.join(@archived_dir, "#{yesterday.strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    File.write(time_task_file, "Test content for #{File.basename(time_task_file)}")
+    
+    # Run the extension
+    run_extension
+    
+    # Expected file for the repeated task
+    expected_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    assert File.exist?(expected_file), "Repeated task for file created yesterday was not created correctly (#{expected_file})."
+  end
+  
+  def test_strict_repeating_task_with_time_created_yesterday
+    # Create a strict task file with a time value created yesterday
+    yesterday = @today - 1
+    strict_time_task_file = File.join(@root_dir, "#{yesterday.strftime('%Y-%m-%d')}+1300.task-strict-with-time.@1d.txt")
+    File.write(strict_time_task_file, "Test content for #{File.basename(strict_time_task_file)}")
+    
+    # Run the extension
+    run_extension
+    
+    # Expected file for the repeated task
+    expected_strict_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-strict-with-time.@1d.txt")
+    assert File.exist?(expected_strict_file), "Strict repeated task for file created yesterday was not created correctly (#{expected_strict_file})."
+  end
 end
