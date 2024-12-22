@@ -1,31 +1,38 @@
 #!/usr/bin/env ruby
 
-# repeating.rb
+# repeat.rb
 #
 # This extension automates the handling of repeating tasks based on rules in the filename.
 #
 # Filename Formats:
-# - `<YYYYMMDD>.<task name>.<repetition rule>.<extension>` (Default repetition)
-# - `<YYYYMMDD>.<task name>.@<repetition rule>.<extension>` (Strict repetition)
+# - `<YYYY-MM-DD>.<task name>.<repetition rule>.<extension>` (Default repetition)
+# - `<YYYY-MM-DD>.<task name>.@<repetition rule>.<extension>` (Strict repetition)
 #
 # Supported Repetition Rules:
-# - Daily: `3d` repeats every 3 days.
-# - Weekly: `2w` repeats every 2 weeks.
-# - Monthly: `3m` repeats every 3 months.
-# - Weekdays: `monday`, `friday`, etc., repeats on the specified weekday.
+# - Daily: `3d` (every 3 days).
+# - Weekly: `1w-mo-fr` (every week on Monday and Friday).
+# - Monthly by date: `1m-15` (every month on the 15th).
+# - Monthly by weekday: `1m-2mo` (every month on the 2nd Monday).
+# - Yearly: `1y` (every year).
 #
 # Behavior:
-# - Default Repetition: Creates the next instance of the task after it’s completed (in `_archived`).
-# - Strict Repetition: Always schedules the next instance, regardless of completion.
+# - **Default Repetition**: Creates the next instance of the task after it’s completed (in `_archived`).
+# - **Strict Repetition**: Always schedules the next instance, regardless of completion, as long as the file is in the root directory.
 #
 # Usage:
-#   ruby repeating.rb <root_directory>
-#   - Replace <root_directory> with the path to the directory you want to process.
+#   ruby repeat.rb <root_directory>
+#   - Replace `<root_directory>` with the path to the directory you want to process.
 #   - If no directory is provided, the current working directory is used.
 #
-# Example:
-# - Before: `20241220.mytask.3d.txt` (Archived)
-# - After:  `20241223.mytask.3d.txt` (Created in `_later`)
+# Examples:
+# - Daily Task: `2024-12-21.daily-task.1d.txt` 
+#   - Archived today, creates `2024-12-22.daily-task.1d.txt` in `_later`.
+# - Weekly Multi-Day Task: `2024-12-21.weekly-task.1w-mo-fr.txt`
+#   - Archived today, creates the next Monday and Friday instances in `_later`.
+# - Monthly Specific Day: `2024-12-21.monthly-task.1m-15.txt`
+#   - Archived today, creates `2025-01-15.monthly-task.1m-15.txt` in `_later`.
+# - Strict Weekly Task: `2024-12-21.strict-task.@1w-mo.txt`
+#   - Always schedules `2024-12-28.strict-task.@1w-mo.txt` in `_later` without requiring completion.
 
 require 'fileutils'
 require 'date'
