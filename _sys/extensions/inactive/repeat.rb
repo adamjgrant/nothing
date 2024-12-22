@@ -40,41 +40,48 @@ FileUtils.mkdir_p(archived_dir)
 FileUtils.mkdir_p(later_dir)
 
 # Method to calculate the next date based on the repetition rule
-def calculate_next_date(current_date, rule)
+def calculate_next_date(current_date, parsed)
+  rule = parsed[:rule]
+  task_name = parsed[:name]
+  extension = parsed[:extension]
+
   if rule =~ /^(\d+)([dwmy])$/i
     number = $1.to_i
     unit = $2.downcase
 
     case unit
     when 'd' # Days
-      current_date + number
+      return current_date + number
     when 'w' # Weeks
-      current_date + (number * 7)
+      return current_date + (number * 7)
     when 'm' # Months
-      current_date >> number
+      return current_date >> number
     when 'y' # Years
-      current_date >> (number * 12)
-    else
-      nil
+      return current_date >> (number * 12)
     end
   elsif rule =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i
     target_weekday = Date::DAYNAMES.index($1.capitalize)
     days_ahead = (target_weekday - current_date.wday) % 7
     days_ahead = 7 if days_ahead.zero? # If today is the target weekday, set to next week
-    current_date + days_ahead
+    return current_date + days_ahead
   elsif rule =~ /^(\d+)m-(\d+)$/
     number = $1.to_i
     specific_day = $2.to_i
     target_month = current_date >> number
-    Date.new(target_month.year, target_month.month, specific_day) rescue nil
-  elsif rule =~ /^(\d+)w-([mtwhfs])$/i
+    return Date.new(target_month.year, target_month.month, specific_day) rescue nil
+  elsif rule =~ /^(\d+)w-([mtwhfs]+)$/i
     number = $1.to_i
-    weekday = "mtwhfs".index($2.downcase) + 1
-    days_ahead = (weekday - current_date.wday + 7) % 7
-    days_ahead = 7 if days_ahead.zero? # Next week if today is the target day
-    next_date = current_date + (number * 7) + days_ahead
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
-    FileUtils.cp(file_path, File.join(later_dir, next_filename))
+    weekdays = $2.chars.map { |day| "mtwhfs".index(day.downcase) + 1 }
+  
+    # Calculate next dates for all specified weekdays
+    next_dates = weekdays.map do |target_weekday|
+      days_ahead = (target_weekday - current_date.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Next week if today is the target day
+      current_date + (number * 7) + days_ahead
+    end
+  
+    # Return the earliest next date (useful if this function needs a single date)
+    return next_dates.min
   elsif rule =~ /^(\d+)m-(\d)([mtwhfs])$/i
     number = $1.to_i
     nth = $2.to_i
@@ -82,7 +89,7 @@ def calculate_next_date(current_date, rule)
     target_month = current_date >> number
     first_day = Date.new(target_month.year, target_month.month, 1)
     first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
-    first_weekday + ((nth - 1) * 7) rescue nil
+    return first_weekday + ((nth - 1) * 7) rescue nil
   elsif rule =~ /^(\d+)m-([mtwhfs])$/i
     number = $1.to_i
     nth = 1 # Default to the first occurrence
@@ -90,9 +97,10 @@ def calculate_next_date(current_date, rule)
     target_month = current_date >> number
     first_day = Date.new(target_month.year, target_month.month, 1)
     first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
-    first_weekday + ((nth - 1) * 7) rescue nil
+    return first_weekday + ((nth - 1) * 7) rescue nil
   else
-    nil
+    puts "Invalid rule: #{rule} for task: #{task_name}. Returning nil."
+    return nil
   end
 end
 
@@ -136,35 +144,35 @@ Dir.foreach(archived_dir) do |filename|
 
   parsed = parse_filename(filename)
   
-  # TODO if this rule is not strict
+  if !parsed[:strict]
+    # Match files with the repetition rule format
+    date_prefix = parsed[:date]
+    task_name = parsed[:name]
+    rule = parsed[:rule]
+    extension = parsed[:extension]
 
-  # Match files with the repetition rule format
-  date_prefix = parsed.date
-  task_name = parsed.name
-  rule = parsed.rule
-  extension = parsed.extension
+    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
+    next unless current_date # Skip if the date cannot be parsed
 
-  current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
-  next unless current_date # Skip if the date cannot be parsed
+    # Calculate the next date
+    next_date = calculate_next_date(current_date, parsed)
+    next unless next_date # Skip if the rule is invalid
 
-  # Calculate the next date
-  next_date = calculate_next_date(current_date, rule)
-  next unless next_date # Skip if the rule is invalid
+    # Check if the next instance already exists in _later
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
+    next_file_path = File.join(later_dir, next_filename)
 
-  # Check if the next instance already exists in _later
-  next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
-  next_file_path = File.join(later_dir, next_filename)
+    unless File.exist?(next_file_path)
+      # Create the next instance
+      FileUtils.cp(file_path, next_file_path)
+      puts "Created repeating task: #{next_filename}"
+    end
 
-  unless File.exist?(next_file_path)
-    # Create the next instance
-    FileUtils.cp(file_path, next_file_path)
-    puts "Created repeating task: #{next_filename}"
+    # Rename the current file to remove the repetition rule
+    renamed_file = "#{date_prefix}.#{task_name}.#{extension}"
+    File.rename(file_path, File.join(archived_dir, renamed_file))
+    puts "Archived task renamed: #{renamed_file}"
   end
-
-  # Rename the current file to remove the repetition rule
-  renamed_file = "#{date_prefix}.#{task_name}#{extension}"
-  File.rename(file_path, File.join(archived_dir, renamed_file))
-  puts "Archived task renamed: #{renamed_file}"
 end
 
 # Process files in root for strict repetition
@@ -177,18 +185,18 @@ Dir.foreach(root_dir) do |filename|
   # Match files with the strict repetition rule format
   parsed = parse_filename(filename)
   
-  # TODO If this rule is strict 
-  if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)\.@(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
-    date_prefix = $1
-    task_name = $2
-    rule = $3
-    extension = $4
+  if parsed[:strict]
+    # Match files with the repetition rule format
+    date_prefix = parsed[:date]
+    task_name = parsed[:name]
+    rule = parsed[:rule]
+    extension = parsed[:extension]
 
     current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
     next unless current_date # Skip if the date cannot be parsed
 
     # Calculate the next date
-    next_date = calculate_next_date(current_date, rule)
+    next_date = calculate_next_date(current_date, parsed)
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
