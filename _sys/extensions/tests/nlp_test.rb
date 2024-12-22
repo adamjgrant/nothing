@@ -44,6 +44,15 @@ class ConvertDayToDateTest < Minitest::Test
       FileUtils.mkdir_p(path)
       path
     end
+
+    @directories.each do |dir|
+      # Dynamically determine the prefix based on the directory
+      prefix = dir == @test_root ? "today" : "tomorrow"
+  
+      filename = "#{prefix}.nlp-mytask.txt"
+      file_path = File.join(dir, filename)
+      File.write(file_path, "Test content for #{filename}")
+    end
   end
 
   def test_convert_day_to_date
@@ -143,18 +152,28 @@ class ConvertDayToDateTest < Minitest::Test
   end
 
   def test_nlp_on_multiple_directories
-    @directories.each do |dir|
-      filename = "today.mytask.txt"
-      file_path = File.join(dir, filename)
-      File.write(file_path, "Test content for #{filename}")
+    system("ruby #{@nlp_extension_path} #{@test_root}")
   
-      system("ruby #{@nlp_extension_path} #{@test_root}")
+    # Debug: List files in each directory before assertions
+    @directories.each do |dir|
+      puts "DEBUG: Files in #{dir}: #{Dir.glob(File.join(dir, '*'))}"
+    end
+  
+    @directories.each do |dir|
+      # Dynamically determine the prefix based on the directory
+      prefix = dir == @test_root ? "today" : "tomorrow"
+  
+      filename = "#{prefix}.nlp-mytask.txt"
+      file_path = File.join(dir, filename)
   
       # Expected filename after processing
-      expected_date = Date.today.strftime('%Y-%m-%d')
-      expected_filename = "#{expected_date}.mytask.txt"
+      expected_date = prefix == "today" ? Date.today.strftime('%Y-%m-%d') : (Date.today + 1).strftime('%Y-%m-%d')
+      expected_filename = "#{expected_date}.nlp-mytask.txt"
       expected_file_path = File.join(dir, expected_filename)
-  
+
+      refute File.exist?(file_path),
+             "File in #{dir} was not renamed correctly to #{expected_filename}. Found #{file_path}."
+     
       assert File.exist?(expected_file_path),
              "File in #{dir} was not renamed correctly to #{expected_filename}."
     end

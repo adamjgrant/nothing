@@ -6,8 +6,11 @@ require 'date'
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
 
-# Directories to process: root and _later
-directories_to_process = [root_dir, File.join(root_dir, '_later')]
+# Dynamically determine directories to process (exclude `_sys`)
+directories_to_process = Dir.glob(File.join(root_dir, '*')).select do |path|
+  File.directory?(path) && !File.basename(path).start_with?('_sys')
+end
+directories_to_process << root_dir # Include the root directory itself
 
 directories_to_process.each do |current_dir|
   # Skip if the directory doesn't exist
@@ -60,7 +63,8 @@ directories_to_process.each do |current_dir|
 
       # Rename the file
       File.rename(file_path, new_file_path)
-      # puts "Renamed #{filename} to #{new_filename}" # Debugging output
+      # puts "DEBUG: Processing file #{file_path}" if File.exist?(file_path)
+      # puts "DEBUG: Renaming #{file_path} to #{new_file_path}" if new_file_path
     end
 
     # Logic for day names (e.g., "Monday.task.txt")
@@ -74,8 +78,8 @@ directories_to_process.each do |current_dir|
       today_wday = today.wday
 
       # Calculate the next occurrence of the day (always at least 7 days ahead)
-      days_until_next_occurrence = (7 - today_wday + target_wday) % 7
-      days_until_next_occurrence += 7 if days_until_next_occurrence == 0
+      days_until_next_occurrence = (target_wday - today_wday + 7) % 7
+      days_until_next_occurrence = 7 if days_until_next_occurrence.zero? # Ensure it's at least a week away
       next_day = today + days_until_next_occurrence
 
       # Construct the new filename with the calculated date
@@ -84,7 +88,7 @@ directories_to_process.each do |current_dir|
 
       # Rename the file
       File.rename(file_path, new_file_path)
-      # puts "Renamed #{filename} to #{new_filename}" # Debugging output
+      puts "Renamed #{filename} to #{new_filename}" # Debugging output
     end
   end
 end
