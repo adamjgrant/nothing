@@ -89,4 +89,40 @@ class TestDueDateMovement < Minitest::Test
     refute fuzzy_file_exists?(TEST_ROOT, "#{future_date}.Future task.txt"),
            "Future-dated task should no longer be in the root directory."
   end
+
+  def test_time_based_movement
+    # Set up a task with a date and time in the future
+    future_time = Time.now + (2 * 60 * 60) # 2 hours from now
+    future_date_str = future_time.strftime('%Y-%m-%d')
+    future_time_str = future_time.strftime('%H%M')
+    future_task = File.join(LATER_DIR, "#{future_date_str}+#{future_time_str}.Task future with time.txt")
+  
+    # Write the task file in '_later'
+    File.write(future_task, "Task content for a future time task")
+  
+    # Run the script
+    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+  
+    # Verify the task remains in '_later' because its time has not yet passed
+    assert fuzzy_file_exists?(LATER_DIR, "#{future_date_str}+#{future_time_str}.Task future with time.txt"),
+           "Future task with a specific time should remain in '_later' if its time has not yet passed."
+  
+    # Manually adjust the task time to simulate a past time
+    past_time = Time.now - (2 * 60 * 60) # 2 hours ago
+    past_date_str = past_time.strftime('%Y-%m-%d')
+    past_time_str = past_time.strftime('%H%M')
+    past_task = File.join(LATER_DIR, "#{past_date_str}+#{past_time_str}.Task past with time.txt")
+    File.write(past_task, "Task content for a past time task")
+  
+    # Run the script again
+    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+  
+    # Verify the past task is moved to the root because its time has passed
+    assert fuzzy_file_exists?(TEST_ROOT, "#{past_date_str}+#{past_time_str}.Task past with time.txt"),
+           "Past task with a specific time should be moved to the root if its time has passed."
+  
+    # Clean up
+    File.delete(future_task) if File.exist?(future_task)
+    File.delete(past_task) if File.exist?(past_task)
+  end
 end
