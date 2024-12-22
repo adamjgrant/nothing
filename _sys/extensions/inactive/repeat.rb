@@ -159,8 +159,12 @@ Dir.foreach(archived_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
+
+    if File.exist?(next_file_path)
+      puts "DEBUG: #{next_filename} already exists."
+    end
 
     unless File.exist?(next_file_path)
       # Create the next instance
@@ -200,7 +204,7 @@ Dir.foreach(root_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.@#{rule}#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.@#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
 
     unless File.exist?(next_file_path)
