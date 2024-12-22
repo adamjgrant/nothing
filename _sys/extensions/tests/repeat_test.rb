@@ -191,34 +191,54 @@ class RepeatingTaskTest < Minitest::Test
   end
 
   def test_weekly_multi_day_repeating_task
-    # Calculate the next occurrences of Tuesday, Thursday, and Friday
-    next_tuesday = @today + (2 - @today.wday + 7) % 7
-    next_thursday = @today + (4 - @today.wday + 7) % 7
-    next_friday = @today + (5 - @today.wday + 7) % 7
+    # Calculate the next occurrences for Tuesday, Thursday, and Friday
+    multi_days = { 
+      "t" => 2, # Tuesday
+      "h" => 4, # Thursday
+      "f" => 5  # Friday
+    }
   
-    # Verify files for each day
-    expected_tuesday_file = File.join(@later_dir, "#{next_tuesday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
-    assert File.exist?(expected_tuesday_file), "Weekly multi-day repeating task for Tuesday was not created."
+    # Determine the first upcoming day
+    next_days = multi_days.transform_values do |target_wday|
+      days_ahead = (target_wday - @today.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Ensure it moves to next week if today is the target weekday
+      @today + days_ahead
+    end
   
-    expected_thursday_file = File.join(@later_dir, "#{next_thursday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
-    assert File.exist?(expected_thursday_file), "Weekly multi-day repeating task for Thursday was not created."
+    first_next_day = next_days.values.min
+    first_next_day_name = next_days.key(first_next_day)
   
-    expected_friday_file = File.join(@later_dir, "#{next_friday.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
-    assert File.exist?(expected_friday_file), "Weekly multi-day repeating task for Friday was not created."
+    # Verify that only the file for the first upcoming day is created
+    expected_first_file = File.join(@later_dir, "#{first_next_day.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+    assert File.exist?(expected_first_file), "Weekly multi-day repeating task for #{first_next_day_name.upcase} was not created."
   
-    # Verify strict format for multi-day repetition
-    strict_next_tuesday = @today + 7
-    strict_next_thursday = @today + 7
-    strict_next_friday = @today + 7
+    # Ensure files for other days are not created yet
+    next_days.each do |day_name, date|
+      next if date == first_next_day # Skip the first day
+      unexpected_file = File.join(@later_dir, "#{date.strftime('%Y-%m-%d')}.task-multi-days.1w-thf.txt")
+      refute File.exist?(unexpected_file), "Unexpected file created for #{day_name.upcase}: #{unexpected_file}"
+    end
   
-    expected_strict_tuesday_file = File.join(@later_dir, "#{strict_next_tuesday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
-    assert File.exist?(expected_strict_tuesday_file), "Strict weekly multi-day repeating task for Tuesday was not created."
-  
-    expected_strict_thursday_file = File.join(@later_dir, "#{strict_next_thursday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
-    assert File.exist?(expected_strict_thursday_file), "Strict weekly multi-day repeating task for Thursday was not created."
-  
-    expected_strict_friday_file = File.join(@later_dir, "#{strict_next_friday.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
-    assert File.exist?(expected_strict_friday_file), "Strict weekly multi-day repeating task for Friday was not created."
+    # Verify strict format creates files for the correct strict cadence
+    multi_days = { 
+      "t" => 2, # Tuesday
+      "h" => 4, # Thursday
+      "f" => 5  # Friday
+    }
+
+    # Determine the next occurrence of each specified day
+    strict_next_days = multi_days.transform_values do |target_wday|
+      days_ahead = (target_wday - @today.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Move to the next week if today matches the target weekday
+      @today + days_ahead
+    end
+
+    # Select the earliest next day
+    strict_next_day = strict_next_days.values.min
+
+    # Expected file for strict weekly repetition
+    expected_strict_file = File.join(@later_dir, "#{strict_next_day.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-thf.txt")
+    assert File.exist?(expected_strict_file), "Strict weekly multi-day repeating task for next week was not created (#{expected_strict_file})."
   end
 
   def test_monthly_specific_day_repeating_task
