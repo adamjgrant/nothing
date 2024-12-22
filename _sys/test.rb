@@ -26,8 +26,6 @@ def setup_test_environment
 
   # Remove the inactive dir at sys/test/extensions
   FileUtils.rm_rf(File.join(TEST_EXTENSIONS_DIR, 'inactive'))
-
-
 end
 
 # Set up the test environment before running any tests
