@@ -32,12 +32,26 @@ end
 
 today = Date.today
 
-# Parse date prefix in new format YYYY-MM-DD
+# Parse date prefix in new format YYYY-MM-DD or YYYY-MM-DD@HHMM
 def parse_yyyymmdd_prefix(filename)
-  match = filename.match(/^(\d{4}-\d{2}-\d{2})\./)
-  return Date.strptime(match[1], '%Y-%m-%d') if match
-rescue ArgumentError
-  nil
+  match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:@(\d{4}))?\./)
+  return nil unless match
+
+  date_part = match[1]
+  time_part = match[2]
+
+  begin
+    date = Date.strptime(date_part, '%Y-%m-%d')
+    if time_part
+      hour = time_part[0..1].to_i
+      minute = time_part[2..3].to_i
+      time = Time.new(date.year, date.month, date.day, hour, minute)
+      return time
+    end
+    date
+  rescue ArgumentError
+    nil
+  end
 end
 
 # Run all extensions in the extensions directory
