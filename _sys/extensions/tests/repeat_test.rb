@@ -50,7 +50,7 @@ class RepeatingTaskTest < Minitest::Test
       @weekly_multi_day_file, @strict_weekly_multi_day_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
-    @monthly_specific_day_file = File.join(@archived_dir, "#{(@today << 1).strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
+    @monthly_specific_day_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
     @strict_monthly_specific_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-day.@1m-5.txt")
 
     @monthly_specific_weekday_file = File.join(@archived_dir, "#{(@today << 2).strftime('%Y-%m-%d')}.task-specific-weekday.2m-2m.txt")
@@ -242,15 +242,22 @@ class RepeatingTaskTest < Minitest::Test
   end
 
   def test_monthly_specific_day_repeating_task
-    # Calculate the next occurrence of the 5th day two months from now
+    # Calculate the next occurrence of the 5th day one month from now
     base_date = Date.strptime(File.basename(@monthly_specific_day_file).split('.').first, '%Y-%m-%d')
-    next_date = base_date >> 2
     specific_day = 5
-    next_specific_day = Date.new(next_date.year, next_date.month, specific_day)
-    
+  
+    # Increment the month by 1
+    next_month = base_date >> 1
+    next_specific_day = Date.new(next_month.year, next_month.month, specific_day)
+  
+    # Ensure the next specific day is valid (e.g., not beyond the end of the month)
+    if next_specific_day.day != specific_day
+      next_specific_day = Date.new(next_month.year, next_month.month + 1, specific_day)
+    end
+  
     # Expected file for default repetition
     expected_file = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
-    assert File.exist?(expected_file), "Monthly specific day repeating task for 5th day was not created."
+    assert File.exist?(expected_file), "Monthly specific day repeating task for 5th day was not created (#{expected_file})."
   
     # Expected file for strict repetition
     expected_strict_file = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.task-strict-specific-day.@1m-5.txt")
