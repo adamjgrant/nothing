@@ -96,6 +96,30 @@ def calculate_next_date(current_date, rule)
   end
 end
 
+def parse_filename(filename)
+  # Split the filename by periods
+  parts = filename.split('.')
+
+  # Ensure there are at least two parts (name and extension)
+  return { date: nil, name: nil, rule: nil, extension: nil } if parts.length < 2
+
+  # Extract the mandatory extension (last part)
+  extension = parts.pop
+
+  # Determine if the first part is a date
+  date = nil
+  if parts.first =~ /^\d{4}-\d{2}-\d{2}$/
+    date = parts.shift # Extract the date if valid
+  end
+
+  # Remaining parts: name and (optional) rule
+  name = parts.shift
+  rule = parts.shift
+
+  # Return a structured hash
+  { date: date, name: name, rule: rule, extension: extension }
+end
+
 # Process files in _archived for default repetition
 Dir.foreach(archived_dir) do |filename|
   next if filename == '.' || filename == '..'
@@ -103,35 +127,35 @@ Dir.foreach(archived_dir) do |filename|
 
   file_path = File.join(archived_dir, filename)
 
+  parsed = parse_filename(filename)
+
   # Match files with the repetition rule format
-  if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)\.(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
-    date_prefix = $1
-    task_name = $2
-    rule = $3
-    extension = $4
+  date_prefix = parsed.date
+  task_name = parsed.name
+  rule = parsed.rule
+  extension = parsed.extension
 
-    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
-    next unless current_date # Skip if the date cannot be parsed
+  current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
+  next unless current_date # Skip if the date cannot be parsed
 
-    # Calculate the next date
-    next_date = calculate_next_date(current_date, rule)
-    next unless next_date # Skip if the rule is invalid
+  # Calculate the next date
+  next_date = calculate_next_date(current_date, rule)
+  next unless next_date # Skip if the rule is invalid
 
-    # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
-    next_file_path = File.join(later_dir, next_filename)
+  # Check if the next instance already exists in _later
+  next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
+  next_file_path = File.join(later_dir, next_filename)
 
-    unless File.exist?(next_file_path)
-      # Create the next instance
-      FileUtils.cp(file_path, next_file_path)
-      puts "Created repeating task: #{next_filename}"
-    end
-
-    # Rename the current file to remove the repetition rule
-    renamed_file = "#{date_prefix}.#{task_name}#{extension}"
-    File.rename(file_path, File.join(archived_dir, renamed_file))
-    puts "Archived task renamed: #{renamed_file}"
+  unless File.exist?(next_file_path)
+    # Create the next instance
+    FileUtils.cp(file_path, next_file_path)
+    puts "Created repeating task: #{next_filename}"
   end
+
+  # Rename the current file to remove the repetition rule
+  renamed_file = "#{date_prefix}.#{task_name}#{extension}"
+  File.rename(file_path, File.join(archived_dir, renamed_file))
+  puts "Archived task renamed: #{renamed_file}"
 end
 
 # Process files in root for strict repetition
