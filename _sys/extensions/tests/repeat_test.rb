@@ -66,6 +66,10 @@ class RepeatingTaskTest < Minitest::Test
     @monthly_default_first_weekday_file, @strict_monthly_default_first_weekday_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
+    # User enters days out of order: "we-mo-su" (Wednesday, Monday, Sunday)
+    unsorted_days_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
+    File.write(unsorted_days_file, "Test content for #{File.basename(unsorted_days_file)}")
+
     run_extension
   end
 
@@ -303,5 +307,29 @@ class RepeatingTaskTest < Minitest::Test
     # Expected file for strict repetition
     expected_strict_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-th.txt")
     assert File.exist?(expected_strict_file), "Strict monthly first weekday repeating task was not created (#{expected_strict_file})."
+  end
+
+  def test_weekly_multi_day_repeating_task_with_unsorted_days
+    # Expected sorted days: "mo-we-su" (Monday, Wednesday, Sunday)
+    sorted_days = %w[mo we su]
+    next_days = sorted_days.map do |day|
+      target_wday = %w[su mo tu we th fr sa].index(day)
+      days_ahead = (target_wday - @today.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Move to next week if today matches the target weekday
+      @today + days_ahead
+    end
+  
+    # Verify that only the file for the first upcoming day is created
+    first_next_day = next_days.min
+    first_next_day_name = sorted_days[next_days.index(first_next_day)]
+    expected_first_file = File.join(@later_dir, "#{first_next_day.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
+    assert File.exist?(expected_first_file), "Weekly multi-day repeating task for #{first_next_day_name.upcase} was not created (#{expected_first_file})."
+  
+    # Ensure files for other days are not created yet
+    next_days.each do |date|
+      next if date == first_next_day # Skip the first day
+      unexpected_file = File.join(@later_dir, "#{date.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
+      refute File.exist?(unexpected_file), "Unexpected file created for #{sorted_days[next_days.index(date)].upcase}: #{unexpected_file}"
+    end
   end
 end
