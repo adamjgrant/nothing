@@ -7,13 +7,44 @@ Encoding.default_internal = Encoding::UTF_8
 require 'fileutils'
 require 'date'
 
-# Set the root directory to the provided argument or default to the current directory
-root_dir = ARGV[0] || Dir.pwd
+current_dir = File.expand_path('.')
+parent_dir = File.expand_path('..', __FILE__)
+parent_dir_name = File.basename(parent_dir)
+
+# Check if this is the first time setup
+if parent_dir_name != '_sys' && !Dir.exist?(File.join(current_dir, '_later')) && 
+   !Dir.exist?(File.join(current_dir, '_archived')) && 
+   !Dir.exist?(File.join(current_dir, '_sys'))
+  # First-time setup
+  puts "First-time setup detected. Creating '_sys' directory and moving 'nothing.rb' into it."
+
+  # Create _sys directory
+  sys_dir = File.join(current_dir, '_sys')
+  Dir.mkdir(sys_dir)
+
+  # Move this script to _sys
+  new_script_path = File.join(sys_dir, 'nothing.rb')
+  FileUtils.cp(__FILE__, new_script_path)
+
+  # Remove the original script
+  File.delete(__FILE__)
+
+  puts "'nothing.rb' has been moved to '_sys'. Please run it from there."
+
+  system("ruby #{new_script_path}")
+
+  exit
+else
+  puts "Skipping first-time setup."
+end
+
+# Set the root directory to the provided argument or default to the parent of the _sys directory
+root_dir = ARGV[0] || File.expand_path('..', __dir__)
 
 BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, '_later')
 ARCHIVED_DIR = File.join(BASE_DIR, '_archived')
-SYS_DIR = File.join(BASE_DIR, '_sys')
+SYS_DIR = File.join(BASE_DIR, '_sys') # This stays the same
 EXTENSIONS_DIR = File.join(SYS_DIR, 'extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive')
 EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests')
@@ -21,7 +52,7 @@ ACTIVITY_LOG = File.join(SYS_DIR, 'activity.log')
 ERROR_LOG = File.join(SYS_DIR, 'error.log')
 
 # Ensure directories exist and include a .keep file
-[ LATER_DIR, ARCHIVED_DIR, SYS_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR, EXTENSIONS_TESTS_DIR ].each do |dir|
+[ LATER_DIR, ARCHIVED_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR, EXTENSIONS_TESTS_DIR ].each do |dir|
   unless Dir.exist?(dir)
     Dir.mkdir(dir)
   end
