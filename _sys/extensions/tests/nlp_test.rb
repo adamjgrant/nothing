@@ -152,7 +152,9 @@ class ConvertDayToDateTest < Minitest::Test
   end
 
   def test_nlp_on_multiple_directories
-    system("ruby #{@nlp_extension_path} #{@test_root}")
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
   
     # Debug: List files in each directory before assertions
     @directories.each do |dir|
@@ -187,7 +189,9 @@ class ConvertDayToDateTest < Minitest::Test
     file_path = File.join(sys_dir, filename)
     File.write(file_path, "Test content for #{filename}")
   
-    system("ruby #{@nlp_extension_path} #{@test_root}")
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
   
     # File should remain unchanged in _sys
     assert File.exist?(file_path), "File in _sys directory was incorrectly processed."
