@@ -119,7 +119,7 @@ class RepeatingTaskTest < Minitest::Test
     days_ahead = (7 - @today.wday) % 7
     days_ahead = 7 if days_ahead == 0 # Ensure we move to next week if today is already the target weekday
     next_weekday = @today + days_ahead
-    expected_weekday_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
+    expected_weekday_file = File.join(@later_dir, "#{next_weekday.strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
     assert File.exist?(expected_weekday_file), "Weekday repeating task for #{today_weekday_name.capitalize} (#{expected_weekday_file}) was not created."
   
     # Verify strict weekday repetition
