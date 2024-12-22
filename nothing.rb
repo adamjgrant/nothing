@@ -48,7 +48,7 @@ def parse_yyyymmdd_prefix(filename)
       time = Time.new(date.year, date.month, date.day, hour, minute)
       return time
     end
-    date
+    Time.new(date.year, date.month, date.day)
   rescue ArgumentError
     nil
   end
@@ -78,7 +78,7 @@ begin
     # Parse the optional date prefix
     due_date = parse_yyyymmdd_prefix(filename)
 
-    if due_date && due_date <= today
+    if due_date && due_date <= Time.now
       from_path = File.join(LATER_DIR, filename)
       to_path = File.join(BASE_DIR, filename)
       FileUtils.mv(from_path, to_path)
@@ -97,7 +97,7 @@ begin
     # Parse the optional date prefix
     due_date = parse_yyyymmdd_prefix(filename)
 
-    if due_date && due_date > today
+    if due_date && due_date > Time.now
       from_path = File.join(BASE_DIR, filename)
       to_path = File.join(LATER_DIR, filename)
       FileUtils.mv(from_path, to_path)

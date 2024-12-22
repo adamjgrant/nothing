@@ -158,7 +158,7 @@ class ConvertDayToDateTest < Minitest::Test
   
     # Debug: List files in each directory before assertions
     @directories.each do |dir|
-      puts "DEBUG: Files in #{dir}: #{Dir.glob(File.join(dir, '*'))}"
+      # puts "DEBUG: Files in #{dir}: #{Dir.glob(File.join(dir, '*'))}"
     end
   
     @directories.each do |dir|
