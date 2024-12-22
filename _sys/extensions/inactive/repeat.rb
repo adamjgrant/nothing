@@ -62,6 +62,35 @@ def calculate_next_date(current_date, rule)
     days_ahead = (target_weekday - current_date.wday) % 7
     days_ahead = 7 if days_ahead.zero? # If today is the target weekday, set to next week
     current_date + days_ahead
+  elsif rule =~ /^(\d+)m-(\d+)$/
+    number = $1.to_i
+    specific_day = $2.to_i
+    target_month = current_date >> number
+    Date.new(target_month.year, target_month.month, specific_day) rescue nil
+  elsif rule =~ /^(\d+)w-([mtwhfs])$/i
+    number = $1.to_i
+    weekday = "mtwhfs".index($2.downcase) + 1
+    days_ahead = (weekday - current_date.wday + 7) % 7
+    days_ahead = 7 if days_ahead.zero? # Next week if today is the target day
+    next_date = current_date + (number * 7) + days_ahead
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}#{extension}"
+    FileUtils.cp(file_path, File.join(later_dir, next_filename))
+  elsif rule =~ /^(\d+)m-(\d)([mtwhfs])$/i
+    number = $1.to_i
+    nth = $2.to_i
+    weekday = "mtwhfs".index($3.downcase) + 1
+    target_month = current_date >> number
+    first_day = Date.new(target_month.year, target_month.month, 1)
+    first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
+    first_weekday + ((nth - 1) * 7) rescue nil
+  elsif rule =~ /^(\d+)m-([mtwhfs])$/i
+    number = $1.to_i
+    nth = 1 # Default to the first occurrence
+    weekday = "mtwhfs".index($2.downcase) + 1
+    target_month = current_date >> number
+    first_day = Date.new(target_month.year, target_month.month, 1)
+    first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
+    first_weekday + ((nth - 1) * 7) rescue nil
   else
     nil
   end
