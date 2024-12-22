@@ -56,7 +56,7 @@ class RepeatingTaskTest < Minitest::Test
     @monthly_specific_weekday_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-weekday.2m-2m.txt")
     @strict_monthly_specific_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-weekday.@2m-2m.txt")
 
-    @monthly_default_first_weekday_file = File.join(@archived_dir, "#{(@today << 3).strftime('%Y-%m-%d')}.task-default-first-weekday.1m-h.txt")
+    @monthly_default_first_weekday_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-default-first-weekday.1m-h.txt")
     @strict_monthly_default_first_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-h.txt")
 
     # Write these files to simulate their presence in the appropriate directories
@@ -302,6 +302,6 @@ class RepeatingTaskTest < Minitest::Test
   
     # Expected file for strict repetition
     expected_strict_file = File.join(@later_dir, "#{next_first_weekday.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-h.txt")
-    assert File.exist?(expected_strict_file), "Strict monthly first weekday repeating task was not created."
+    assert File.exist?(expected_strict_file), "Strict monthly first weekday repeating task was not created (#{expected_strict_file})."
   end
 end
