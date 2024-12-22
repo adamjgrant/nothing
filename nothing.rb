@@ -34,7 +34,7 @@ today = Date.today
 
 # Parse date prefix in new format YYYY-MM-DD or YYYY-MM-DD@HHMM
 def parse_yyyymmdd_prefix(filename)
-  match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:@(\d{4}))?\./)
+  match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?\./)
   return nil unless match
 
   date_part = match[1]
