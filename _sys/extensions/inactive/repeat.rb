@@ -101,7 +101,7 @@ def parse_filename(filename)
   parts = filename.split('.')
 
   # Ensure there are at least two parts (name and extension)
-  return { date: nil, name: nil, rule: nil, extension: nil } if parts.length < 2
+  return { date: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
 
   # Extract the mandatory extension (last part)
   extension = parts.pop
@@ -116,8 +116,15 @@ def parse_filename(filename)
   name = parts.shift
   rule = parts.shift
 
+  # Determine if the rule is strict (starts with '@')
+  strict = false
+  if rule&.start_with?('@')
+    strict = true
+    rule = rule[1..] # Remove '@' from the rule
+  end
+
   # Return a structured hash
-  { date: date, name: name, rule: rule, extension: extension }
+  { date: date, name: name, rule: rule, strict: strict, extension: extension }
 end
 
 # Process files in _archived for default repetition
@@ -128,6 +135,8 @@ Dir.foreach(archived_dir) do |filename|
   file_path = File.join(archived_dir, filename)
 
   parsed = parse_filename(filename)
+  
+  # TODO if this rule is not strict
 
   # Match files with the repetition rule format
   date_prefix = parsed.date
@@ -166,6 +175,9 @@ Dir.foreach(root_dir) do |filename|
   file_path = File.join(root_dir, filename)
 
   # Match files with the strict repetition rule format
+  parsed = parse_filename(filename)
+  
+  # TODO If this rule is strict 
   if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)\.@(\d+[dwmy]|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(\..+)$/
     date_prefix = $1
     task_name = $2
