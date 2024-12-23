@@ -10,6 +10,12 @@ require 'date'
 # Set the root directory to the provided argument or default to the current directory
 root_dir = ARGV[0] || File.expand_path('..', __dir__)
 
+# Ensure the script is running inside a folder named '_nothing'
+unless File.basename(root_dir) == '_nothing'
+  STDERR.puts "Error: This script must be run from inside a '_nothing' directory."
+  exit 1
+end
+
 BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, '_later')
 DONE_DIR = File.join(BASE_DIR, '_done')
