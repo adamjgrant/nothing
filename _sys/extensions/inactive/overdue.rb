@@ -61,7 +61,7 @@ def process_directory(directory)
 
       # Determine if the task is overdue
       current_time = Time.now
-      is_overdue = due_date < Time.now
+      is_overdue = due_date.to_date < current_time.to_date
 
       # Remove « emoji from non-overdue tasks
       if !is_overdue && task_name.start_with?('«')
