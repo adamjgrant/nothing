@@ -6,9 +6,9 @@ require 'date'
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
 
-# Dynamically determine directories to process (exclude `_sys`)
+# Dynamically determine directories to process (exclude `_nothing`)
 directories_to_process = Dir.glob(File.join(root_dir, '*')).select do |path|
-  File.directory?(path) && !File.basename(path).start_with?('_sys')
+  File.directory?(path) && !File.basename(path).start_with?('_nothing')
 end
 directories_to_process << root_dir # Include the root directory itself
 
