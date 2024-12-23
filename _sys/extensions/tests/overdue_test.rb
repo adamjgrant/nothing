@@ -62,7 +62,7 @@ class AddOverdueEmojiTest < Minitest::Test
 
     # Verify the warning emoji is removed for non-overdue task in root
     expected_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.non overdue task.md")
-    assert File.exist?(expected_file), "The warning emoji was not removed for non-overdue task in root."
+    assert File.exist?(expected_file), "The warning emoji was not removed for non-overdue task in root. (#{expected_file})"
     refute File.exist?(@non_overdue_with_emoji_in_root), "The original file with warning emoji in root still exists."
   end
 

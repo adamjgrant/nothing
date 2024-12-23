@@ -214,7 +214,6 @@ Dir.foreach(root_dir) do |filename|
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      puts "Created strict repeating task: #{next_filename}"
     end
   end
 end

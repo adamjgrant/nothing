@@ -36,7 +36,7 @@ def process_directory(directory)
 
     # Skip directories, only process files
     next unless File.file?(file_path)
-
+      
     # Match files with the format <YYYY-MM-DD[+HHMM]>.<task name>.<extension>
     if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)$/
       date_prefix = $1
@@ -48,23 +48,25 @@ def process_directory(directory)
       due_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
       next unless due_date # Skip if the date cannot be parsed
 
-      # Parse the time component, if present
-      due_time = time_suffix ? Time.strptime(time_suffix, '+%H%M') : nil
+      if time_suffix.nil?
+        assumed_time_suffix = "+2359" 
+      else time_suffix
+        assumed_time_suffix = time_suffix
+      end
+
+      # Parse the time component
+      due_time = Time.strptime(assumed_time_suffix, '+%H%M')
+
+      due_date = Time.new(due_date.year, due_date.month, due_date.day, due_time.hour, due_time.min, due_time.sec, due_time.utc_offset)
 
       # Determine if the task is overdue
       current_time = Time.now
-      is_overdue = if due_date < Date.today
-                    true
-                  elsif due_date == Date.today && due_time && due_time < current_time
-                    true
-                  else
-                    false
-                  end
+      is_overdue = due_date < Time.now
 
       # Remove « emoji from non-overdue tasks
       if !is_overdue && task_name.start_with?('«')
         new_task_name = task_name.sub(/^«/, '') # Remove the « emoji
-        new_filename = "#{date_prefix}#{time_suffix}#{new_task_name}#{extension}"
+        new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
 
         # Rename the file
