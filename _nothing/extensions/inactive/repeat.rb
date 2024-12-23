@@ -174,7 +174,7 @@ Dir.foreach(done_dir) do |filename|
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      puts "Created repeating task: #{next_filename}"
+      # puts "Created repeating task: #{next_filename}"
     end
 
     # Rename the current file to remove the repetition rule
