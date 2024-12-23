@@ -16,7 +16,7 @@
 # - Yearly: `1y` (every year).
 #
 # Behavior:
-# - **Default Repetition**: Creates the next instance of the task after it’s completed (in `_archived`).
+# - **Default Repetition**: Creates the next instance of the task after it’s completed (in `_done`).
 # - **Strict Repetition**: Always schedules the next instance, regardless of completion, as long as the file is in the root directory.
 #
 # Usage:
@@ -39,11 +39,11 @@ require 'date'
 
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
-archived_dir = File.join(root_dir, '_archived')
+done_dir = File.join(root_dir, '_done')
 later_dir = File.join(root_dir, '_later')
 
-# Ensure _archived and _later directories exist
-FileUtils.mkdir_p(archived_dir)
+# Ensure _done and _later directories exist
+FileUtils.mkdir_p(done_dir)
 FileUtils.mkdir_p(later_dir)
 
 # Method to calculate the next date based on the repetition rule
@@ -144,12 +144,12 @@ def parse_filename(filename)
   { date: date, time: time, name: name, rule: rule, strict: strict, extension: extension }
 end
 
-# Process files in _archived for default repetition
-Dir.foreach(archived_dir) do |filename|
+# Process files in _done for default repetition
+Dir.foreach(done_dir) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('.') # Skip hidden files
 
-  file_path = File.join(archived_dir, filename)
+  file_path = File.join(done_dir, filename)
 
   parsed = parse_filename(filename)
   
@@ -179,7 +179,7 @@ Dir.foreach(archived_dir) do |filename|
 
     # Rename the current file to remove the repetition rule
     renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{extension}"
-    File.rename(file_path, File.join(archived_dir, renamed_file))
+    File.rename(file_path, File.join(done_dir, renamed_file))
   end
 end
 

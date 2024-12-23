@@ -8,10 +8,10 @@ require 'date'
 root_dir = ARGV[0] || Dir.pwd
 
 BASE_DIR = root_dir
-ARCHIVED_DIR = File.join(BASE_DIR, '_archived')
+DONE_DIR = File.join(BASE_DIR, '_done')
 
 # Ensure the archived directory exists
-FileUtils.mkdir_p(ARCHIVED_DIR) unless Dir.exist?(ARCHIVED_DIR)
+FileUtils.mkdir_p(DONE_DIR) unless Dir.exist?(DONE_DIR)
 
 # Process all task files in the base directory
 Dir.foreach(BASE_DIR) do |filename|
@@ -47,10 +47,10 @@ Dir.foreach(BASE_DIR) do |filename|
 
   # Archive the file if it has reached 6 or more days old
   if days_old >= 6
-    archived_path = File.join(ARCHIVED_DIR, File.basename(file_path))
+    done_path = File.join(DONE_DIR, File.basename(file_path))
     begin
-      # puts "Archiving file: #{file_path} -> #{archived_path}" # Debugging: Log archiving
-      FileUtils.mv(file_path, archived_path)
+      # puts "Archiving file: #{file_path} -> #{done_path}" # Debugging: Log archiving
+      FileUtils.mv(file_path, done_path)
     rescue => e
       puts "Error archiving file: #{e.message}" # Debugging: Log errors
     end

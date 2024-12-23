@@ -39,7 +39,7 @@ class ConvertDayToDateTest < Minitest::Test
     File.write(@later_irrelevant_file, "Task content for irrelevant file in _later")
 
     # Add to the existing `setup` method
-    @directories = %w[_later _archived _push-1d _push-1w _push-rand].map do |dir|
+    @directories = %w[_later _done _push-1d _push-1w _push-rand].map do |dir|
       path = File.join(@test_root, dir)
       FileUtils.mkdir_p(path)
       path
@@ -181,19 +181,19 @@ class ConvertDayToDateTest < Minitest::Test
     end
   end
 
-  def test_nlp_does_not_process_sys_directory
-    sys_dir = File.join(@test_root, '_sys')
-    FileUtils.mkdir_p(sys_dir)
+  def test_nlp_does_not_process_nothing_directory
+    nothing_dir = File.join(@test_root, '_nothing')
+    FileUtils.mkdir_p(nothing_dir)
   
     filename = "today.mytask.txt"
-    file_path = File.join(sys_dir, filename)
+    file_path = File.join(nothing_dir, filename)
     File.write(file_path, "Test content for #{filename}")
   
     # Run the extension
     extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
   
-    # File should remain unchanged in _sys
-    assert File.exist?(file_path), "File in _sys directory was incorrectly processed."
+    # File should remain unchanged in _nothing
+    assert File.exist?(file_path), "File in _nothing directory was incorrectly processed."
   end
 end

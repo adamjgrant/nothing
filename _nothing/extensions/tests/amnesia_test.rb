@@ -5,7 +5,7 @@ class AmnesiaTest < Minitest::Test
   def setup
     # Create test directories and files
     @test_root = File.expand_path('../../../../test', __dir__)
-    FileUtils.mkdir_p(File.join(@test_root, '_archived')) # Ensure 'archived' directory exists
+    FileUtils.mkdir_p(File.join(@test_root, '_done')) # Ensure 'archived' directory exists
   
     now = Time.now
     three_days_ago = now - (3 * 24 * 60 * 60) - (5 * 60) # 3 days ago, minus 5 minutes
@@ -62,13 +62,13 @@ class AmnesiaTest < Minitest::Test
     assert File.exist?(skull_file), "The file modified five days ago should have three skull emojis."
   end
 
-  def test_six_days_old_task_archived
+  def test_six_days_old_task_done
     # Simulate progression to archiving
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
-    archived_file = File.join(@test_root, '_archived', "💀💀💀💀Task six days old.txt")
-    assert File.exist?(archived_file), "The file modified six days ago should be archived with four skull emojis."
+    done_file = File.join(@test_root, '_done', "💀💀💀💀Task six days old.txt")
+    assert File.exist?(done_file), "The file modified six days ago should be archived with four skull emojis."
   end
 
   def test_today_file_remains
