@@ -30,7 +30,16 @@ def process_file(file_path, increment_days, later_dir)
   components = filename.split('.')
   return unless components.size >= 2 # Skip files without a date
 
-  date_str = components[0]
+  date_time_str = components[0]
+  time_str = nil
+
+  # Split date and time if the format includes '+HHMM'
+  if date_time_str.include?('+')
+    date_str, time_str = date_time_str.split('+')
+  else
+    date_str = date_time_str
+  end
+
   begin
     task_date = Date.strptime(date_str, '%Y-%m-%d')
   rescue ArgumentError
@@ -39,7 +48,8 @@ def process_file(file_path, increment_days, later_dir)
 
   # Increment the date
   new_date = task_date + increment_days
-  new_filename = filename.sub(date_str, new_date.strftime('%Y-%m-%d'))
+  new_date_time_str = time_str ? "#{new_date.strftime('%Y-%m-%d')}+#{time_str}" : new_date.strftime('%Y-%m-%d')
+  new_filename = filename.sub(date_time_str, new_date_time_str)
   new_path = File.join(later_dir, new_filename)
 
   # Move the file to _later
