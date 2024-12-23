@@ -123,4 +123,19 @@ class AddOverdueEmojiTest < Minitest::Test
     # Verify future file with time component remains unchanged
     assert File.exist?(future_with_time_file), "The future file with time component should remain unchanged."
   end
+
+  def test_task_with_past_time_but_same_day_is_not_marked_overdue
+    # Create a test file with today's date and a past time component
+    past_time_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+1200.task.md")
+    File.write(past_time_today_file, "Task with past time but same day content")
+    
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+    
+    # Verify the task is not marked overdue
+    assert File.exist?(past_time_today_file), "The task with past time but same day should not be marked as overdue."
+    overdue_version = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+1200.«task.md")
+    refute File.exist?(overdue_version), "The task with past time but same day was incorrectly marked as overdue."
+  end
 end
