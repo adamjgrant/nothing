@@ -16,7 +16,7 @@
 # - Yearly: `1y` (every year).
 #
 # Behavior:
-# - **Default Repetition**: Creates the next instance of the task after it’s completed (in `_archived`).
+# - **Default Repetition**: Creates the next instance of the task after it’s completed (in `_done`).
 # - **Strict Repetition**: Always schedules the next instance, regardless of completion, as long as the file is in the root directory.
 #
 # Usage:
@@ -39,11 +39,11 @@ require 'date'
 
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
-archived_dir = File.join(root_dir, '_archived')
+done_dir = File.join(root_dir, '_done')
 later_dir = File.join(root_dir, '_later')
 
-# Ensure _archived and _later directories exist
-FileUtils.mkdir_p(archived_dir)
+# Ensure _done and _later directories exist
+FileUtils.mkdir_p(done_dir)
 FileUtils.mkdir_p(later_dir)
 
 # Method to calculate the next date based on the repetition rule
@@ -109,15 +109,17 @@ def parse_filename(filename)
   parts = filename.split('.')
 
   # Ensure there are at least two parts (name and extension)
-  return { date: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
+  return { date: nil, time: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
 
   # Extract the mandatory extension (last part)
   extension = parts.pop
 
-  # Determine if the first part is a date
-  date = nil
-  if parts.first =~ /^\d{4}-\d{2}-\d{2}$/
-    date = parts.shift # Extract the date if valid
+  # Determine if the first part contains a date and optional time
+  date, time = nil, nil
+  if parts.first =~ /^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?$/
+    date = $1
+    time = $2 # Capture time if present
+    parts.shift # Extract the date+time if valid
   end
 
   # Remaining parts: name and (optional) rule
@@ -139,15 +141,15 @@ def parse_filename(filename)
   end
 
   # Return a structured hash
-  { date: date, name: name, rule: rule, strict: strict, extension: extension }
+  { date: date, time: time, name: name, rule: rule, strict: strict, extension: extension }
 end
 
-# Process files in _archived for default repetition
-Dir.foreach(archived_dir) do |filename|
+# Process files in _done for default repetition
+Dir.foreach(done_dir) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('.') # Skip hidden files
 
-  file_path = File.join(archived_dir, filename)
+  file_path = File.join(done_dir, filename)
 
   parsed = parse_filename(filename)
   
@@ -166,12 +168,8 @@ Dir.foreach(archived_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.#{rule}.#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
-
-    if File.exist?(next_file_path)
-      # puts "DEBUG: #{next_filename} already exists."
-    end
 
     unless File.exist?(next_file_path)
       # Create the next instance
@@ -180,9 +178,8 @@ Dir.foreach(archived_dir) do |filename|
     end
 
     # Rename the current file to remove the repetition rule
-    renamed_file = "#{date_prefix}.#{task_name}.#{extension}"
-    File.rename(file_path, File.join(archived_dir, renamed_file))
-    # puts "Archived task renamed: #{renamed_file}"
+    renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{extension}"
+    File.rename(file_path, File.join(done_dir, renamed_file))
   end
 end
 
@@ -211,13 +208,12 @@ Dir.foreach(root_dir) do |filename|
     next unless next_date # Skip if the rule is invalid
 
     # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}.#{task_name}.@#{rule}.#{extension}"
+    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.@#{rule}.#{extension}"
     next_file_path = File.join(later_dir, next_filename)
 
     unless File.exist?(next_file_path)
       # Create the next instance
       FileUtils.cp(file_path, next_file_path)
-      # puts "Created strict repeating task: #{next_filename}"
     end
   end
 end

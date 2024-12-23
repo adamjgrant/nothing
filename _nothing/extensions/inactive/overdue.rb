@@ -21,6 +21,7 @@ Encoding.default_internal = Encoding::UTF_8
 
 require 'fileutils'
 require 'date'
+require 'time'
 
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
@@ -35,21 +36,37 @@ def process_directory(directory)
 
     # Skip directories, only process files
     next unless File.file?(file_path)
-
-    # Match files with the format <YYYY-MM-DD>.<task name>.<extension>
-    if filename =~ /^(\d{4}-\d{2}-\d{2})\.(.+)(\..+)$/
+      
+    # Match files with the format <YYYY-MM-DD[+HHMM]>.<task name>.<extension>
+    if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)$/
       date_prefix = $1
-      task_name = $2
-      extension = $3
+      time_suffix = $2 # Optional time component
+      task_name = $3
+      extension = $4
 
       # Parse the date prefix
       due_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
       next unless due_date # Skip if the date cannot be parsed
 
+      if time_suffix.nil?
+        assumed_time_suffix = "+2359" 
+      else time_suffix
+        assumed_time_suffix = time_suffix
+      end
+
+      # Parse the time component
+      due_time = Time.strptime(assumed_time_suffix, '+%H%M')
+
+      due_date = Time.new(due_date.year, due_date.month, due_date.day, due_time.hour, due_time.min, due_time.sec, due_time.utc_offset)
+
+      # Determine if the task is overdue
+      current_time = Time.now
+      is_overdue = due_date.to_date < current_time.to_date
+
       # Remove « emoji from non-overdue tasks
-      if due_date >= Date.today && task_name.start_with?('«')
+      if !is_overdue && task_name.start_with?('«')
         new_task_name = task_name.sub(/^«/, '') # Remove the « emoji
-        new_filename = "#{date_prefix}.#{new_task_name}#{extension}"
+        new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
 
         # Rename the file
@@ -63,9 +80,9 @@ def process_directory(directory)
       end
 
       # Add « emoji to overdue tasks
-      if due_date < Date.today && !task_name.start_with?('«')
+      if is_overdue && !task_name.start_with?('«')
         new_task_name = "«#{task_name}"
-        new_filename = "#{date_prefix}.#{new_task_name}#{extension}"
+        new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
 
         # Rename the file

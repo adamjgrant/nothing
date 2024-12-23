@@ -11,19 +11,19 @@ class RepeatingTaskTest < Minitest::Test
   def setup
     # Existing test directories
     @test_root = File.expand_path('../../../../test', __dir__)
-    @archived_dir = File.join(@test_root, '_archived')
+    @done_dir = File.join(@test_root, '_done')
     @later_dir = File.join(@test_root, '_later')
     @root_dir = @test_root
 
     # Test files for various formats with dynamic dates
     @today = Date.today
-    @daily_repeating_file = File.join(@archived_dir, "#{(@today - 3).strftime('%Y-%m-%d')}.mytask-three-days.3d.txt")
+    @daily_repeating_file = File.join(@done_dir, "#{(@today - 3).strftime('%Y-%m-%d')}.mytask-three-days.3d.txt")
     @strict_daily_repeating_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-eight-days-strict.@8d.txt")
 
-    @weekly_repeating_file = File.join(@archived_dir, "#{(@today - 14).strftime('%Y-%m-%d')}.mytask-two-weeks.2w.txt")
+    @weekly_repeating_file = File.join(@done_dir, "#{(@today - 14).strftime('%Y-%m-%d')}.mytask-two-weeks.2w.txt")
     @strict_weekly_repeating_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-five-weeks-strict.@5w.txt")
 
-    @monthly_repeating_file = File.join(@archived_dir, "#{(@today << 3).strftime('%Y-%m-%d')}.mytask-three-months.3m.txt")
+    @monthly_repeating_file = File.join(@done_dir, "#{(@today << 3).strftime('%Y-%m-%d')}.mytask-three-months.3m.txt")
     @strict_monthly_repeating_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-six-months-strict.@6m.txt")
 
     # Dynamically calculate weekday names
@@ -31,7 +31,7 @@ class RepeatingTaskTest < Minitest::Test
     next_weekday_name = (@today + 7).strftime('%A').downcase # Same weekday next week (e.g., "tuesday" next week)
 
     # Dynamic filenames
-    @weekday_repeating_file = File.join(@archived_dir, "#{(@today - (@today.wday - 1)).strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
+    @weekday_repeating_file = File.join(@done_dir, "#{(@today - (@today.wday - 1)).strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
     @strict_weekday_repeating_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-#{next_weekday_name}-strict.@#{next_weekday_name}.txt")
 
     # Write test content dynamically
@@ -42,7 +42,7 @@ class RepeatingTaskTest < Minitest::Test
       @weekday_repeating_file, @strict_weekday_repeating_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
-    @weekly_multi_day_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-multi-days.1w-tu-th-fr.txt")
+    @weekly_multi_day_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-multi-days.1w-tu-th-fr.txt")
     @strict_weekly_multi_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-multi-days.@1w-tu-th-fr.txt")
 
     # Write test content dynamically
@@ -50,13 +50,13 @@ class RepeatingTaskTest < Minitest::Test
       @weekly_multi_day_file, @strict_weekly_multi_day_file
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
-    @monthly_specific_day_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
+    @monthly_specific_day_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-day.1m-5.txt")
     @strict_monthly_specific_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-day.@1m-5.txt")
 
-    @monthly_specific_weekday_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-weekday.2m-2mo.txt")
+    @monthly_specific_weekday_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-specific-weekday.2m-2mo.txt")
     @strict_monthly_specific_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-specific-weekday.@2m-2mo.txt")
 
-    @monthly_default_first_weekday_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-default-first-weekday.1m-th.txt")
+    @monthly_default_first_weekday_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-default-first-weekday.1m-th.txt")
     @strict_monthly_default_first_weekday_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-default-first-weekday.@1m-th.txt")
 
     # Write these files to simulate their presence in the appropriate directories
@@ -67,7 +67,7 @@ class RepeatingTaskTest < Minitest::Test
     ].each { |file| File.write(file, "Test content for #{File.basename(file)}") }
 
     # User enters days out of order: "we-mo-su" (Wednesday, Monday, Sunday)
-    unsorted_days_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
+    unsorted_days_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
     File.write(unsorted_days_file, "Test content for #{File.basename(unsorted_days_file)}")
 
     run_extension
@@ -117,9 +117,11 @@ class RepeatingTaskTest < Minitest::Test
   
     # Verify default weekday repetition
     days_ahead = (7 - @today.wday) % 7
-    days_ahead = 7 if days_ahead == 0 # Ensure we move to next week if today is already the target weekday
+    days_ahead = 7 if days_ahead == 6 # Ensure we move to next week if today is already the target weekday
+
     next_weekday = @today + days_ahead
     expected_weekday_file = File.join(@later_dir, "#{next_weekday.strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
+
     assert File.exist?(expected_weekday_file), "Weekday repeating task for #{today_weekday_name.capitalize} (#{expected_weekday_file}) was not created."
   
     # Verify strict weekday repetition
@@ -167,7 +169,7 @@ class RepeatingTaskTest < Minitest::Test
                         end
   
     # Create test files dynamically based on tomorrow's weekday
-    @weekly_single_day_file = File.join(@archived_dir, "#{@today.strftime('%Y-%m-%d')}.task-#{tomorrow_weekday_name}.1w-#{weekday_shorthand}.txt")
+    @weekly_single_day_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-#{tomorrow_weekday_name}.1w-#{weekday_shorthand}.txt")
     @strict_weekly_single_day_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.task-strict-#{tomorrow_weekday_name}.@1w-#{weekday_shorthand}.txt")
   
     # Write test content dynamically
@@ -331,5 +333,33 @@ class RepeatingTaskTest < Minitest::Test
       unexpected_file = File.join(@later_dir, "#{date.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
       refute File.exist?(unexpected_file), "Unexpected file created for #{sorted_days[next_days.index(date)].upcase}: #{unexpected_file}"
     end
+  end
+
+  def test_repeating_task_with_time_created_yesterday
+    # Create a task file with a time value created yesterday
+    yesterday = @today - 1
+    time_task_file = File.join(@done_dir, "#{yesterday.strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    File.write(time_task_file, "Test content for #{File.basename(time_task_file)}")
+    
+    # Run the extension
+    run_extension
+    
+    # Expected file for the repeated task
+    expected_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-with-time.1d.txt")
+    assert File.exist?(expected_file), "Repeated task for file created yesterday was not created correctly (#{expected_file})."
+  end
+  
+  def test_strict_repeating_task_with_time_created_yesterday
+    # Create a strict task file with a time value created yesterday
+    yesterday = @today - 1
+    strict_time_task_file = File.join(@root_dir, "#{yesterday.strftime('%Y-%m-%d')}+1300.task-strict-with-time.@1d.txt")
+    File.write(strict_time_task_file, "Test content for #{File.basename(strict_time_task_file)}")
+    
+    # Run the extension
+    run_extension
+    
+    # Expected file for the repeated task
+    expected_strict_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-strict-with-time.@1d.txt")
+    assert File.exist?(expected_strict_file), "Strict repeated task for file created yesterday was not created correctly (#{expected_strict_file})."
   end
 end

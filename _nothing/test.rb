@@ -4,19 +4,19 @@ require 'date'
 
 # Test environment setup paths
 ROOT_DIR = File.expand_path('..', __dir__)
-TEST_ROOT = File.join(ROOT_DIR, '_sys/test')
+TEST_ROOT = File.join(ROOT_DIR, '_nothing/test')
 LATER_DIR = File.join(TEST_ROOT, '_later')
-ARCHIVED_DIR = File.join(TEST_ROOT, '_archived')
-ACTIVITY_LOG = File.join(TEST_ROOT, '_sys', 'activity.log')
-ERROR_LOG = File.join(TEST_ROOT, '_sys', 'error.log')
-EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, '_sys/extensions')
+DONE_DIR = File.join(TEST_ROOT, '_done')
+ACTIVITY_LOG = File.join(TEST_ROOT, '_nothing', 'activity.log')
+ERROR_LOG = File.join(TEST_ROOT, '_nothing', 'error.log')
+EXTENSIONS_SRC_DIR = File.join(ROOT_DIR, '_nothing/extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_SRC_DIR, 'inactive')
-TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, '_sys/extensions')
+TEST_EXTENSIONS_DIR = File.join(TEST_ROOT, '_nothing/extensions')
 
 def setup_test_environment
   # Completely reset the test root directory
   FileUtils.rm_rf(TEST_ROOT)
-  FileUtils.mkdir_p([TEST_ROOT, LATER_DIR, ARCHIVED_DIR, TEST_EXTENSIONS_DIR])
+  FileUtils.mkdir_p([TEST_ROOT, LATER_DIR, DONE_DIR, TEST_EXTENSIONS_DIR])
 
   # Copy active extensions
   FileUtils.cp_r(Dir.glob(File.join(EXTENSIONS_SRC_DIR, '*')), TEST_EXTENSIONS_DIR)
