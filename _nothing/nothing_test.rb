@@ -29,7 +29,7 @@ class TestDueDateMovement < Minitest::Test
 
   def test_due_date_movement
     # Run the main script with the test root directory
-    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
   
     # Verify overdue and due-today tasks were moved to the base directory
     assert fuzzy_file_exists?(TEST_ROOT, "#{(Date.today - 1).strftime('%Y-%m-%d')}.Task overdue.txt"),
@@ -79,7 +79,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(future_task, "Task content for a future task")
   
     # Run the script
-    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
   
     # Verify the task is moved to '_later'
     assert fuzzy_file_exists?(LATER_DIR, "#{future_date}.Future task.txt"),
@@ -101,7 +101,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(future_task, "Task content for a future time task")
   
     # Run the script
-    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
   
     # Verify the task remains in '_later' because its time has not yet passed
     assert fuzzy_file_exists?(LATER_DIR, "#{future_date_str}+#{future_time_str}.Task future with time.txt"),
@@ -115,7 +115,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(past_task, "Task content for a past time task")
   
     # Run the script again
-    system("ruby #{File.expand_path('../nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
   
     # Verify the past task is moved to the root because its time has passed
     assert fuzzy_file_exists?(TEST_ROOT, "#{past_date_str}+#{past_time_str}.Task past with time.txt"),
