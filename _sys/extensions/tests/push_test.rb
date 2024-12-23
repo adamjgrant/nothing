@@ -74,4 +74,46 @@ class PushExtensionTest < Minitest::Test
     assert random_date >= expected_min_date && random_date <= expected_max_date,
            "File was pushed with an invalid random date (#{random_date})."
   end
+
+  def test_push_with_time_value
+    # Test for _push-1d
+    filename_1d = "#{@today.strftime('%Y-%m-%d')}+1300.test-task.1d.txt"
+    file_path_1d = File.join(@push_1d_dir, filename_1d)
+    FileUtils.mkdir_p(@push_1d_dir) # Ensure the directory exists
+    File.write(file_path_1d, "Test content")
+
+    # Test for _push-1w
+    filename_1w = "#{@today.strftime('%Y-%m-%d')}+0930.test-task.1w.txt"
+    file_path_1w = File.join(@push_1w_dir, filename_1w)
+    FileUtils.mkdir_p(@push_1w_dir) # Ensure the directory exists
+    File.write(file_path_1w, "Test content")
+
+    # Test for _push-rand
+    filename_rand = "#{@today.strftime('%Y-%m-%d')}+1800.test-task.rand.txt"
+    file_path_rand = File.join(@push_rand_dir, filename_rand)
+    FileUtils.mkdir_p(@push_rand_dir) # Ensure the directory exists
+    File.write(file_path_rand, "Test content")
+
+    system("ruby #{@extension_path} #{@test_root}")
+
+    # Validate _push-1d file
+    expected_filename_1d = "#{(@today + 1).strftime('%Y-%m-%d')}+1300.test-task.1d.txt"
+    expected_file_path_1d = File.join(@later_dir, expected_filename_1d)
+    assert File.exist?(expected_file_path_1d), "File with time value was not pushed to _later with +1 day."
+
+    # Validate _push-1w file
+    expected_filename_1w = "#{(@today + 7).strftime('%Y-%m-%d')}+0930.test-task.1w.txt"
+    expected_file_path_1w = File.join(@later_dir, expected_filename_1w)
+    assert File.exist?(expected_file_path_1w), "File with time value was not pushed to _later with +1 week."
+
+    # Validate _push-rand file
+    pushed_file_rand = Dir.glob(File.join(@later_dir, "*.test-task.rand.txt")).first
+    refute_nil pushed_file_rand, "File with time value was not pushed to _later with a random date."
+    random_date = Date.strptime(File.basename(pushed_file_rand).split('+').first, '%Y-%m-%d')
+    expected_min_date = @today + 1
+    expected_max_date = @today + 10
+
+    assert random_date >= expected_min_date && random_date <= expected_max_date,
+           "File with time value was pushed with an invalid random date (#{random_date})."
+  end
 end
