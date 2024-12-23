@@ -8,7 +8,7 @@ require 'fileutils'
 require 'date'
 
 # Set the root directory to the provided argument or default to the current directory
-root_dir = ARGV[0] || Dir.pwd
+root_dir = ARGV[0] || File.expand_path('..', __dir__)
 
 BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, '_later')
