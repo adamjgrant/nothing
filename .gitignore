@@ -7,3 +7,4 @@ test
 *.md                # Ignore all .md files
 !/README.md          # Re-include README.md
 .DS_Store
+lazy_update.sh
