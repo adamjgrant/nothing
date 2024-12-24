@@ -196,4 +196,34 @@ class ConvertDayToDateTest < Minitest::Test
     # File should remain unchanged in _nothing
     assert File.exist?(file_path), "File in _nothing directory was incorrectly processed."
   end
+
+  def test_convert_day_to_date_with_time
+    # Create test files with time values
+    @today_with_time_file = File.join(@test_root, "today+0300.mytask.txt")
+    @tomorrow_with_time_file = File.join(@test_root, "tomorrow+1430.mytask.txt")
+    @three_days_with_time_file = File.join(@test_root, "3d+1500.mytask.txt")
+  
+    File.write(@today_with_time_file, "Task content for today with time")
+    File.write(@tomorrow_with_time_file, "Task content for tomorrow with time")
+    File.write(@three_days_with_time_file, "Task content for 3 days from now with time")
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Verify "today+HHMM" file
+    expected_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+0300.mytask.txt")
+    assert File.exist?(expected_today_file), "The 'today+HHMM' file in the main directory was not renamed correctly."
+    refute File.exist?(@today_with_time_file), "The original 'today+HHMM' file in the main directory still exists."
+  
+    # Verify "tomorrow+HHMM" file
+    expected_tomorrow_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}+1430.mytask.txt")
+    assert File.exist?(expected_tomorrow_file), "The 'tomorrow+HHMM' file in the main directory was not renamed correctly."
+    refute File.exist?(@tomorrow_with_time_file), "The original 'tomorrow+HHMM' file in the main directory still exists."
+  
+    # Verify "3d+HHMM" file
+    expected_three_days_file = File.join(@test_root, "#{(Date.today + 3).strftime('%Y-%m-%d')}+1500.mytask.txt")
+    assert File.exist?(expected_three_days_file), "The '3d+HHMM' file in the main directory was not renamed correctly."
+    refute File.exist?(@three_days_with_time_file), "The original '3d+HHMM' file in the main directory still exists."
+  end
 end
