@@ -36,11 +36,11 @@ class AmnesiaTest < Minitest::Test
 
     # Dynamically calculate a date that will result in a single skull
     one_skull_date = (Date.today - 3).strftime('%Y-%m-%d') # 3 days ago
-    @file_with_date_and_task = File.join(@test_root, "#{one_skull_date}.my task.txt")
+    @file_with_date_and_task = File.join(@test_root, "#{one_skull_date}.my task with date.txt")
     File.write(@file_with_date_and_task, "Task content")
     FileUtils.touch(@file_with_date_and_task, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
 
-    @file_without_date = File.join(@test_root, "my task.txt")
+    @file_without_date = File.join(@test_root, "my task wo date.txt")
     File.write(@file_without_date, "Task content")
     FileUtils.touch(@file_without_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
   end
@@ -95,8 +95,8 @@ class AmnesiaTest < Minitest::Test
   
     # Dynamically calculate expected filenames
     one_skull_date = (Date.today - 3).strftime('%Y-%m-%d')
-    expected_with_date = File.join(@test_root, "#{one_skull_date}.💀my task.txt")
-    expected_without_date = File.join(@test_root, "💀my task.txt")
+    expected_with_date = File.join(@test_root, "#{one_skull_date}.💀my task with date.txt")
+    expected_without_date = File.join(@test_root, "💀my task wo date.txt")
   
     # Assertions
     assert File.exist?(expected_with_date), "File with date did not have the skull added correctly."
