@@ -38,9 +38,11 @@ class AmnesiaTest < Minitest::Test
     one_skull_date = (Date.today - 3).strftime('%Y-%m-%d') # 3 days ago
     @file_with_date_and_task = File.join(@test_root, "#{one_skull_date}.my task.txt")
     File.write(@file_with_date_and_task, "Task content")
+    FileUtils.touch(@file_with_date_and_task, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
 
     @file_without_date = File.join(@test_root, "my task.txt")
     File.write(@file_without_date, "Task content")
+    FileUtils.touch(@file_without_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
   end
 
   def test_three_days_old_task

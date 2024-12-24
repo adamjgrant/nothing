@@ -36,6 +36,11 @@ Dir.foreach(BASE_DIR) do |filename|
   # Determine the number of skulls based on days_old
   skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
 
+  if filename == "my task.txt"
+    puts "DEBUG: Skull count for #{filename} is #{skull_count}"
+    puts "DEBUG: Days old for #{filename} is #{days_old}"
+  end
+
   if skull_count > 0
     skulls = '💀' * [skull_count, 4].min # Cap the skull count at 4
 
