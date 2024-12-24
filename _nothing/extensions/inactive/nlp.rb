@@ -30,12 +30,13 @@ directories_to_process.each do |current_dir|
     base_name = File.basename(filename, '.*')
     extension = File.extname(filename)
 
-    # Logic for "today", "tomorrow", or "<number><unit>" formats
-    if base_name =~ /^(today|tomorrow|(\d+)([dwmy]))\.(.+)$/i
+    # Logic for "today", "tomorrow", or "<number><unit>" formats with optional time
+    if base_name =~ /^(today|tomorrow|(\d+)([dwmy]))([\+\d]*)\.(.+)$/i
       prefix = $1.downcase
       number = $2 ? $2.to_i : nil
       unit = $3
-      rest_of_filename = $4
+      time_component = $4
+      rest_of_filename = $5
 
       # Determine the appropriate date
       date = case prefix
@@ -57,20 +58,21 @@ directories_to_process.each do |current_dir|
                end
              end
 
-      # Construct the new filename with the date
-      new_filename = "#{date.strftime('%Y-%m-%d')}.#{rest_of_filename}#{extension}"
+      # Construct the new filename with the date and optional time
+      date_str = date.strftime('%Y-%m-%d')
+      new_filename = "#{date_str}#{time_component}.#{rest_of_filename}#{extension}"
       new_file_path = File.join(current_dir, new_filename)
 
       # Rename the file
       File.rename(file_path, new_file_path)
-      # puts "DEBUG: Processing file #{file_path}" if File.exist?(file_path)
-      # puts "DEBUG: Renaming #{file_path} to #{new_file_path}" if new_file_path
+      puts "Renamed #{filename} to #{new_filename}" # Debugging output
     end
 
     # Logic for day names (e.g., "Monday.task.txt")
-    if base_name =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\.(.+)$/i
+    if base_name =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)([\+\d]*)\.(.+)$/i
       day_name = $1.downcase
-      task_name = $2
+      time_component = $2 # Captures the +HHMM part, if present
+      task_name = $3
 
       # Calculate the target day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
       target_wday = %w[sunday monday tuesday wednesday thursday friday saturday].index(day_name)
@@ -83,7 +85,8 @@ directories_to_process.each do |current_dir|
       next_day = today + days_until_next_occurrence
 
       # Construct the new filename with the calculated date
-      new_filename = "#{next_day.strftime('%Y-%m-%d')}.#{task_name}#{extension}"
+      date_str = next_day.strftime('%Y-%m-%d')
+      new_filename = "#{date_str}#{time_component}.#{task_name}#{extension}"
       new_file_path = File.join(current_dir, new_filename)
 
       # Rename the file
