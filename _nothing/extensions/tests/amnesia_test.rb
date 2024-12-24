@@ -33,6 +33,14 @@ class AmnesiaTest < Minitest::Test
   
     File.write(@today_file, "Task content")
     FileUtils.touch(@today_file, mtime: now)
+
+    # Dynamically calculate a date that will result in a single skull
+    one_skull_date = (Date.today - 3).strftime('%Y-%m-%d') # 3 days ago
+    @file_with_date_and_task = File.join(@test_root, "#{one_skull_date}.my task.txt")
+    File.write(@file_with_date_and_task, "Task content")
+
+    @file_without_date = File.join(@test_root, "my task.txt")
+    File.write(@file_without_date, "Task content")
   end
 
   def test_three_days_old_task
@@ -77,5 +85,19 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
     assert File.exist?(@today_file), "The file created today should remain untouched."
+  end
+
+  def test_skull_emoji_placement
+    # Run the amnesia script
+    system("ruby #{@amnesia_extension_path} #{@test_root}")
+  
+    # Dynamically calculate expected filenames
+    one_skull_date = (Date.today - 3).strftime('%Y-%m-%d')
+    expected_with_date = File.join(@test_root, "#{one_skull_date}.💀my task.txt")
+    expected_without_date = File.join(@test_root, "💀my task.txt")
+  
+    # Assertions
+    assert File.exist?(expected_with_date), "File with date did not have the skull added correctly."
+    assert File.exist?(expected_without_date), "File without date did not have the skull added correctly."
   end
 end
