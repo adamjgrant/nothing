@@ -31,7 +31,7 @@ class RepeatingTaskTest < Minitest::Test
     next_weekday_name = (@today + 7).strftime('%A').downcase # Same weekday next week (e.g., "tuesday" next week)
 
     # Dynamic filenames
-    @weekday_repeating_file = File.join(@done_dir, "#{(@today - (@today.wday - 1)).strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
+    @weekday_repeating_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
     @strict_weekday_repeating_file = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.mytask-#{next_weekday_name}-strict.@#{next_weekday_name}.txt")
 
     # Write test content dynamically
@@ -114,12 +114,8 @@ class RepeatingTaskTest < Minitest::Test
     # Dynamically calculate today's and a future weekday name
     today_weekday_name = @today.strftime('%A').downcase # E.g., "saturday"
     next_weekday_name = (@today + 7).strftime('%A').downcase # Same weekday next week
-  
-    # Verify default weekday repetition
-    days_ahead = (7 - @today.wday) % 7
-    days_ahead = 7 if days_ahead == 6 # Ensure we move to next week if today is already the target weekday
 
-    next_weekday = @today + days_ahead
+    next_weekday = @today + 7
     expected_weekday_file = File.join(@later_dir, "#{next_weekday.strftime('%Y-%m-%d')}.mytask-#{today_weekday_name}.#{today_weekday_name}.txt")
 
     assert File.exist?(expected_weekday_file), "Weekday repeating task for #{today_weekday_name.capitalize} (#{expected_weekday_file}) was not created."
