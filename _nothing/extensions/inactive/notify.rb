@@ -73,8 +73,7 @@ def process_directory(root_dir, test_mode = false)
   
   if test_mode
     # In test mode, just print the files that would trigger notifications
-    puts new_notifications
-    return
+    return new_notifications
   end
   
   # Process new notifications

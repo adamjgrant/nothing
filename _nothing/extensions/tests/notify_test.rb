@@ -31,7 +31,7 @@ class NotifyTest < Minitest::Test
     extension_path = File.expand_path('../../extensions/notify.rb', __dir__)
     
     # Capture the notification command that would be executed
-    output = `ruby #{extension_path} #{@test_root} test`
+    output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
     
     # The test mode should return the filenames it would notify about
     assert_includes output, '2024-12-20+1200+.mytask.txt'
