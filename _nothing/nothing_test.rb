@@ -187,4 +187,42 @@ class TestDueDateMovement < Minitest::Test
     assert File.exist?(renamed_task_file), "The task file in the subfolder was not renamed properly."
     refute File.exist?(task_file), "The original task file in the subfolder should not exist."
   end
+
+  # Test case to verify directory task handling
+  def test_directory_task_movement
+    directory_with_date = File.join(TEST_ROOT, "2024-01-01.my-folder-task")
+    FileUtils.mkdir_p(directory_with_date)
+    FileUtils.touch(directory_with_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
+
+    directory_with_date_and_time = File.join(TEST_ROOT, "2024-01-01+1300.my-folder-task")
+    FileUtils.mkdir_p(directory_with_date_and_time)
+    FileUtils.touch(directory_with_date_and_time, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
+
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    # Run nothing.rb script
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+
+    # Verify directory moved to _later
+    moved_directory = File.join(LATER_DIR, "2024-01-01.my-folder-task")
+    assert Dir.exist?(moved_directory), "Directory task should have been moved to _later when due."
+
+    # Verify directory with time moved to _later
+    moved_directory_with_time = File.join(LATER_DIR, "2024-01-01+1300.my-folder-task")
+    assert Dir.exist?(moved_directory_with_time), "Directory task with time should have been moved to _later when due."
+  end
+
+  def test_directory_task_archival
+    directory_with_date = File.join(TEST_ROOT, "2024-01-01.my-folder-task")
+    FileUtils.mkdir_p(directory_with_date)
+    FileUtils.touch(directory_with_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
+
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    # Simulate overdue directory
+    FileUtils.touch(directory_with_date, mtime: Time.now - (7 * 24 * 60 * 60)) # 7 days ago
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+
+    # Verify directory archived
+    archived_directory = File.join(DONE_DIR, "2024-01-01.my-folder-task")
+    assert Dir.exist?(archived_directory), "Overdue directory task should have been archived."
+  end
 end
