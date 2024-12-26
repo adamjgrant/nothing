@@ -31,6 +31,11 @@ ERROR_LOG = File.join(NOTHING_DIR, 'error.log')
   unless Dir.exist?(dir)
     Dir.mkdir(dir)
   end
+
+  # Delete install_nothing.sh if it exists
+  install_script = File.join(dir, 'install_nothing.sh')
+  File.delete(install_script) if File.exist?(install_script)
+
   # Add a .keep file to the directory
   keep_file = File.join(dir, '.keep')
   FileUtils.touch(keep_file) unless File.exist?(keep_file)
