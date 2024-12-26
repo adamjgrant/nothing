@@ -5,7 +5,7 @@ require 'date'
 class NotifyTest < Minitest::Test
   def setup
     @test_root = File.expand_path('../../../../test', __dir__)
-    @meta_file = File.join(@test_root, 'notify-meta.txt')
+    @meta_file = File.join(@test_root, '_nothing', 'notify-meta.txt')
     
     # Clean up and create fresh test directory
     FileUtils.mkdir_p(@test_root)
@@ -40,7 +40,7 @@ class NotifyTest < Minitest::Test
     # Capture the notification command that would be executed
     output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
 
-    meta_file = File.join(@test_root, 'notify-meta.txt')
+    meta_file = File.join(@test_root, '_nothing', 'notify-meta.txt')
     
     # Read existing notifications
     notified_files = File.readlines(meta_file, chomp: true)
