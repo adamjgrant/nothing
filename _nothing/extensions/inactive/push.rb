@@ -44,22 +44,32 @@ end
 def process_file(file_path, increment_days, later_dir)
   filename = File.basename(file_path)
   components = filename.split('.')
-  return unless components.size >= 2 # Skip files without a date
-
+  
+  # If the first component is a valid date, use it. Otherwise use today's date
   date_time_str = components[0]
   time_str = nil
 
-  # Split date and time if the format includes '+HHMM'
-  if date_time_str.include?('+')
-    date_str, time_str = date_time_str.split('+')
-  else
-    date_str = date_time_str
-  end
-
+  # Try to parse the date if it looks like one
   begin
-    task_date = Date.strptime(date_str, '%Y-%m-%d')
+    if date_time_str.match?(/^\d{4}-\d{2}-\d{2}/)
+      # Split date and time if the format includes '+HHMM'
+      if date_time_str.include?('+')
+        date_str, time_str = date_time_str.split('+')
+      else
+        date_str = date_time_str
+      end
+      task_date = Date.strptime(date_str, '%Y-%m-%d')
+    else
+      # No valid date found, use today's date
+      task_date = Date.today
+      # Construct new filename with today's date
+      original_name = filename
+      date_time_str = original_name
+    end
   rescue ArgumentError
-    return # Skip files that don't have a valid date format
+    # Invalid date format, use today's date
+    task_date = Date.today
+    date_time_str = filename
   end
 
   # Increment the date
@@ -77,10 +87,22 @@ def process_file(file_path, increment_days, later_dir)
               else
                 task_date
               end
-  new_date_time_str = time_str ? "#{new_date.strftime('%Y-%m-%d')}+#{time_str}" : new_date.strftime('%Y-%m-%d')
-  new_filename = filename.sub(date_time_str, new_date_time_str)
-  new_path = File.join(later_dir, new_filename)
 
+  # Create new filename
+  new_date_str = new_date.strftime('%Y-%m-%d')
+  if time_str
+    new_filename = "#{new_date_str}+#{time_str}.#{components[1..-1].join('.')}"
+  else
+    # If the original file had no date, insert the new date at the start
+    if date_time_str == filename
+      new_filename = "#{new_date_str}.#{filename}"
+    else
+      new_filename = filename.sub(date_time_str, new_date_str)
+    end
+  end
+
+  new_path = File.join(later_dir, new_filename)
+  
   # Move the file to _later
   FileUtils.mv(file_path, new_path)
 end

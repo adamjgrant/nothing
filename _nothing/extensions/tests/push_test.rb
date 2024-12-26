@@ -138,4 +138,27 @@ class PushExtensionTest < Minitest::Test
     expected_file_path_1y = File.join(@later_dir, expected_filename_1y)
     assert File.exist?(expected_file_path_1y), "File was not pushed to _later with +1 year."
   end
+
+  def test_push_without_date
+    # Test for files without dates in _push-1d
+    push_1d_dir = File.join(@test_root, '_push-1d')
+    filename_no_date = "my task.txt"
+    file_path_no_date = File.join(push_1d_dir, filename_no_date)
+    FileUtils.mkdir_p(push_1d_dir)
+    File.write(file_path_no_date, "Test content")
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # The expected filename should have today's date plus one day (since it's in push-1d)
+    # and preserve the original filename after the date
+    expected_filename = "#{(@today + 1).strftime('%Y-%m-%d')}.my task.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+    
+    assert File.exist?(expected_file_path), 
+           "File without date was not properly pushed with today's date +1 day"
+    
+    # Also verify the original file was removed
+    refute File.exist?(file_path_no_date),
+           "Original file without date was not removed from push directory"
+  end
 end
