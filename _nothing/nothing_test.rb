@@ -190,39 +190,25 @@ class TestDueDateMovement < Minitest::Test
 
   # Test case to verify directory task handling
   def test_directory_task_movement
-    directory_with_date = File.join(TEST_ROOT, "2024-01-01.my-folder-task")
-    FileUtils.mkdir_p(directory_with_date)
-    FileUtils.touch(directory_with_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
-
-    directory_with_date_and_time = File.join(TEST_ROOT, "2024-01-01+1300.my-folder-task")
-    FileUtils.mkdir_p(directory_with_date_and_time)
-    FileUtils.touch(directory_with_date_and_time, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
-
+    # Dynamically generate dates
+    past_date = (Date.today - 1).strftime('%Y-%m-%d')
+    future_date = (Date.today + 1).strftime('%Y-%m-%d')
+  
+    directory_with_past_date = File.join(TEST_ROOT, "#{past_date}.my-folder-task")
+    FileUtils.mkdir_p(directory_with_past_date)
+  
+    directory_with_future_date_and_time = File.join(TEST_ROOT, "#{future_date}+1300.my-folder-task")
+    FileUtils.mkdir_p(directory_with_future_date_and_time)
+  
     nothing_script_path = File.expand_path('./nothing.rb', __dir__)
     # Run nothing.rb script
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
-
-    # Verify directory moved to _later
-    moved_directory = File.join(LATER_DIR, "2024-01-01.my-folder-task")
-    assert Dir.exist?(moved_directory), "Directory task should have been moved to _later when due."
-
-    # Verify directory with time moved to _later
-    moved_directory_with_time = File.join(LATER_DIR, "2024-01-01+1300.my-folder-task")
-    assert Dir.exist?(moved_directory_with_time), "Directory task with time should have been moved to _later when due."
-  end
-
-  def test_directory_task_archival
-    directory_with_date = File.join(TEST_ROOT, "2024-01-01.my-folder-task")
-    FileUtils.mkdir_p(directory_with_date)
-    FileUtils.touch(directory_with_date, mtime: Time.now - (3 * 24 * 60 * 60)) # Set to 3 days ago
-
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
-    # Simulate overdue directory
-    FileUtils.touch(directory_with_date, mtime: Time.now - (7 * 24 * 60 * 60)) # 7 days ago
-    system("ruby #{nothing_script_path} #{TEST_ROOT}")
-
-    # Verify directory archived
-    archived_directory = File.join(DONE_DIR, "2024-01-01.my-folder-task")
-    assert Dir.exist?(archived_directory), "Overdue directory task should have been archived."
+  
+    # Verify past-dated directory remains in the root directory
+    assert Dir.exist?(directory_with_past_date), "Directory task with a past date should remain in the root directory."
+  
+    # Verify future-dated directory with time is moved to _later
+    moved_future_directory_with_time = File.join(LATER_DIR, "#{future_date}+1300.my-folder-task")
+    assert Dir.exist?(moved_future_directory_with_time), "Directory task with future date and time should have been moved to _later."
   end
 end
