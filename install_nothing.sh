@@ -26,3 +26,8 @@ CRON_JOB="* * * * * LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 cd $INSTALL_DIR && ruby 
 
 # Final message
 echo "Setup complete. Nothing is installed and will now run automatically."
+
+# Delete this script
+SCRIPT_PATH=$(realpath "$0")
+echo "Deleting setup script..."
+rm -f "$SCRIPT_PATH"
