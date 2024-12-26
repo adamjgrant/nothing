@@ -128,6 +128,6 @@ echo "
                                                  .|....'   
                                                            
                                                            
-                                                          
+
 
 Learn how to use Nothing: https://adamgrant.info/nothing"

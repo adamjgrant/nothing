@@ -13,6 +13,7 @@ class NotifyTest < Minitest::Test
     # Create test files
     @notify_file = File.join(@test_root, '2024-12-20+1200+.mytask.txt')
     @notify_file_2 = File.join(@test_root, '2024-12-20+1500+.another-task.txt')
+    @no_notify_file = File.join(@test_root, '2024-12-20+1500.another-task-no-notify.txt')
     @normal_file = File.join(@test_root, '2024-12-20.normal-task.txt')
     @no_date_file = File.join(@test_root, 'task.txt')
     @repeat_file = File.join(@test_root, 'task.3d.txt')
@@ -20,6 +21,7 @@ class NotifyTest < Minitest::Test
     # Create test files
     File.write(@notify_file, 'Task content')
     File.write(@notify_file_2, 'Another task content')
+    File.write(@no_notify_file, 'Another task content')
     File.write(@normal_file, 'Normal task content')
     File.write(@no_date_file, 'No date task content')
     File.write(@repeat_file, 'Repeat task content')
@@ -49,6 +51,7 @@ class NotifyTest < Minitest::Test
     meta_content = File.read(@meta_file)
     assert_includes meta_content, '2024-12-20+1200+.mytask.txt'
     assert_includes meta_content, '2024-12-20+1500+.another-task.txt'
+    refute_includes meta_content, '2024-12-20+1500.another-task-no-notify.txt'
     
     # Create a new notification file after first run
     new_file = File.join(@test_root, '2024-12-20+1800+.new-task.txt')
@@ -74,6 +77,7 @@ class NotifyTest < Minitest::Test
     meta_content = File.read(@meta_file)
     assert_includes meta_content, '2024-12-20+1200+.mytask.txt'
     assert_includes meta_content, '2024-12-20+1500+.another-task.txt'
+    refute_includes meta_content, '2024-12-20+1500.another-task-no-notify.txt'
   end
 
   def test_handles_duplicate_notifications
