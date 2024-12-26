@@ -64,4 +64,6 @@ echo "
 # Advising the user about crontab delay
 echo "Note: The cron job runs every minute. Please allow up to a minute for the first execution.
 During this time, you may not see any changes. The installation script will disappear and setup
-will complete with the first execution of NOTHING."
+will complete with the first execution of NOTHING.
+
+Learn how to use Nothing: https://adamgrant.info/nothing"
