@@ -10,19 +10,19 @@ class AddOverdueEmojiTest < Minitest::Test
 
     # Create test files
     @overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.my task.md")
-    @overdue_with_emoji_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.«my task.md")
+    @overdue_with_emoji_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.■my task.md")
     @due_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}.due today task.md")
     @future_file = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.future task.md")
     @non_date_file = File.join(@test_root, "Task without date.md")
 
     # Add test case for non-overdue file with warning emoji in root
-    @non_overdue_with_emoji_in_root = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.«non overdue task.md")
+    @non_overdue_with_emoji_in_root = File.join(@test_root, "#{(Date.today + 1).strftime('%Y-%m-%d')}.■non overdue task.md")
     File.write(@non_overdue_with_emoji_in_root, "Non-overdue task with warning emoji content")
 
     # Add test case for non-overdue file with warning emoji in _later
     @later_dir = File.join(@test_root, '_later')
     FileUtils.mkdir_p(@later_dir)
-    @non_overdue_with_emoji_in_later = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y-%m-%d')}.«non overdue task in later.md")
+    @non_overdue_with_emoji_in_later = File.join(@later_dir, "#{(Date.today + 1).strftime('%Y-%m-%d')}.■non overdue task in later.md")
     File.write(@non_overdue_with_emoji_in_later, "Non-overdue task with warning emoji in later content")
 
     File.write(@overdue_file, "Overdue task content")
@@ -37,13 +37,13 @@ class AddOverdueEmojiTest < Minitest::Test
     extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
 
-    # Verify overdue file is renamed with « added to the task name
-    expected_overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.«my task.md")
+    # Verify overdue file is renamed with ■ added to the task name
+    expected_overdue_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.■my task.md")
     assert File.exist?(expected_overdue_file), "The overdue file was not renamed correctly."
     refute File.exist?(@overdue_file), "The original overdue file still exists."
 
-    # Verify overdue file with existing « emoji remains unchanged
-    assert File.exist?(@overdue_with_emoji_file), "The overdue file already tagged with « should remain unchanged."
+    # Verify overdue file with existing ■ emoji remains unchanged
+    assert File.exist?(@overdue_with_emoji_file), "The overdue file already tagged with ■ should remain unchanged."
 
     # Verify due today file remains unchanged
     assert File.exist?(@due_today_file), "The due-today file should remain unchanged."
@@ -81,7 +81,7 @@ class AddOverdueEmojiTest < Minitest::Test
     # Create the test file in _later
     future_repeating_file_with_emoji = File.join(
       @later_dir,
-      "#{(Date.today >> 1).strftime('%Y-%m-%d')}.«Patrick.1d.md"
+      "#{(Date.today >> 1).strftime('%Y-%m-%d')}.■Patrick.1d.md"
     )
     File.write(future_repeating_file_with_emoji, "Future repeating task with warning emoji in later content")
   
@@ -112,8 +112,8 @@ class AddOverdueEmojiTest < Minitest::Test
     extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
     system("ruby #{extension_path} #{@test_root}")
   
-    # Verify overdue file with time component is renamed with « added to the task name
-    expected_overdue_with_time_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}+1200.«my task.md")
+    # Verify overdue file with time component is renamed with ■ added to the task name
+    expected_overdue_with_time_file = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}+1200.■my task.md")
     assert File.exist?(expected_overdue_with_time_file), "The overdue file with time component was not renamed correctly."
     refute File.exist?(overdue_with_time_file), "The original overdue file with time component still exists."
   
@@ -135,7 +135,7 @@ class AddOverdueEmojiTest < Minitest::Test
     
     # Verify the task is not marked overdue
     assert File.exist?(past_time_today_file), "The task with past time but same day should not be marked as overdue."
-    overdue_version = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+1200.«task.md")
+    overdue_version = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+1200.■task.md")
     refute File.exist?(overdue_version), "The task with past time but same day was incorrectly marked as overdue."
   end
 end

@@ -4,14 +4,14 @@ class TestDueDateMovement < Minitest::Test
   def fuzzy_file_exists?(directory, base_filename)
     # Perform a fuzzy lookup in the specified directory
     Dir.entries(directory).any? do |file|
-      file.gsub(/«/, '') == base_filename # Strip « emoji for comparison
+      file.gsub(/■/, '') == base_filename # Strip « emoji for comparison
     end
   end
 
   def fuzzy_log_match?(log_contents, expected_fragment)
     # Check if any line in the log contains the expected fragment, ignoring emojis
     log_contents.any? do |line|
-      line.gsub(/«/, '').include?(expected_fragment)
+      line.gsub(/■/, '').include?(expected_fragment)
     end
   end
 
