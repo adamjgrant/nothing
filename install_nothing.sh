@@ -83,7 +83,7 @@ if [[ ! -f "nothing.rb" ]]; then
 fi
 
 # Download extensions
-EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia")
+EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia", "housekeeper")
 echo "Downloading extensions..."
 for EXT in "${EXTENSIONS[@]}"; do
   if [[ "$EXT" == "amnesia" ]]; then
