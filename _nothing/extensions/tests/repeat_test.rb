@@ -70,6 +70,18 @@ class RepeatingTaskTest < Minitest::Test
     unsorted_days_file = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.task-unsorted-days.1w-we-mo-su.txt")
     File.write(unsorted_days_file, "Test content for #{File.basename(unsorted_days_file)}")
 
+    @daily_repeating_folder = File.join(@done_dir, "#{(@today - 3).strftime('%Y-%m-%d')}.folder-three-days.3d")
+    @strict_daily_repeating_folder = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.folder-eight-days-strict.@8d")
+
+    @weekly_repeating_folder = File.join(@done_dir, "#{(@today - 14).strftime('%Y-%m-%d')}.folder-two-weeks.2w")
+    @strict_weekly_repeating_folder = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.folder-five-weeks-strict.@5w")
+
+    # Create test folders
+    [
+      @daily_repeating_folder, @strict_daily_repeating_folder,
+      @weekly_repeating_folder, @strict_weekly_repeating_folder
+    ].each { |folder| FileUtils.mkdir_p(folder) }
+
     run_extension
   end
 
@@ -357,5 +369,79 @@ class RepeatingTaskTest < Minitest::Test
     # Expected file for the repeated task
     expected_strict_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+1300.task-strict-with-time.@1d.txt")
     assert File.exist?(expected_strict_file), "Strict repeated task for file created yesterday was not created correctly (#{expected_strict_file})."
+  end
+
+  def test_daily_repeating_folder
+    # Verify default daily repetition
+    expected_daily_folder = File.join(@later_dir, "#{(@today).strftime('%Y-%m-%d')}.folder-three-days.3d")
+    assert Dir.exist?(expected_daily_folder), "Daily repeating folder was not created."
+  
+    # Verify strict daily repetition
+    expected_strict_daily_folder = File.join(@later_dir, "#{(@today + 8).strftime('%Y-%m-%d')}.folder-eight-days-strict.@8d")
+    assert Dir.exist?(expected_strict_daily_folder), "Strict daily repeating folder was not created."
+  end
+
+  def test_weekly_repeating_folder
+    # Verify default weekly repetition
+    expected_weekly_folder = File.join(@later_dir, "#{(@today).strftime('%Y-%m-%d')}.folder-two-weeks.2w")
+    assert Dir.exist?(expected_weekly_folder), "Weekly repeating folder was not created."
+  
+    # Verify strict weekly repetition
+    expected_strict_weekly_folder = File.join(@later_dir, "#{(@today + 35).strftime('%Y-%m-%d')}.folder-five-weeks-strict.@5w")
+    assert Dir.exist?(expected_strict_weekly_folder), "Strict weekly repeating folder was not created."
+  end
+
+  def test_weekly_multi_day_repeating_folder
+    # Add a multi-day weekly repeating folder
+    multi_day_folder = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.multi-days-folder.1w-mo-we-fr")
+    FileUtils.mkdir_p(multi_day_folder)
+  
+    # Calculate next occurrences for Monday, Wednesday, Friday
+    multi_days = { 
+      "mo" => 1, # Monday
+      "we" => 3, # Wednesday
+      "fr" => 5  # Friday
+    }
+  
+    next_days = multi_days.transform_values do |target_wday|
+      days_ahead = (target_wday - @today.wday + 7) % 7
+      @today + days_ahead
+    end
+  
+    first_next_day = next_days.values.min
+  
+    # Verify that only the first upcoming day is created
+    expected_first_folder = File.join(@later_dir, "#{first_next_day.strftime('%Y-%m-%d')}.multi-days-folder.1w-mo-we-fr")
+    assert Dir.exist?(expected_first_folder), "Multi-day weekly repeating folder was not created for the first upcoming day."
+  end
+
+  def test_monthly_specific_day_repeating_folder
+    # Add a specific day monthly repeating folder
+    specific_day_folder = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.specific-day-folder.1m-15")
+    FileUtils.mkdir_p(specific_day_folder)
+  
+    # Calculate the next occurrence of the 15th day next month
+    specific_day = 15
+    next_month = @today >> 1
+    next_specific_day = Date.new(next_month.year, next_month.month, specific_day)
+  
+    # Verify that the next specific day folder is created
+    expected_folder = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.specific-day-folder.1m-15")
+    assert Dir.exist?(expected_folder), "Specific day monthly repeating folder was not created."
+  end
+
+  def test_strict_monthly_specific_day_repeating_folder
+    # Add a strict specific day monthly repeating folder
+    strict_specific_day_folder = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.strict-specific-day-folder.@1m-20")
+    FileUtils.mkdir_p(strict_specific_day_folder)
+  
+    # Calculate the next occurrence of the 20th day next month
+    specific_day = 20
+    next_month = @today >> 1
+    next_specific_day = Date.new(next_month.year, next_month.month, specific_day)
+  
+    # Verify that the next specific day folder is created
+    expected_strict_folder = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.strict-specific-day-folder.@1m-20")
+    assert Dir.exist?(expected_strict_folder), "Strict specific day monthly repeating folder was not created."
   end
 end
