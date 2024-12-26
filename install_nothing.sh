@@ -2,11 +2,12 @@
 
 # Set the directory where nothing will be installed
 INSTALL_DIR="$(pwd)/_nothing"
+EXTENSIONS_DIR="$INSTALL_DIR/extensions"
 
-# Create the installation directory
-mkdir -p "$INSTALL_DIR"
+# Create the installation and extensions directories
+mkdir -p "$EXTENSIONS_DIR"
 
-# Navigate to the directory
+# Navigate to the installation directory
 cd "$INSTALL_DIR" || exit 1
 
 # Download the nothing.rb script
@@ -18,6 +19,19 @@ if [[ ! -f "nothing.rb" ]]; then
   echo "Failed to download nothing.rb. Please check your connection and try again."
   exit 1
 fi
+
+# Download extensions
+EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia")
+echo "Downloading extensions..."
+for EXT in "${EXTENSIONS[@]}"; do
+  EXT_URL="https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/extensions/inactive/$EXT.rb"
+  curl -o "$EXTENSIONS_DIR/$EXT.rb" "$EXT_URL"
+  if [[ ! -f "$EXTENSIONS_DIR/$EXT.rb" ]]; then
+    echo "Failed to download $EXT extension."
+  else
+    echo "Downloaded $EXT extension."
+  fi
+done
 
 # Add cron job
 echo "Adding cron job..."
