@@ -51,21 +51,9 @@ class TestDueDateMovement < Minitest::Test
     assert fuzzy_file_exists?(LATER_DIR, "Task no date.txt"),
            "No-date task should remain in '_later'."
   
-    # Verify activity log entries
-    assert File.exist?(ACTIVITY_LOG), "Activity log should be created."
-    activity_log_contents = File.readlines(ACTIVITY_LOG).map(&:strip)
-  
     overdue_task_fragment = "Moved #{(Date.today - 1).strftime('%Y-%m-%d')}.Task overdue.txt from '_later' to '#{TEST_ROOT}'"
     due_today_task_fragment = "Moved #{Date.today.strftime('%Y-%m-%d')}.Task due today.txt from '_later' to '#{TEST_ROOT}'"
     future_task_fragment = "Moved #{(Date.today + 1).strftime('%Y-%m-%d')}.Task due tomorrow.txt from '#{TEST_ROOT}' to '_later'"
-  
-    assert fuzzy_log_match?(activity_log_contents, overdue_task_fragment),
-           "Activity log should contain a log entry for overdue task."
-    assert fuzzy_log_match?(activity_log_contents, due_today_task_fragment),
-           "Activity log should contain a log entry for due-today task."
-  
-    refute fuzzy_log_match?(activity_log_contents, "Task no date.txt"),
-           "Activity log should not contain any entry for a date-less task."
   
     # Verify no error log was created
     refute File.exist?(ERROR_LOG), "Error log should not exist if no errors occurred."
@@ -124,5 +112,79 @@ class TestDueDateMovement < Minitest::Test
     # Clean up
     File.delete(future_task) if File.exist?(future_task)
     File.delete(past_task) if File.exist?(past_task)
+  end
+
+  def test_copy_nothing_to_non_underscored_dirs
+    # Set up the test environment
+    subnothing_dir = File.join(TEST_ROOT, '_nothing')
+    FileUtils.mkdir_p(subnothing_dir)
+    File.write(File.join(subnothing_dir, 'sample.txt'), 'Sample content')
+
+    # Non-underscored directories
+    project_dir = File.join(TEST_ROOT, 'my project')
+    old_project_dir = File.join(TEST_ROOT, 'my old project')
+    another_project_dir = File.join(TEST_ROOT, 'another project')
+
+    FileUtils.mkdir_p(project_dir)
+    FileUtils.mkdir_p(old_project_dir)
+    FileUtils.mkdir_p(another_project_dir)
+
+    # Add an existing _nothing directory to one project
+    FileUtils.mkdir_p(File.join(old_project_dir, '_nothing'))
+
+    # Run the script
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+
+    # Assertions
+    assert Dir.exist?(File.join(project_dir, '_nothing')), "_nothing was not copied to 'my project'."
+    assert Dir.exist?(File.join(another_project_dir, '_nothing')), "_nothing was not copied to 'another project'."
+    refute Dir.exist?(File.join(old_project_dir, '_nothing', 'sample.txt')), "_nothing should not have been copied to 'my old project'."
+  end
+
+  def test_recursive_nothing_execution
+    subnothing_dir = File.join(TEST_ROOT, '_nothing')
+    # Create a test root directory
+    subfolder_dir = File.join(TEST_ROOT, 'my project')
+  
+    # Set up the test environment
+    # Create _nothing in the root directory
+    FileUtils.mkdir_p(subnothing_dir)
+    File.write(File.join(subnothing_dir, 'nothing.rb'), <<~RUBY)
+      # Minimal nothing.rb script for testing
+      Dir.foreach(Dir.pwd) do |file|
+        next if file.start_with?('.') || File.directory?(file)
+        if file =~ /today\\.task\\.txt$/
+          new_name = "\#{Date.today.strftime('%Y-%m-%d')}.task.txt"
+          File.rename(file, new_name) unless File.exist?(new_name)
+        end
+      end
+    RUBY
+
+    # Create a subfolder with its own _nothing
+    FileUtils.mkdir_p(File.join(subfolder_dir, '_nothing'))
+    File.write(File.join(subfolder_dir, '_nothing', 'nothing.rb'), <<~RUBY)
+      # Minimal nothing.rb script for testing
+      Dir.foreach(Dir.pwd) do |file|
+        next if file.start_with?('.') || File.directory?(file)
+        if file =~ /today\\.task\\.txt$/
+          new_name = "\#{Date.today.strftime('%Y-%m-%d')}.task.txt"
+          File.rename(file, new_name) unless File.exist?(new_name)
+        end
+      end
+    RUBY
+
+    # Add a task file to the subfolder
+    task_file = File.join(subfolder_dir, 'today.task.txt')
+    File.write(task_file, "Task content")
+
+    # Run the script
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+
+    # Assertions
+    renamed_task_file = File.join(subfolder_dir, "#{Date.today.strftime('%Y-%m-%d')}.task.txt")
+    assert File.exist?(renamed_task_file), "The task file in the subfolder was not renamed properly."
+    refute File.exist?(task_file), "The original task file in the subfolder should not exist."
   end
 end

@@ -23,8 +23,6 @@ NOTHING_DIR = File.join(BASE_DIR, '_nothing')
 EXTENSIONS_DIR = File.join(NOTHING_DIR, 'extensions')
 INACTIVE_EXTENSIONS_DIR = File.join(EXTENSIONS_DIR, 'inactive')
 EXTENSIONS_TESTS_DIR = File.join(EXTENSIONS_DIR, 'tests')
-ACTIVITY_LOG = File.join(NOTHING_DIR, 'activity.log')
-ERROR_LOG = File.join(NOTHING_DIR, 'error.log')
 
 # Ensure directories exist and include a .keep file
 [ LATER_DIR, DONE_DIR, NOTHING_DIR, EXTENSIONS_DIR, INACTIVE_EXTENSIONS_DIR, EXTENSIONS_TESTS_DIR ].each do |dir|
@@ -69,62 +67,75 @@ end
 # Run all extensions in the extensions directory
 def run_extensions(root_dir)
   Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
-    begin
-      system("ruby #{extension_file} #{root_dir}")
-    rescue => e
-      File.open(File.join(root_dir, '_nothing', 'error.log'), 'a') do |f|
-        f.puts "#{Time.now} Error running extension #{File.basename(extension_file)}: #{e.message}"
-        f.puts e.backtrace
+    puts "Debug: Running extension #{extension_file}"
+    system("ruby \"#{extension_file}\" \"#{root_dir}\"")
+  end
+end
+
+moved_tasks = false
+
+# Check tasks in _later for due tasks
+Dir.foreach(LATER_DIR) do |filename|
+  next if filename == '.' || filename == '..'
+
+  # Parse the optional date prefix
+  due_date = parse_yyyymmdd_prefix(filename)
+
+  if due_date && due_date <= Time.now
+    from_path = File.join(LATER_DIR, filename)
+    to_path = File.join(BASE_DIR, filename)
+    FileUtils.mv(from_path, to_path)
+    moved_tasks = true
+  end
+end
+
+# Check tasks in BASE_DIR for future tasks and move them to _later
+Dir.foreach(BASE_DIR) do |filename|
+  next if filename == '.' || filename == '..'
+  next if filename.start_with?('_') # Skip special directories like _later, _done, _nothing
+
+  # Parse the optional date prefix
+  due_date = parse_yyyymmdd_prefix(filename)
+
+  if due_date && due_date > Time.now
+    from_path = File.join(BASE_DIR, filename)
+    to_path = File.join(LATER_DIR, filename)
+    FileUtils.mv(from_path, to_path)
+    moved_tasks = true
+  end
+end
+
+# Run any extension scripts
+run_extensions(BASE_DIR)
+
+# Recursively process non-underscored directories
+def process_non_underscored_dirs(base_dir)
+  Dir.foreach(base_dir) do |entry|
+    next if entry.start_with?('_') || entry == '.' || entry == '..'
+
+    entry_path = File.join(base_dir, entry)
+
+    if File.directory?(entry_path)
+      # Copy _nothing folder if it doesn't exist
+      target_nothing_dir = File.join(entry_path, '_nothing')
+      unless Dir.exist?(target_nothing_dir)
+        puts "Copying _nothing to #{entry_path}"
+        FileUtils.cp_r(NOTHING_DIR, target_nothing_dir)
       end
+
+      # Run nothing.rb if it exists
+      nothing_script_path = File.join(target_nothing_dir, 'nothing.rb')
+      if File.exist?(nothing_script_path)
+        puts "DEBUG: Running #{nothing_script_path} in #{entry_path}"
+        system("ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
+        puts "DEBUG: Done"
+      end
+
+      # Recursively process subdirectories
+      process_non_underscored_dirs(entry_path)
     end
   end
 end
 
-begin
-  moved_tasks = false
-
-  # Check tasks in _later for due tasks
-  Dir.foreach(LATER_DIR) do |filename|
-    next if filename == '.' || filename == '..'
-
-    # Parse the optional date prefix
-    due_date = parse_yyyymmdd_prefix(filename)
-
-    if due_date && due_date <= Time.now
-      from_path = File.join(LATER_DIR, filename)
-      to_path = File.join(BASE_DIR, filename)
-      FileUtils.mv(from_path, to_path)
-      File.open(ACTIVITY_LOG, 'a') do |f|
-        f.puts "#{Time.now} Moved #{filename} from '_later' to '#{BASE_DIR}'."
-      end
-      moved_tasks = true
-    end
-  end
-
-  # Check tasks in BASE_DIR for future tasks and move them to _later
-  Dir.foreach(BASE_DIR) do |filename|
-    next if filename == '.' || filename == '..'
-    next if filename.start_with?('_') # Skip special directories like _later, _done, _nothing
-
-    # Parse the optional date prefix
-    due_date = parse_yyyymmdd_prefix(filename)
-
-    if due_date && due_date > Time.now
-      from_path = File.join(BASE_DIR, filename)
-      to_path = File.join(LATER_DIR, filename)
-      FileUtils.mv(from_path, to_path)
-      File.open(ACTIVITY_LOG, 'a') do |f|
-        f.puts "#{Time.now} Moved #{filename} from '#{BASE_DIR}' to '_later'."
-      end
-      moved_tasks = true
-    end
-  end
-
-  # Run any extension scripts
-  run_extensions(BASE_DIR)
-rescue => e
-  File.open(ERROR_LOG, 'a') do |f|
-    f.puts "#{Time.now} Error: #{e.message}"
-    f.puts e.backtrace
-  end
-end
+# Add this line before exiting the script
+process_non_underscored_dirs(BASE_DIR)
