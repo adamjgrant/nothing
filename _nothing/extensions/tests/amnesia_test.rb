@@ -50,7 +50,7 @@ class AmnesiaTest < Minitest::Test
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
-    skull_file = File.join(@test_root, "💀Task three days old.txt")
+    skull_file = File.join(@test_root, "║Task three days old.txt")
     assert File.exist?(skull_file), "The file modified three days ago should have one skull emoji."
   end
 
@@ -59,7 +59,7 @@ class AmnesiaTest < Minitest::Test
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
-    skull_file = File.join(@test_root, "💀💀Task four days old.txt")
+    skull_file = File.join(@test_root, "║║Task four days old.txt")
     assert File.exist?(skull_file), "The file modified four days ago should have two skull emojis."
   end
 
@@ -68,7 +68,7 @@ class AmnesiaTest < Minitest::Test
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
-    skull_file = File.join(@test_root, "💀💀💀Task five days old.txt")
+    skull_file = File.join(@test_root, "║║║Task five days old.txt")
     assert File.exist?(skull_file), "The file modified five days ago should have three skull emojis."
   end
 
@@ -77,7 +77,7 @@ class AmnesiaTest < Minitest::Test
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
-    done_file = File.join(@test_root, '_done', "💀💀💀💀Task six days old.txt")
+    done_file = File.join(@test_root, '_done', "║║║║Task six days old.txt")
     assert File.exist?(done_file), "The file modified six days ago should be archived with four skull emojis."
   end
 
@@ -95,8 +95,8 @@ class AmnesiaTest < Minitest::Test
   
     # Dynamically calculate expected filenames
     one_skull_date = (Date.today - 3).strftime('%Y-%m-%d')
-    expected_with_date = File.join(@test_root, "#{one_skull_date}.💀my task with date.txt")
-    expected_without_date = File.join(@test_root, "💀my task wo date.txt")
+    expected_with_date = File.join(@test_root, "#{one_skull_date}.║my task with date.txt")
+    expected_without_date = File.join(@test_root, "║my task wo date.txt")
   
     # Assertions
     assert File.exist?(expected_with_date), "File with date did not have the skull added correctly."

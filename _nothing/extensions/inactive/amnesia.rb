@@ -37,7 +37,7 @@ Dir.foreach(BASE_DIR) do |filename|
   skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
 
   if skull_count > 0
-    skulls = '💀' * [skull_count, 4].min # Cap the skull count at 4
+    skulls = '║' * [skull_count, 4].min # Cap the skull count at 4
 
     # Split filename by "."
     parent_array = filename.split('.')
