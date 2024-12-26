@@ -138,4 +138,26 @@ class AddOverdueEmojiTest < Minitest::Test
     overdue_version = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}+1200.■task.md")
     refute File.exist?(overdue_version), "The task with past time but same day was incorrectly marked as overdue."
   end
+
+  def test_remove_overdue_mark_when_task_is_no_longer_overdue
+    # Create a test file that was previously overdue
+    overdue_filename = "#{(Date.today - 2).strftime('%Y-%m-%d')}.■task.md"
+    overdue_file = File.join(@test_root, overdue_filename)
+    File.write(overdue_file, "Previously overdue task content")
+    FileUtils.touch(overdue_file, mtime: Time.now - (2 * 24 * 60 * 60)) # Set modified time to 2 days ago
+  
+    # Simulate the task being updated to a future date, making it no longer overdue
+    updated_filename = "#{(Date.today + 2).strftime('%Y-%m-%d')}.task.md"
+    updated_file = File.join(@test_root, updated_filename)
+    File.rename(overdue_file, updated_file)
+    FileUtils.touch(updated_file, mtime: Time.now) # Update modified time to now
+  
+    # Run the overdue extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Verify that the overdue mark (■) has been removed
+    refute File.exist?(File.join(@test_root, "#{(Date.today + 2).strftime('%Y-%m-%d')}.■task.md")), "The overdue mark was not removed from the task."
+    assert File.exist?(updated_file), "The updated task file should exist without the overdue mark."
+  end
 end

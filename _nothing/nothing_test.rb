@@ -4,7 +4,7 @@ class TestDueDateMovement < Minitest::Test
   def fuzzy_file_exists?(directory, base_filename)
     # Perform a fuzzy lookup in the specified directory
     Dir.entries(directory).any? do |file|
-      file.gsub(/■/, '') == base_filename # Strip « emoji for comparison
+      file.gsub(/■/, '') == base_filename # Strip ■ emoji for comparison
     end
   end
 
