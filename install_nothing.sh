@@ -3,9 +3,11 @@
 # Set the directory where nothing will be installed
 INSTALL_DIR="$(pwd)/_nothing"
 EXTENSIONS_DIR="$INSTALL_DIR/extensions"
+INACTIVE_EXTENSIONS_DIR="$EXTENSIONS_DIR/inactive"
 
 # Create the installation and extensions directories
 mkdir -p "$EXTENSIONS_DIR"
+mkdir -p "$INACTIVE_EXTENSIONS_DIR"
 
 # Navigate to the installation directory
 cd "$INSTALL_DIR" || exit 1
@@ -24,12 +26,19 @@ fi
 EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia")
 echo "Downloading extensions..."
 for EXT in "${EXTENSIONS[@]}"; do
-  EXT_URL="https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/extensions/inactive/$EXT.rb"
-  curl -o "$EXTENSIONS_DIR/$EXT.rb" "$EXT_URL"
-  if [[ ! -f "$EXTENSIONS_DIR/$EXT.rb" ]]; then
+  if [[ "$EXT" == "amnesia" ]]; then
+    EXT_URL="https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/extensions/inactive/$EXT.rb"
+    DEST_DIR="$INACTIVE_EXTENSIONS_DIR"
+  else
+    EXT_URL="https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/extensions/inactive/$EXT.rb"
+    DEST_DIR="$EXTENSIONS_DIR"
+  fi
+  
+  curl -o "$DEST_DIR/$EXT.rb" "$EXT_URL"
+  if [[ ! -f "$DEST_DIR/$EXT.rb" ]]; then
     echo "Failed to download $EXT extension."
   else
-    echo "Downloaded $EXT extension."
+    echo "Downloaded $EXT extension to $DEST_DIR."
   fi
 done
 
