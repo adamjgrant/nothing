@@ -109,6 +109,14 @@ CRON_JOB="* * * * * LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 cd \"$INSTALL_DIR\" && r
 
 # Final message
 echo "Setup complete. Nothing is installed and will now run automatically."
+
+# Advising the user about crontab delay
+echo "Note: The cron job runs every minute, so allow up to a minute for the first execution. During this time, you may not see any changes. The installation script will disappear and setup will complete with the first execution of NOTHING.
+
+If that does not happen, try running this cron manually to detect any errors:
+
+$CRON_JOB"
+
 echo "                                                           
                                                            
                                                            
@@ -120,12 +128,6 @@ echo "
                                                  .|....'   
                                                            
                                                            
-                                                           "
-# Advising the user about crontab delay
-echo "Note: The cron job runs every minute, so allow up to a minute for the first execution. During this time, you may not see any changes. The installation script will disappear and setup will complete with the first execution of NOTHING.
-
-If that does not happen, try running this cron manually to detect any errors:
-
-$CRON_JOB
+                                                          
 
 Learn how to use Nothing: https://adamgrant.info/nothing"
