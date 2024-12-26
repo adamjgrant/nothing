@@ -104,7 +104,7 @@ def calculate_next_date(current_date, parsed)
   end
 end
 
-def parse_filename(filename)
+def parse_filename(filename, directory=false)
   # Split the filename by periods
   parts = filename.split('.')
 
@@ -112,7 +112,7 @@ def parse_filename(filename)
   return { date: nil, time: nil, name: nil, rule: nil, strict: false, extension: nil } if parts.length < 2
 
   # Extract the mandatory extension (last part)
-  extension = parts.pop
+  extension = parts.pop unless directory
 
   # Determine if the first part contains a date and optional time
   date, time = nil, nil
@@ -144,42 +144,66 @@ def parse_filename(filename)
   { date: date, time: time, name: name, rule: rule, strict: strict, extension: extension }
 end
 
+def handle_default_repeating_task(file_path, filename, parsed, from_dir, to_dir)
+  return unless parsed[:rule] # Skip if no repetition rule
+  return if parsed[:strict] # Skip strict rules in `_done`
+
+  date_prefix = parsed[:date]
+  task_name = parsed[:name]
+  rule = parsed[:rule]
+  extension = parsed[:extension]
+
+  current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
+  return unless current_date # Skip invalid dates
+
+  # Calculate the next date
+  next_date = calculate_next_date(current_date, parsed)
+  return unless next_date # Skip invalid rules
+
+  # Create the next instance
+  next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{rule}#{extension ? ".#{extension}" : ''}"
+  next_file_path = File.join(to_dir, next_filename)
+  unless File.exist?(next_file_path)
+    FileUtils.cp_r(file_path, next_file_path)
+  end
+
+  # Rename the current file to remove the repetition rule
+  renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}#{extension ? ".#{extension}" : ''}"
+  File.rename(file_path, File.join(from_dir, renamed_file))
+end
+
 # Process files in _done for default repetition
 Dir.foreach(done_dir) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('.') # Skip hidden files
 
   file_path = File.join(done_dir, filename)
+  directory = File.directory?(file_path)
+  parsed = parse_filename(filename, directory)
 
-  parsed = parse_filename(filename)
-  
-  if !parsed[:strict]
-    # Match files with the repetition rule format
-    date_prefix = parsed[:date]
-    task_name = parsed[:name]
-    rule = parsed[:rule]
-    extension = parsed[:extension]
+  handle_default_repeating_task(file_path, filename, parsed, done_dir, later_dir)
+end
 
-    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
-    next unless current_date # Skip if the date cannot be parsed
+def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
+  return unless parsed[:rule] && parsed[:strict] # Process only strict rules
 
-    # Calculate the next date
-    next_date = calculate_next_date(current_date, parsed)
-    next unless next_date # Skip if the rule is invalid
+  date_prefix = parsed[:date]
+  task_name = parsed[:name]
+  rule = parsed[:rule]
+  extension = parsed[:extension]
 
-    # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{rule}.#{extension}"
-    next_file_path = File.join(later_dir, next_filename)
+  current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
+  return unless current_date # Skip invalid dates
 
-    unless File.exist?(next_file_path)
-      # Create the next instance
-      FileUtils.cp(file_path, next_file_path)
-      # puts "Created repeating task: #{next_filename}"
-    end
+  # Calculate the next date
+  next_date = calculate_next_date(current_date, parsed)
+  return unless next_date # Skip invalid rules
 
-    # Rename the current file to remove the repetition rule
-    renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{extension}"
-    File.rename(file_path, File.join(done_dir, renamed_file))
+  # Create the next instance
+  next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.@#{rule}#{extension ? ".#{extension}" : ''}"
+  next_file_path = File.join(to_dir, next_filename)
+  unless File.exist?(next_file_path)
+    FileUtils.cp_r(file_path, next_file_path)
   end
 end
 
@@ -189,31 +213,9 @@ Dir.foreach(root_dir) do |filename|
   next if filename.start_with?('.') # Skip hidden files
 
   file_path = File.join(root_dir, filename)
+  directory = File.directory?(file_path)
+  parsed = parse_filename(filename, directory)
 
-  # Match files with the strict repetition rule format
-  parsed = parse_filename(filename)
-  
-  if parsed[:strict]
-    # Match files with the repetition rule format
-    date_prefix = parsed[:date]
-    task_name = parsed[:name]
-    rule = parsed[:rule]
-    extension = parsed[:extension]
-
-    current_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil
-    next unless current_date # Skip if the date cannot be parsed
-
-    # Calculate the next date
-    next_date = calculate_next_date(current_date, parsed)
-    next unless next_date # Skip if the rule is invalid
-
-    # Check if the next instance already exists in _later
-    next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.@#{rule}.#{extension}"
-    next_file_path = File.join(later_dir, next_filename)
-
-    unless File.exist?(next_file_path)
-      # Create the next instance
-      FileUtils.cp(file_path, next_file_path)
-    end
-  end
+  # Process files and directories
+  handle_strict_repeating_task(file_path, filename, parsed, root_dir, later_dir)
 end
