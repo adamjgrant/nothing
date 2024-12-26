@@ -91,7 +91,7 @@ def process_directory(directory)
           # puts "Renamed #{filename} to #{new_filename}" # Debugging output
           file_path = new_file_path # Update the file path after renaming
         rescue => e
-          puts "Error renaming file: #{e.message}" # Log errors during renaming
+          # puts "Error renaming file: #{e.message}" # Log errors during renaming
         end
 
         # Move overdue file to the base directory
@@ -100,7 +100,7 @@ def process_directory(directory)
           FileUtils.mv(new_file_path, base_directory_path)
           # puts "Moved overdue file: #{new_file_path} -> #{base_directory_path}"
         rescue => e
-          puts "Error moving overdue file: #{e.message}" # Log errors during movement
+          # puts "Error moving overdue file: #{e.message}" # Log errors during movement
         end
       end
     end

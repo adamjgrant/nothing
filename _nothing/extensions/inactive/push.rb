@@ -54,7 +54,6 @@ def process_file(file_path, increment_days, later_dir)
 
   # Move the file to _later
   FileUtils.mv(file_path, new_path)
-  puts "Moved #{filename} to #{new_filename} in _later."
 end
 
 # Main processing logic

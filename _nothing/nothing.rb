@@ -118,7 +118,6 @@ def process_non_underscored_dirs(base_dir)
       # Copy _nothing folder if it doesn't exist
       target_nothing_dir = File.join(entry_path, '_nothing')
       unless Dir.exist?(target_nothing_dir)
-        puts "Copying _nothing to #{entry_path}"
         FileUtils.cp_r(NOTHING_DIR, target_nothing_dir)
       end
 
