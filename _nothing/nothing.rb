@@ -67,7 +67,6 @@ end
 # Run all extensions in the extensions directory
 def run_extensions(root_dir)
   Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
-    puts "Debug: Running extension #{extension_file}"
     system("ruby \"#{extension_file}\" \"#{root_dir}\"")
   end
 end
@@ -126,9 +125,7 @@ def process_non_underscored_dirs(base_dir)
       # Run nothing.rb if it exists
       nothing_script_path = File.join(target_nothing_dir, 'nothing.rb')
       if File.exist?(nothing_script_path)
-        puts "DEBUG: Running #{nothing_script_path} in #{entry_path}"
         system("ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
-        puts "DEBUG: Done"
       end
 
       # Recursively process subdirectories

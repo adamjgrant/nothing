@@ -91,7 +91,8 @@ class AmnesiaTest < Minitest::Test
 
   def test_skull_emoji_placement
     # Run the amnesia script
-    system("ruby #{@amnesia_extension_path} #{@test_root}")
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
   
     # Dynamically calculate expected filenames
     one_skull_date = (Date.today - 3).strftime('%Y-%m-%d')
