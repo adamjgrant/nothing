@@ -126,9 +126,6 @@ def process_non_underscored_dirs(base_dir)
       if File.exist?(nothing_script_path)
         system("ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
       end
-
-      # Recursively process subdirectories
-      process_non_underscored_dirs(entry_path)
     end
   end
 end
