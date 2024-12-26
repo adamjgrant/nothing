@@ -40,3 +40,19 @@ CRON_JOB="* * * * * LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 cd $INSTALL_DIR && ruby 
 
 # Final message
 echo "Setup complete. Nothing is installed and will now run automatically."
+echo "                                                           
+                                                           
+                                                           
+  '|.   '|'           .   '||       ||                     
+   |'|   |    ...   .||.   || ..   ...  .. ...     ... .   
+   | '|. |  .|  '|.  ||    ||' ||   ||   ||  ||   || ||    
+   |   |||  ||   ||  ||    ||  ||   ||   ||  ||    |''     
+  .|.   '|   '|..|'  '|.' .||. ||. .||. .||. ||.  '||||.   
+                                                 .|....'   
+                                                           
+                                                           
+                                                           "
+# Advising the user about crontab delay
+echo "Note: The cron job runs every minute. Please allow up to a minute for the first execution.
+During this time, you may not see any changes. The installation script will disappear and setup
+will complete with the first execution of NOTHING."
