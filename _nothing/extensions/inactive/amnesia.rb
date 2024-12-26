@@ -37,7 +37,7 @@ Dir.foreach(BASE_DIR) do |filename|
   skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
 
   if skull_count > 0
-    skulls = '║' * [skull_count, 4].min # Cap the skull count at 4
+    skulls = '■' * [skull_count, 4].min # Cap the skull count at 4
 
     # Split filename by "."
     parent_array = filename.split('.')
@@ -53,7 +53,7 @@ Dir.foreach(BASE_DIR) do |filename|
       # If not a date, apply skulls to the whole filename
       task_part = first_part
     end
-    base_name = task_part.gsub(/^(\u{1F480}+)/, '') # Remove any existing skulls
+    base_name = task_part.gsub(/^(■+)/, '') # Remove any existing skulls
     new_filename = "#{date_part}#{skulls}#{base_name}.#{extension}"
 
     new_file_path = File.join(BASE_DIR, new_filename)
