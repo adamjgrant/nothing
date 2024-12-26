@@ -83,10 +83,10 @@ if [[ ! -f "nothing.rb" ]]; then
 fi
 
 # Download extensions
-EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia", "housekeeper")
+EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia" "housekeeper")
 echo "Downloading extensions..."
 for EXT in "${EXTENSIONS[@]}"; do
-  if [[ "$EXT" == "amnesia" ]]; then
+  if [[ "$EXT" == "amnesia" || "$EXT" == "housekeeper" ]]; then
     EXT_URL="https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/extensions/inactive/$EXT.rb"
     DEST_DIR="$INACTIVE_EXTENSIONS_DIR"
   else
