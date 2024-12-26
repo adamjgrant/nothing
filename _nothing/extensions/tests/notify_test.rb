@@ -15,7 +15,7 @@ class NotifyTest < Minitest::Test
     @notify_file_2 = File.join(@test_root, '2024-12-20+1500+.another-task.txt')
     @no_notify_file = File.join(@test_root, '2024-12-20+1500.another-task-no-notify.txt')
     @normal_file = File.join(@test_root, '2024-12-20.normal-task.txt')
-    @no_date_file = File.join(@test_root, 'task.txt')
+    @no_date_file = File.join(@test_root, 'justtask.txt')
     @repeat_file = File.join(@test_root, 'task.3d.txt')
     
     # Create test files
@@ -27,17 +27,29 @@ class NotifyTest < Minitest::Test
     File.write(@repeat_file, 'Repeat task content')
   end
 
+  def teardown
+    [@notify_file, @notify_file_2, @no_notify_file, @normal_file, @no_date_file, @repeat_file].each do |file|
+      FileUtils.rm_rf(file)
+    end
+    FileUtils.rm_rf(@meta_file)
+  end
+
   def test_identifies_files_with_plus_ending_first_part
     extension_path = File.expand_path('../../extensions/notify.rb', __dir__)
     
     # Capture the notification command that would be executed
     output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
+
+    meta_file = File.join(@test_root, 'notify-meta.txt')
     
+    # Read existing notifications
+    notified_files = File.readlines(meta_file, chomp: true)
+
     # The test mode should return the filenames it would notify about
     assert_includes output, '2024-12-20+1200+.mytask.txt'
     assert_includes output, '2024-12-20+1500+.another-task.txt'
     refute_includes output, '2024-12-20.normal-task.txt'
-    refute_includes output, 'task.txt'
+    refute_includes output, 'justtask.txt'
     refute_includes output, 'task.3d.txt'
   end
 
