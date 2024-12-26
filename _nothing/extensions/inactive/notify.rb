@@ -50,7 +50,7 @@ def send_notification(title, message)
 end
 
 def process_directory(root_dir, test_mode = false)
-  meta_file = File.join(root_dir, '_nothing', 'notify-meta.txt')
+  meta_file = File.join(root_dir, '_nothing', 'extensions', 'notify-meta.txt')
   
   File.write(meta_file, '') if !File.exist?(meta_file)
 
