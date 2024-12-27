@@ -103,4 +103,85 @@ class AmnesiaTest < Minitest::Test
     assert File.exist?(expected_with_date), "File with date did not have the skull added correctly."
     assert File.exist?(expected_without_date), "File without date did not have the skull added correctly."
   end
+
+  def test_directory_with_date_prefix
+    directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    skull_directory = File.join(@test_root, "#{(Date.today - 3).strftime('%Y-%m-%d')}.»my-folder-task")
+    assert Dir.exist?(skull_directory), "Directory with date prefix did not have the skull added correctly."
+  end
+
+  def test_directory_without_date_prefix
+    directory_name = "my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    assert Dir.exist?(directory_path), "Directory without date prefix should remain unchanged."
+  end
+
+  def test_directory_archived_after_max_skulls
+    directory_name = "#{(Date.today - 6).strftime('%Y-%m-%d')}.my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    archived_directory = File.join(@test_root, '_done', "#{(Date.today - 6).strftime('%Y-%m-%d')}.»»»»my-folder-task")
+    assert Dir.exist?(archived_directory), "Directory should have been archived with the maximum number of skulls."
+  end
+
+  def test_mixed_files_and_directories
+    # File setup
+    file_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-file-task.txt"
+    file_path = File.join(@test_root, file_name)
+    File.write(file_path, "Task content")
+  
+    # Directory setup
+    directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    # Expected results
+    skull_file = File.join(@test_root, "#{(Date.today - 3).strftime('%Y-%m-%d')}.»my-file-task.txt")
+    skull_directory = File.join(@test_root, "#{(Date.today - 3).strftime('%Y-%m-%d')}.»my-folder-task")
+  
+    # Assertions
+    assert File.exist?(skull_file), "File did not have skull added correctly."
+    assert Dir.exist?(skull_directory), "Directory did not have skull added correctly."
+  end
+
+  def test_directory_with_future_date
+    directory_name = "#{(Date.today + 3).strftime('%Y-%m-%d')}.my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    assert Dir.exist?(directory_path), "Directory with future date should remain unchanged."
+  end
+
+  def test_directory_with_date_and_time
+    directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}+1200.my-folder-task"
+    directory_path = File.join(@test_root, directory_name)
+    FileUtils.mkdir_p(directory_path)
+  
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+  
+    skull_directory = File.join(@test_root, "#{(Date.today - 3).strftime('%Y-%m-%d')}+1200.»my-folder-task")
+    assert Dir.exist?(skull_directory), "Directory with date and time did not have skull added correctly."
+  end
 end
