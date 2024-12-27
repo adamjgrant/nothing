@@ -160,4 +160,18 @@ class AddOverdueEmojiTest < Minitest::Test
     refute File.exist?(File.join(@test_root, "#{(Date.today + 2).strftime('%Y-%m-%d')}.■task.md")), "The overdue mark was not removed from the task."
     assert File.exist?(updated_file), "The updated task file should exist without the overdue mark."
   end
+
+  def test_directory_with_overdue_date
+    overdue_dir = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.my-folder-task")
+    FileUtils.mkdir_p(overdue_dir)
+  
+    # Run the extension
+    extension_path = File.expand_path('../../extensions/overdue.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+  
+    # Verify the overdue directory is renamed
+    expected_dir = File.join(@test_root, "#{(Date.today - 1).strftime('%Y-%m-%d')}.■my-folder-task")
+    assert Dir.exist?(expected_dir), "Overdue directory should be renamed to include the overdue mark."
+    refute Dir.exist?(overdue_dir), "Original overdue directory should no longer exist."
+  end
 end
