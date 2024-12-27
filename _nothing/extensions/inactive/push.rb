@@ -22,22 +22,25 @@ def ensure_directories(root_dir)
   Dir.mkdir(push_rand_dir) unless Dir.exist?(push_rand_dir)
 end
 
-# Parse a push directory name and extract increment days
+# Parse a push directory name and extract increment days and optional time value
 def parse_push_directory(dir_name)
-  match = dir_name.match(/^_push-(\d+)([dwmy])$/)
+  match = dir_name.match(/^_push-(\d+)([dwmy])(?:\+(\d{4}))?$/)
   return unless match
 
   increment = match[1].to_i
   unit = match[2]
+  time_value = match[3] # Optional time value (e.g., 1400 for 14:00)
 
   # Determine increment unit
-  case unit
-  when 'd' then increment # days
-  when 'w' then increment * 7 # weeks
-  when 'm' then { months: increment } # months
-  when 'y' then { years: increment } # years
-  else nil
-  end
+  increment_unit = case unit
+                   when 'd' then increment # days
+                   when 'w' then increment * 7 # weeks
+                   when 'm' then { months: increment } # months
+                   when 'y' then { years: increment } # years
+                   else nil
+                   end
+
+  { increment: increment_unit, time: time_value }
 end
 
 # Process a file and move it to _later with the date incremented
@@ -50,11 +53,17 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
   time_str = nil
 
   # Try to parse the date if it looks like one
+  if filename == "never-to-today-afternoon.txt"
+    puts "DEBUG: #{increment_days[:time]}"
+  end
+
   begin
     if date_time_str.match?(/^\d{4}-\d{2}-\d{2}/)
       # Split date and time if the format includes '+HHMM'
-      if date_time_str.include?('+')
-        date_str, time_str = date_time_str.split('+')
+      # make sure the string does not end in a "+"
+
+      if date_time_str.include?('+') && !date_time_str.end_with?('+')
+        date_str, time_str = date_time_str.split('+')[0..1]
       else
         date_str = date_time_str
       end
@@ -65,6 +74,7 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
       # Construct new filename with today's date
       original_name = filename
       date_time_str = original_name
+      time_str = increment_days[:time]
     end
   rescue ArgumentError
     # Invalid date format, use today's date
@@ -72,15 +82,19 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
     date_time_str = filename
   end
 
+  if filename == "never-to-today-afternoon.txt"
+    puts "DEBUG: Time string should be set: #{time_str}"
+  end
+
   # Increment the date
-  new_date = case increment_days
+  new_date = case increment_days[:increment]
               when Integer
-                task_date + increment_days # days and weeks
+                task_date + increment_days[:increment] # days and weeks
               when Hash
-                if increment_days[:months]
-                  task_date >> increment_days[:months] # months
-                elsif increment_days[:years]
-                  task_date.next_year(increment_days[:years]) # years
+                if increment_days[:increment][:months] 
+                  task_date >> increment_days[:increment][:months] # months
+                elsif increment_days[:increment][:years]
+                  task_date.next_year(increment_days[:increment][:years]) # years
                 else
                   task_date
                 end
@@ -93,9 +107,13 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
   if time_str
     new_filename = "#{new_date_str}+#{time_str}.#{components[1..-1].join('.')}"
   else
+    if filename == "never-to-today-afternoon.txt"
+      puts "DEBUG: #{filename} #{date_time_str} #{time_str}"
+    end
     # If the original file had no date, insert the new date at the start
     if date_time_str == filename
-      new_filename = "#{new_date_str}.#{filename}"
+      new_time_str = time_str ? "+#{time_str}" : ''
+      new_filename = "#{new_date_str}#{time_str}.#{filename}"
     else
       new_filename = filename.sub(date_time_str, new_date_str)
     end
@@ -119,7 +137,12 @@ def process_push_directories(root_dir)
     next unless Dir.exist?(dir_path)
 
     # Parse increment from directory name
-    increment_days = parse_push_directory(entry)
+    
+    if entry == PUSH_RAND
+      increment_days = { increment: rand(1..10), time_value: nil }
+    else
+      increment_days = parse_push_directory(entry)
+    end
     next unless increment_days # Skip invalid directories
 
     # Process files in the directory
@@ -128,16 +151,6 @@ def process_push_directories(root_dir)
       file_path = File.join(dir_path, file)
       is_directory = File.directory?(file_path)
       process_file(file_path, increment_days, later_dir, is_directory)
-    end
-  end
-
-  # Handle _push-rand as a special case
-  rand_dir = File.join(root_dir, PUSH_RAND)
-  if Dir.exist?(rand_dir)
-    Dir.foreach(rand_dir) do |file|
-      next if file == '.' || file == '..'
-      file_path = File.join(rand_dir, file)
-      process_file(file_path, rand(1..10), later_dir)
     end
   end
 end
