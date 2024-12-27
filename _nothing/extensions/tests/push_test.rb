@@ -274,7 +274,7 @@ class PushExtensionTest < Minitest::Test
   end
 
   def test_push_0d_2359_with_reminder
-    filename = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon-with-reminder.txt"
+    filename = "#{Date.today.strftime('%Y-%m-%d')}+0000+.today-to-today-afternoon-with-reminder.txt"
     file_path = File.join(@push_0d_2359_dir, filename)
     File.write(file_path, "Test content")
   
@@ -313,7 +313,7 @@ class PushExtensionTest < Minitest::Test
   end
 
   def test_push_0d_2359_for_directory_with_reminder
-    folder_name = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon-with-reminder"
+    folder_name = "#{Date.today.strftime('%Y-%m-%d')}+0000+.today-to-today-afternoon-with-reminder"
     folder_path = File.join(@push_0d_2359_dir, folder_name)
     FileUtils.mkdir_p(folder_path)
   

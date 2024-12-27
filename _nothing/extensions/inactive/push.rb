@@ -24,7 +24,7 @@ end
 
 # Parse a push directory name and extract increment days and optional time value
 def parse_push_directory(dir_name)
-  match = dir_name.match(/^_push-(\d+)([dwmy])(?:\+(\d{4}))?$/)
+  match = dir_name.match(/^_push-(\d+)([dwmy])(?:\+(\d{4}\+?))?$/)
   return unless match
 
   increment = match[1].to_i
@@ -39,7 +39,6 @@ def parse_push_directory(dir_name)
                    when 'y' then { years: increment } # years
                    else nil
                    end
-
   { increment: increment_unit, time: time_value }
 end
 
@@ -47,11 +46,15 @@ end
 def process_file(file_path, increment_days, later_dir, is_directory=false)
   filename = File.basename(file_path)
   components = filename.split('.')
+
+  if filename == "2024-12-27+0000+.today-to-today-afternoon-with-reminder.txt"
+    puts "DEBUG: Time value is #{increment_days[:time]}"
+  end
   
   # If the first component is a valid date, use it. Otherwise use today's date
   date_time_str = components[0]
-  time_str = nil
-
+  original_time_str = nil
+  notify = false
   # Try to parse the date if it looks like one
 
   begin
@@ -60,7 +63,9 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
       # make sure the string does not end in a "+"
 
       if date_time_str.include?('+')
-        date_str, time_str = date_time_str.split('+')[0..1]
+        notify = true
+        date_str, original_time_str = date_time_str.split('+')[0..1]
+        original_time_str = "#{original_time_str}+" if date_time_str.end_with?('+')
       else
         date_str = date_time_str
       end
@@ -72,7 +77,11 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
       original_name = filename
       date_time_str = original_name
     end
-    time_str = time_str || increment_days[:time]
+    if original_time_str && !increment_days[:time]
+      time_str = original_time_str
+    else
+      time_str = increment_days[:time]
+    end
   rescue ArgumentError
     # Invalid date format, use today's date
     task_date = Date.today
@@ -95,20 +104,20 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
                 task_date
               end
 
-  if filename == "2024-12-27.today-to-today-afternoon.txt"
+  if filename == "2024-12-27+0000+.today-to-today-afternoon-with-reminder.txt"
     puts "DEBUG: New date: #{new_date} time string is #{time_str}"
   end
 
   # Create new filename
   new_date_str = new_date.strftime('%Y-%m-%d')
   task_name = /(?:\d{4}\-\d{2}\-\d{2})?(?:\+)?(?:\d{4})?\.?([^.]+\.?\w{3}?)$/.match(filename)[1]
-    if filename == "2024-12-27.today-to-today-afternoon.txt"
+    if filename == "2024-12-27+0000+.today-to-today-afternoon-with-reminder.txt"
     puts "DEBUG: Task name: #{task_name}"
   end
 
   if time_str
     new_filename = "#{new_date_str}+#{time_str}.#{task_name}"
-    if filename == "2024-12-27.today-to-today-afternoon.txt"
+    if filename == "2024-12-27+0000+.today-to-today-afternoon-with-reminder.txt"
       puts "DEBUG: New Filename: #{new_filename}"
     end
   else
