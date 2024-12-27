@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'date'
+require 'time'
 
 class PushExtensionTest < Minitest::Test
   def setup
@@ -14,11 +15,17 @@ class PushExtensionTest < Minitest::Test
     @push_rand_dir = File.join(@test_root, '_push-rand')
     @push_1d_dir = File.join(@test_root, '_push-1d')
     @push_1w_dir = File.join(@test_root, '_push-1w')
+    @push_5h_dir = File.join(@test_root, '_push-5h')
+    @push_3h_dir = File.join(@test_root, '_push-3h')
+    @push_2h_dir = File.join(@test_root, '_push-2h')
     @push_0d_2359_dir = File.join(@test_root, '_push-0d+2359')
 
     # Remove existing push directories to test their creation
     FileUtils.rm_rf(@push_rand_dir)
 
+    FileUtils.mkdir_p(@push_5h_dir)
+    FileUtils.mkdir_p(@push_3h_dir)
+    FileUtils.mkdir_p(@push_2h_dir)
     FileUtils.mkdir_p(@push_0d_2359_dir)
 
     @extension_path = File.expand_path('../../extensions/push.rb', __dir__)
