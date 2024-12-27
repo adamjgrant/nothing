@@ -108,6 +108,7 @@ class AmnesiaTest < Minitest::Test
     directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
@@ -120,6 +121,7 @@ class AmnesiaTest < Minitest::Test
     directory_name = "my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now) # Set modified time to now
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
@@ -131,6 +133,7 @@ class AmnesiaTest < Minitest::Test
     directory_name = "#{(Date.today - 6).strftime('%Y-%m-%d')}.my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now - (6 * 24 * 60 * 60)) # Set modified time to 6 days ago
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
@@ -144,11 +147,13 @@ class AmnesiaTest < Minitest::Test
     file_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-file-task.txt"
     file_path = File.join(@test_root, file_name)
     File.write(file_path, "Task content")
+    FileUtils.touch(file_path, mtime: Time.now - (3 * 24 * 60 * 60)) # 3 days ago
   
     # Directory setup
     directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}.my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now - (3 * 24 * 60 * 60)) # 3 days ago
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
@@ -166,6 +171,7 @@ class AmnesiaTest < Minitest::Test
     directory_name = "#{(Date.today + 3).strftime('%Y-%m-%d')}.my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now) # Set modified time to now
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
@@ -177,6 +183,7 @@ class AmnesiaTest < Minitest::Test
     directory_name = "#{(Date.today - 3).strftime('%Y-%m-%d')}+1200.my-folder-task"
     directory_path = File.join(@test_root, directory_name)
     FileUtils.mkdir_p(directory_path)
+    FileUtils.touch(directory_path, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
   
     amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
     system("ruby #{amnesia_extension_path} #{@test_root}")
