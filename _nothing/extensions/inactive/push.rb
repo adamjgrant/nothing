@@ -53,16 +53,13 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
   time_str = nil
 
   # Try to parse the date if it looks like one
-  if filename == "never-to-today-afternoon.txt"
-    puts "DEBUG: #{increment_days[:time]}"
-  end
 
   begin
     if date_time_str.match?(/^\d{4}-\d{2}-\d{2}/)
       # Split date and time if the format includes '+HHMM'
       # make sure the string does not end in a "+"
 
-      if date_time_str.include?('+') && !date_time_str.end_with?('+')
+      if date_time_str.include?('+')
         date_str, time_str = date_time_str.split('+')[0..1]
       else
         date_str = date_time_str
@@ -74,16 +71,12 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
       # Construct new filename with today's date
       original_name = filename
       date_time_str = original_name
-      time_str = increment_days[:time]
     end
+    time_str = time_str || increment_days[:time]
   rescue ArgumentError
     # Invalid date format, use today's date
     task_date = Date.today
     date_time_str = filename
-  end
-
-  if filename == "never-to-today-afternoon.txt"
-    puts "DEBUG: Time string should be set: #{time_str}"
   end
 
   # Increment the date
@@ -102,18 +95,27 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
                 task_date
               end
 
+  if filename == "2024-12-27.today-to-today-afternoon.txt"
+    puts "DEBUG: New date: #{new_date} time string is #{time_str}"
+  end
+
   # Create new filename
   new_date_str = new_date.strftime('%Y-%m-%d')
+  task_name = /(?:\d{4}\-\d{2}\-\d{2})?(?:\+)?(?:\d{4})?\.?([^.]+\.?\w{3}?)$/.match(filename)[1]
+    if filename == "2024-12-27.today-to-today-afternoon.txt"
+    puts "DEBUG: Task name: #{task_name}"
+  end
+
   if time_str
-    new_filename = "#{new_date_str}+#{time_str}.#{components[1..-1].join('.')}"
-  else
-    if filename == "never-to-today-afternoon.txt"
-      puts "DEBUG: #{filename} #{date_time_str} #{time_str}"
+    new_filename = "#{new_date_str}+#{time_str}.#{task_name}"
+    if filename == "2024-12-27.today-to-today-afternoon.txt"
+      puts "DEBUG: New Filename: #{new_filename}"
     end
+  else
     # If the original file had no date, insert the new date at the start
     if date_time_str == filename
       new_time_str = time_str ? "+#{time_str}" : ''
-      new_filename = "#{new_date_str}#{time_str}.#{filename}"
+      new_filename = "#{new_date_str}#{time_str}.#{task_name}"
     else
       new_filename = filename.sub(date_time_str, new_date_str)
     end

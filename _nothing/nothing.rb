@@ -67,9 +67,16 @@ def parse_yyyymmdd_prefix(filename)
   end
 end
 
-# Run all extensions in the extensions directory
+# Always run nlp.rb first if it exists
+nlp_script_path = File.join(EXTENSIONS_DIR, 'nlp.rb')
+if File.exist?(nlp_script_path)
+  system("ruby \"#{nlp_script_path}\" \"#{root_dir}\"")
+end
+
 def run_extensions(root_dir)
   Dir.glob(File.join(EXTENSIONS_DIR, '*.rb')).each do |extension_file|
+    # Skip nlp.rb since it was already run
+    next if File.basename(extension_file) == 'nlp.rb'
     system("ruby \"#{extension_file}\" \"#{root_dir}\"")
   end
 end
