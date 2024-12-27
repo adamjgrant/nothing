@@ -161,4 +161,67 @@ class PushExtensionTest < Minitest::Test
     refute File.exist?(file_path_no_date),
            "Original file without date was not removed from push directory"
   end
+
+  def test_push_1d_for_folder
+    folder_name = "#{(Date.today - 1).strftime('%Y-%m-%d')}.folder-task"
+    folder_path = File.join(@push_1d_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # Verify folder is moved to _later with date incremented by 1 day
+    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
+    assert Dir.exist?(expected_folder_path), "Folder in _push-1d was not processed correctly."
+  end
+  
+  def test_push_1w_for_folder
+    folder_name = "#{(Date.today - 7).strftime('%Y-%m-%d')}.folder-task"
+    folder_path = File.join(@push_1w_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # Verify folder is moved to _later with date incremented by 7 days
+    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
+    assert Dir.exist?(expected_folder_path), "Folder in _push-1w was not processed correctly."
+  end
+  
+  def test_push_rand_for_folder
+    folder_name = "#{(Date.today - 5).strftime('%Y-%m-%d')}.folder-task"
+    folder_path = File.join(@push_rand_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # Verify folder is moved to _later with date incremented by 1-10 days
+    moved_folder = Dir.glob(File.join(@later_dir, '*.folder-task')).first
+    assert Dir.exist?(moved_folder), "Folder in _push-rand was not processed correctly."
+    
+    moved_date = Date.strptime(File.basename(moved_folder).split('.').first, '%Y-%m-%d')
+    assert_includes ((Date.today - 10)..Date.today), moved_date, "Folder in _push-rand was moved to an incorrect date."
+  end
+  
+  def test_folder_without_date_prefix
+    folder_name = "folder-without-date"
+    folder_path = File.join(@push_1d_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # Verify folder is not moved
+    assert Dir.exist?(folder_path), "Folder without date prefix should not be moved."
+  end
+  
+  def test_future_dated_folder
+    folder_name = "#{(Date.today + 1).strftime('%Y-%m-%d')}.folder-task"
+    folder_path = File.join(@push_1d_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    # Verify folder is not moved
+    assert Dir.exist?(folder_path), "Future-dated folder should not be processed."
+  end
 end
