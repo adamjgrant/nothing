@@ -34,8 +34,8 @@ def process_directory(directory)
 
     file_path = File.join(directory, filename)
 
-    # Skip directories, only process files
-    next unless File.file?(file_path)
+    # Skip directories that start with an underscore
+    next if File.directory?(file_path) && filename.start_with?('_')
       
     # Match files with the format <YYYY-MM-DD[+HHMM]>.<task name>.<extension>
     if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)$/
