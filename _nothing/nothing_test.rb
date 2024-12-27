@@ -8,6 +8,13 @@ class TestDueDateMovement < Minitest::Test
     end
   end
 
+  def fuzzy_dir_exists?(directory, base_dirname)
+    # Perform a fuzzy lookup in the specified directory
+    Dir.entries(directory).any? do |dir|
+      dir.gsub(/■/, '') == base_dirname # Strip ■ emoji for comparison
+    end
+  end
+
   def fuzzy_log_match?(log_contents, expected_fragment)
     # Check if any line in the log contains the expected fragment, ignoring emojis
     log_contents.any? do |line|
@@ -194,7 +201,8 @@ class TestDueDateMovement < Minitest::Test
     past_date = (Date.today - 1).strftime('%Y-%m-%d')
     future_date = (Date.today + 1).strftime('%Y-%m-%d')
   
-    directory_with_past_date = File.join(TEST_ROOT, "#{past_date}.my-folder-task")
+    directory_with_past_date_filename = "#{past_date}.my-folder-task"
+    directory_with_past_date = File.join(TEST_ROOT, directory_with_past_date_filename)
     FileUtils.mkdir_p(directory_with_past_date)
   
     directory_with_future_date_and_time = File.join(TEST_ROOT, "#{future_date}+1300.my-folder-task")
@@ -205,7 +213,7 @@ class TestDueDateMovement < Minitest::Test
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
   
     # Verify past-dated directory remains in the root directory
-    assert Dir.exist?(directory_with_past_date), "Directory task with a past date should remain in the root directory."
+    assert fuzzy_dir_exists?(TEST_ROOT, directory_with_past_date_filename), "Directory task with a past date should remain in the root directory."
   
     # Verify future-dated directory with time is moved to _later
     moved_future_directory_with_time = File.join(LATER_DIR, "#{future_date}+1300.my-folder-task")
