@@ -14,9 +14,12 @@ class PushExtensionTest < Minitest::Test
     @push_rand_dir = File.join(@test_root, '_push-rand')
     @push_1d_dir = File.join(@test_root, '_push-1d')
     @push_1w_dir = File.join(@test_root, '_push-1w')
+    @push_0d_1400_dir = File.join(@test_root, '_push-0d+1400')
 
     # Remove existing push directories to test their creation
     FileUtils.rm_rf(@push_rand_dir)
+
+    FileUtils.mkdir_p(@push_0d_1400_dir)
 
     @extension_path = File.expand_path('../../extensions/push.rb', __dir__)
   end
@@ -235,5 +238,83 @@ class PushExtensionTest < Minitest::Test
   
     # Verify the folder was moved and renamed correctly
     assert Dir.exist?(expected_folder_path), "Future-dated folder should be pushed to the correct future date."
+  end
+
+  def test_push_0d_1400_for_never_to_today_afternoon
+    filename = "never-to-today-afternoon.txt"
+    file_path = File.join(@push_0d_1400_dir, filename)
+    File.write(file_path, "Test content")
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_filename = "#{Date.today.strftime('%Y-%m-%d')}+1400.never-to-today-afternoon.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+  
+    assert File.exist?(expected_file_path), "File was not pushed to _later with today's date at 14:00."
+  end
+
+  def test_push_0d_1400_for_today_to_today_afternoon
+    filename = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon.txt"
+    file_path = File.join(@push_0d_1400_dir, filename)
+    File.write(file_path, "Test content")
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_filename = "#{Date.today.strftime('%Y-%m-%d')}+1400.today-to-today-afternoon.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+  
+    assert File.exist?(expected_file_path), "File was not rescheduled to _later with today's date at 14:00."
+  end
+
+  def test_push_0d_1400_with_reminder
+    filename = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon-with-reminder.txt"
+    file_path = File.join(@push_0d_1400_dir, filename)
+    File.write(file_path, "Test content")
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_filename = "#{Date.today.strftime('%Y-%m-%d')}+1400+.today-to-today-afternoon-with-reminder.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+  
+    assert File.exist?(expected_file_path), "File with reminder was not rescheduled to _later with today's date at 14:00."
+  end
+
+  def test_push_0d_1400_for_directory_never_to_today_afternoon
+    folder_name = "never-to-today-afternoon"
+    folder_path = File.join(@push_0d_1400_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}+1400.never-to-today-afternoon"
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
+  
+    assert Dir.exist?(expected_folder_path), "Directory was not pushed to _later with today's date at 14:00."
+  end
+
+  def test_push_0d_1400_for_directory_today_to_today_afternoon
+    folder_name = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon"
+    folder_path = File.join(@push_0d_1400_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}+1400.today-to-today-afternoon"
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
+  
+    assert Dir.exist?(expected_folder_path), "Directory was not rescheduled to _later with today's date at 14:00."
+  end
+
+  def test_push_0d_1400_for_directory_with_reminder
+    folder_name = "#{Date.today.strftime('%Y-%m-%d')}.today-to-today-afternoon-with-reminder"
+    folder_path = File.join(@push_0d_1400_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    system("ruby #{@extension_path} #{@test_root}")
+  
+    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}+1400+.today-to-today-afternoon-with-reminder"
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
+  
+    assert Dir.exist?(expected_folder_path), "Directory with reminder was not rescheduled to _later with today's date at 14:00."
   end
 end
