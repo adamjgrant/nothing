@@ -407,6 +407,7 @@ class RepeatingTaskTest < Minitest::Test
   
     next_days = multi_days.transform_values do |target_wday|
       days_ahead = (target_wday - @today.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Skip today by advancing to the next week
       @today + days_ahead
     end
   
