@@ -25,6 +25,15 @@ class NotifyTest < Minitest::Test
     File.write(@normal_file, 'Normal task content')
     File.write(@no_date_file, 'No date task content')
     File.write(@repeat_file, 'Repeat task content')
+
+    @notify_dir = File.join(@test_root, '2024-12-20+1200+.mydir')
+    @no_notify_dir = File.join(@test_root, '2024-12-20.mydir')
+    @normal_dir = File.join(@test_root, 'mydir')
+
+    # Create test directories
+    FileUtils.mkdir_p(@notify_dir)
+    FileUtils.mkdir_p(@no_notify_dir)
+    FileUtils.mkdir_p(@normal_dir)
   end
 
   def teardown
@@ -32,6 +41,10 @@ class NotifyTest < Minitest::Test
       FileUtils.rm_rf(file)
     end
     FileUtils.rm_rf(@meta_file)
+
+    [@notify_dir, @no_notify_dir, @normal_dir].each do |dir|
+      FileUtils.rm_rf(dir)
+    end
   end
 
   def test_identifies_files_with_plus_ending_first_part
@@ -106,5 +119,26 @@ class NotifyTest < Minitest::Test
     
     meta_content = File.read(@meta_file)
     assert_equal 1, meta_content.lines.count { |line| line.include?('2024-12-20+1200+.mytask.txt') }
+  end
+
+  def test_identifies_directories_with_plus_ending_first_part
+    extension_path = File.expand_path('../../extensions/notify.rb', __dir__)
+    
+    # Capture the notification command that would be executed
+    output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
+  
+    # The test mode should return the directory names it would notify about
+    assert_includes output, '2024-12-20+1200+.mydir'
+    refute_includes output, '2024-12-20.mydir'
+    refute_includes output, 'mydir'
+  end
+
+  def test_non_date_prefixed_directories
+    extension_path = File.expand_path('../../extensions/notify.rb', __dir__)
+    
+    output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
+  
+    # Directories without date prefixes should not trigger notifications
+    refute_includes output, 'mydir'
   end
 end
