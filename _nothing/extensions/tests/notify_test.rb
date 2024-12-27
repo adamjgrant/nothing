@@ -28,7 +28,7 @@ class NotifyTest < Minitest::Test
 
     @notify_dir = File.join(@test_root, '2024-12-20+1200+.mydir')
     @no_notify_dir = File.join(@test_root, '2024-12-20.mydir')
-    @normal_dir = File.join(@test_root, 'mydir')
+    @normal_dir = File.join(@test_root, 'just_mydir')
 
     # Create test directories
     FileUtils.mkdir_p(@notify_dir)
@@ -130,7 +130,7 @@ class NotifyTest < Minitest::Test
     # The test mode should return the directory names it would notify about
     assert_includes output, '2024-12-20+1200+.mydir'
     refute_includes output, '2024-12-20.mydir'
-    refute_includes output, 'mydir'
+    refute_includes output, 'just_mydir'
   end
 
   def test_non_date_prefixed_directories
@@ -139,6 +139,6 @@ class NotifyTest < Minitest::Test
     output = `ruby \"#{extension_path}\" \"#{@test_root}\" test`
   
     # Directories without date prefixes should not trigger notifications
-    refute_includes output, 'mydir'
+    refute_includes output, 'just_mydir'
   end
 end
