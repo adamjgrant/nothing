@@ -34,15 +34,21 @@ def process_directory(directory)
 
     file_path = File.join(directory, filename)
 
-    # Skip directories, only process files
-    next unless File.file?(file_path)
+    # Skip directories that start with an underscore
+    is_directory = File.directory?(file_path)
+    next if is_directory && filename.start_with?('_')
       
     # Match files with the format <YYYY-MM-DD[+HHMM]>.<task name>.<extension>
-    if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)$/
+    if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)?$/
       date_prefix = $1
       time_suffix = $2 # Optional time component
       task_name = $3
-      extension = $4
+      # If this is a directory, set the extension to an empty string, otherwise, $4
+      if is_directory
+        extension = ""
+      else
+        extension = $4
+      end
 
       # Parse the date prefix
       due_date = Date.strptime(date_prefix, '%Y-%m-%d') rescue nil

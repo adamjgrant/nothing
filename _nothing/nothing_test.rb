@@ -8,6 +8,13 @@ class TestDueDateMovement < Minitest::Test
     end
   end
 
+  def fuzzy_dir_exists?(directory, base_dirname)
+    # Perform a fuzzy lookup in the specified directory
+    Dir.entries(directory).any? do |dir|
+      dir.gsub(/■/, '') == base_dirname # Strip ■ emoji for comparison
+    end
+  end
+
   def fuzzy_log_match?(log_contents, expected_fragment)
     # Check if any line in the log contains the expected fragment, ignoring emojis
     log_contents.any? do |line|
@@ -186,5 +193,30 @@ class TestDueDateMovement < Minitest::Test
     renamed_task_file = File.join(subfolder_dir, "#{Date.today.strftime('%Y-%m-%d')}.task.txt")
     assert File.exist?(renamed_task_file), "The task file in the subfolder was not renamed properly."
     refute File.exist?(task_file), "The original task file in the subfolder should not exist."
+  end
+
+  # Test case to verify directory task handling
+  def test_directory_task_movement
+    # Dynamically generate dates
+    past_date = (Date.today - 1).strftime('%Y-%m-%d')
+    future_date = (Date.today + 1).strftime('%Y-%m-%d')
+  
+    directory_with_past_date_filename = "#{past_date}.my-folder-task"
+    directory_with_past_date = File.join(TEST_ROOT, directory_with_past_date_filename)
+    FileUtils.mkdir_p(directory_with_past_date)
+  
+    directory_with_future_date_and_time = File.join(TEST_ROOT, "#{future_date}+1300.my-folder-task")
+    FileUtils.mkdir_p(directory_with_future_date_and_time)
+  
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    # Run nothing.rb script
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+  
+    # Verify past-dated directory remains in the root directory
+    assert fuzzy_dir_exists?(TEST_ROOT, directory_with_past_date_filename), "Directory task with a past date should remain in the root directory."
+  
+    # Verify future-dated directory with time is moved to _later
+    moved_future_directory_with_time = File.join(LATER_DIR, "#{future_date}+1300.my-folder-task")
+    assert Dir.exist?(moved_future_directory_with_time), "Directory task with future date and time should have been moved to _later."
   end
 end

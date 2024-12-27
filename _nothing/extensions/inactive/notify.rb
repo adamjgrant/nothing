@@ -63,6 +63,11 @@ def process_directory(root_dir, test_mode = false)
   Dir.foreach(root_dir) do |filename|
     next if filename == '.' || filename == '..'
     next if filename.start_with?('.') # Skip hidden files
+
+    # Skip directories that start with an underscore
+    file_path = File.join(root_dir, filename)
+    is_directory = File.directory?(file_path)
+    next if is_directory && filename.start_with?('_')
     
     # Check if file has a date first part and ends with +
     if has_date_first_part?(filename) && filename.split('.')[0].end_with?('+')

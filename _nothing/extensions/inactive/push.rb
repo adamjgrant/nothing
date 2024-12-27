@@ -41,7 +41,7 @@ def parse_push_directory(dir_name)
 end
 
 # Process a file and move it to _later with the date incremented
-def process_file(file_path, increment_days, later_dir)
+def process_file(file_path, increment_days, later_dir, is_directory=false)
   filename = File.basename(file_path)
   components = filename.split('.')
   
@@ -126,7 +126,8 @@ def process_push_directories(root_dir)
     Dir.foreach(dir_path) do |file|
       next if file == '.' || file == '..'
       file_path = File.join(dir_path, file)
-      process_file(file_path, increment_days, later_dir)
+      is_directory = File.directory?(file_path)
+      process_file(file_path, increment_days, later_dir, is_directory)
     end
   end
 

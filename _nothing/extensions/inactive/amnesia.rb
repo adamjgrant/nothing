@@ -27,7 +27,10 @@ Dir.foreach(BASE_DIR) do |filename|
   next if filename.start_with?('.') # Skip hidden files (like `.keep`)
 
   file_path = File.join(BASE_DIR, filename)
-  next unless File.file?(file_path) # Skip directories
+
+  # Skip directories that start with an underscore
+  is_directory = File.directory?(file_path)
+  next if is_directory && filename.start_with?('_')
 
   # Calculate how many days old the file is
   last_modified = File.mtime(file_path)
@@ -43,7 +46,12 @@ Dir.foreach(BASE_DIR) do |filename|
     parent_array = filename.split('.')
     first_part = parent_array[0]
     second_part = parent_array[1]
-    extension = parent_array[-1]
+
+    if is_directory
+      extension = ""
+    else
+      extension = "." + parent_array[-1]
+    end
 
     # Check if the first part matches any of the date conditions
     if is_date_part?(first_part)
@@ -54,20 +62,28 @@ Dir.foreach(BASE_DIR) do |filename|
       task_part = first_part
     end
     base_name = task_part.gsub(/^(»+)/, '') # Remove any existing skulls
-    new_filename = "#{date_part}#{skulls}#{base_name}.#{extension}"
+    new_filename = "#{date_part}#{skulls}#{base_name}#{extension}"
 
     new_file_path = File.join(BASE_DIR, new_filename)
 
     # Rename the file with the correct number of skulls
     if new_filename != filename
-      File.rename(file_path, new_file_path)
+      if is_directory
+        FileUtils.mv(file_path, new_file_path)
+      else
+        File.rename(file_path, new_file_path)
+      end
       file_path = new_file_path # Update the file_path to reflect the rename
     end
   end
 
   # Archive the file if it has reached 6 or more days old
   if days_old >= 6
-    done_path = File.join(DONE_DIR, File.basename(file_path))
+    if is_directory
+      done_path = file_path.gsub(BASE_DIR, DONE_DIR)
+    else
+      done_path = File.join(DONE_DIR, File.basename(file_path))
+    end
     begin
       FileUtils.mv(file_path, done_path)
     rescue => e

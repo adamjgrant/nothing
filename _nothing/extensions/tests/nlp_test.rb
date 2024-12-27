@@ -226,4 +226,38 @@ class ConvertDayToDateTest < Minitest::Test
     assert File.exist?(expected_three_days_file), "The '3d+HHMM' file in the main directory was not renamed correctly."
     refute File.exist?(@three_days_with_time_file), "The original '3d+HHMM' file in the main directory still exists."
   end
+  
+  def test_directory_with_shortcut_prefix
+    dir_name_today = "today.project-folder-nlp"
+    dir_name_tomorrow = "tomorrow.project-folder-nlp"
+    dir_path_today = File.join(@test_root, dir_name_today)
+    dir_path_tomorrow = File.join(@test_root, dir_name_tomorrow)
+    
+    FileUtils.mkdir_p(dir_path_today)
+    FileUtils.mkdir_p(dir_path_tomorrow)
+    
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify the directories are renamed correctly
+    expected_today_dir = "#{Date.today.strftime('%Y-%m-%d')}.project-folder-nlp"
+    expected_tomorrow_dir = "#{(Date.today + 1).strftime('%Y-%m-%d')}.project-folder-nlp"
+    
+    assert Dir.exist?(File.join(@test_root, expected_today_dir)), "Directory with 'today' prefix should be renamed correctly."
+    assert Dir.exist?(File.join(@test_root, expected_tomorrow_dir)), "Directory with 'tomorrow' prefix should be renamed correctly."
+  end
+
+  def test_directory_with_relative_date
+    dir_name = "3d.project-folder"
+    dir_path = File.join(@test_root, dir_name)
+    FileUtils.mkdir_p(dir_path)
+    
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+    
+    # Verify the directory is renamed correctly
+    expected_dir_name = "#{(Date.today + 3).strftime('%Y-%m-%d')}.project-folder"
+    expected_dir_path = File.join(@test_root, expected_dir_name)
+    assert Dir.exist?(expected_dir_path), "Directory with relative date should be renamed correctly."
+  end
 end

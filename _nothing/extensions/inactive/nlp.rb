@@ -23,15 +23,21 @@ directories_to_process.each do |current_dir|
 
     file_path = File.join(current_dir, filename)
 
-    # Skip directories, only process files
-    next unless File.file?(file_path)
+    # Skip directories that start with an underscore
+    is_directory = File.directory?(file_path)
+    next if is_directory && filename.start_with?('_')
 
     # Extract the base name and extension
-    base_name = File.basename(filename, '.*')
-    extension = File.extname(filename)
+    if is_directory
+      extension = ''
+      base_name = filename
+    else
+      extension = File.extname(filename)
+      base_name = File.basename(filename, '.*')
+    end
 
     # Logic for "today", "tomorrow", or "<number><unit>" formats with optional time
-    if base_name =~ /^(today|tomorrow|(\d+)([dwmy]))([\+\d]*)\.(.+)$/i
+    if base_name =~ /^(today|tomorrow|(\d+)([dwmy]))([\+\d]*)\.(.+)?$/i
       prefix = $1.downcase
       number = $2 ? $2.to_i : nil
       unit = $3
@@ -68,7 +74,7 @@ directories_to_process.each do |current_dir|
     end
 
     # Logic for day names (e.g., "Monday.task.txt")
-    if base_name =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)([\+\d]*)\.(.+)$/i
+    if base_name =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)([\+\d]*)\.(.+)?$/i
       day_name = $1.downcase
       time_component = $2 # Captures the +HHMM part, if present
       task_name = $3

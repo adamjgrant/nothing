@@ -25,21 +25,26 @@ def process_directory(directory)
     next if entry.start_with?('.') # Skip hidden files/directories
     
     full_path = File.join(directory, entry)
+    is_directory = File.directory?(full_path)
     
-    if File.directory?(full_path)
+    if is_directory
       # Recursively process subdirectories
       process_directory(full_path)
-    elsif File.file?(full_path)
-      # Check file age
-      file_age = Time.now - File.mtime(full_path)
-      
-      if file_age > SIX_MONTHS_IN_SECONDS
-        begin
+    end
+
+    # Check file age
+    file_age = Time.now - File.mtime(full_path)
+    
+    if file_age > SIX_MONTHS_IN_SECONDS
+      begin
+        if is_directory
+          FileUtils.rm_rf(full_path)
+        else
           File.delete(full_path)
-          # puts "Deleted old file: #{full_path}" # Debugging output
-        rescue => e
-          puts "Error deleting file #{full_path}: #{e.message}"
         end
+        # puts "Deleted old file: #{full_path}" # Debugging output
+      rescue => e
+        puts "Error deleting file #{full_path}: #{e.message}"
       end
     end
   end

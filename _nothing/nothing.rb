@@ -45,6 +45,9 @@ today = Date.today
 # Parse date prefix in new format YYYY-MM-DD or YYYY-MM-DD@HHMM
 def parse_yyyymmdd_prefix(filename)
   match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?\./)
+  if filename == "2024-01-01.my-folder-task"
+    puts "DEBUG: #{match}"
+  end
   return nil unless match
 
   date_part = match[1]
@@ -77,13 +80,20 @@ moved_tasks = false
 Dir.foreach(LATER_DIR) do |filename|
   next if filename == '.' || filename == '..'
 
+  entry_path = File.join(LATER_DIR, filename)
+
   # Parse the optional date prefix
   due_date = parse_yyyymmdd_prefix(filename)
 
   if due_date && due_date <= Time.now
-    from_path = File.join(LATER_DIR, filename)
-    to_path = File.join(BASE_DIR, filename)
-    FileUtils.mv(from_path, to_path)
+    if File.directory?(entry_path)
+      to_path = File.join(BASE_DIR, filename)
+      FileUtils.mv(entry_path, to_path)
+    else
+      from_path = entry_path
+      to_path = File.join(BASE_DIR, filename)
+      FileUtils.mv(from_path, to_path)
+    end
     moved_tasks = true
   end
 end
@@ -93,13 +103,25 @@ Dir.foreach(BASE_DIR) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('_') # Skip special directories like _later, _done, _nothing
 
+  entry_path = File.join(BASE_DIR, filename)
+
   # Parse the optional date prefix
   due_date = parse_yyyymmdd_prefix(filename)
 
+  if filename == "2024-01-01.my-folder-task"
+    puts "DEBUG: #{entry_path} - #{due_date}"
+    puts "DEBUG: old? #{due_date && due_date > Time.now}"
+  end
+
   if due_date && due_date > Time.now
-    from_path = File.join(BASE_DIR, filename)
-    to_path = File.join(LATER_DIR, filename)
-    FileUtils.mv(from_path, to_path)
+    if File.directory?(entry_path)
+      to_path = File.join(LATER_DIR, filename)
+      FileUtils.mv(entry_path, to_path)
+    else
+      from_path = entry_path
+      to_path = File.join(LATER_DIR, filename)
+      FileUtils.mv(from_path, to_path)
+    end
     moved_tasks = true
   end
 end
