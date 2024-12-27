@@ -212,11 +212,11 @@ class PushExtensionTest < Minitest::Test
     system("ruby #{@extension_path} #{@test_root}")
   
     # Expected folder name and path after the push operation
-    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}.folder-without-date"
+    expected_folder_name = "#{(Date.today+1).strftime('%Y-%m-%d')}.folder-without-date"
     expected_folder_path = File.join(@later_dir, expected_folder_name)
   
     # Verify the folder was moved and renamed correctly
-    assert Dir.exist?(expected_folder_path), "Folder without date prefix should be moved with today's date."
+    assert Dir.exist?(expected_folder_path), "Folder without date prefix should be moved with today's date plus 1."
     refute Dir.exist?(folder_path), "Original folder without date prefix should be removed after processing."
   end
   
