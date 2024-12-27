@@ -231,7 +231,7 @@ class PushExtensionTest < Minitest::Test
   
     # Expected folder name and path after the push operation
     expected_folder_name = "#{(Date.today + 2).strftime('%Y-%m-%d')}.folder-task"
-    expected_folder_path = File.join(LATER_DIR, expected_folder_name)
+    expected_folder_path = File.join(@later_dir, expected_folder_name)
   
     # Verify the folder was moved and renamed correctly
     assert Dir.exist?(expected_folder_path), "Future-dated folder should be pushed to the correct future date."
