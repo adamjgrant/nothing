@@ -215,13 +215,19 @@ class PushExtensionTest < Minitest::Test
   end
   
   def test_future_dated_folder
+    # Create a folder with a date one day in the future
     folder_name = "#{(Date.today + 1).strftime('%Y-%m-%d')}.folder-task"
     folder_path = File.join(@push_1d_dir, folder_name)
     FileUtils.mkdir_p(folder_path)
   
+    # Run the extension
     system("ruby #{@extension_path} #{@test_root}")
   
-    # Verify folder is not moved
-    assert Dir.exist?(folder_path), "Future-dated folder should not be processed."
+    # Expected folder name and path after the push operation
+    expected_folder_name = "#{(Date.today + 2).strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_path = File.join(LATER_DIR, expected_folder_name)
+  
+    # Verify the folder was moved and renamed correctly
+    assert Dir.exist?(expected_folder_path), "Future-dated folder should be pushed to the correct future date."
   end
 end
