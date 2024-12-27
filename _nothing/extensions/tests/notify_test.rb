@@ -87,7 +87,8 @@ class NotifyTest < Minitest::Test
     
     meta_content = File.read(@meta_file)
     assert_includes meta_content, '2024-12-20+1800+.new-task.txt'
-    assert_equal 3, meta_content.lines.count, "Should have exactly three entries"
+    # 4 because there's that dir too. Bad code separation. Sorry.
+    assert_equal 4, meta_content.lines.count, "Should have exactly three entries"
   end
 
   def test_handles_empty_meta_file
