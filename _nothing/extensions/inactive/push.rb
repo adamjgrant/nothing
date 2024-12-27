@@ -57,6 +57,73 @@ def calculate_new_date(task_date, increment_days)
   end
 end
 
+# Process a file and move it to _later with the date incremented
+def process_file(file_path, increment_days, later_dir)
+  filename = File.basename(file_path)
+  components = filename.split('.')
+  
+  # If the first component is a valid date, use it. Otherwise use today's date
+  date_time_str = components[0]
+  time_str = nil
+
+  # Try to parse the date if it looks like one
+  begin
+    if date_time_str.match?(/^\d{4}-\d{2}-\d{2}/)
+      # Split date and time if the format includes '+HHMM'
+      if date_time_str.include?('+')
+        date_str, time_str = date_time_str.split('+')
+      else
+        date_str = date_time_str
+      end
+      task_date = Date.strptime(date_str, '%Y-%m-%d')
+    else
+      # No valid date found, use today's date
+      task_date = Date.today
+      # Construct new filename with today's date
+      original_name = filename
+      date_time_str = original_name
+    end
+  rescue ArgumentError
+    # Invalid date format, use today's date
+    task_date = Date.today
+    date_time_str = filename
+  end
+
+  # Increment the date
+  new_date = case increment_days
+              when Integer
+                task_date + increment_days # days and weeks
+              when Hash
+                if increment_days[:months]
+                  task_date >> increment_days[:months] # months
+                elsif increment_days[:years]
+                  task_date.next_year(increment_days[:years]) # years
+                else
+                  task_date
+                end
+              else
+                task_date
+              end
+
+  # Create new filename
+  new_date_str = new_date.strftime('%Y-%m-%d')
+  if time_str
+    new_filename = "#{new_date_str}+#{time_str}.#{components[1..-1].join('.')}"
+  else
+    # If the original file had no date, insert the new date at the start
+    if date_time_str == filename
+      new_filename = "#{new_date_str}.#{filename}"
+    else
+      new_filename = filename.sub(date_time_str, new_date_str)
+    end
+  end
+
+  new_path = File.join(later_dir, new_filename)
+  
+  # Move the file to _later
+  FileUtils.mv(file_path, new_path)
+end
+
 # Process a file/dir and move it to _later with the date incremented
 def process_entry(entry_path, increment_days, later_dir)
   entry_name = File.basename(entry_path)
