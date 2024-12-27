@@ -395,6 +395,8 @@ class RepeatingTaskTest < Minitest::Test
     # Add a multi-day weekly repeating folder
     multi_day_folder = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.multi-days-folder.1w-mo-we-fr")
     FileUtils.mkdir_p(multi_day_folder)
+
+    run_extension
   
     # Calculate next occurrences for Monday, Wednesday, Friday
     multi_days = { 
@@ -419,12 +421,16 @@ class RepeatingTaskTest < Minitest::Test
     # Add a specific day monthly repeating folder
     specific_day_folder = File.join(@done_dir, "#{@today.strftime('%Y-%m-%d')}.specific-day-folder.1m-15")
     FileUtils.mkdir_p(specific_day_folder)
+
+    run_extension
   
     # Calculate the next occurrence of the 15th day next month
     specific_day = 15
+    # The numerical month plus one
+
     next_month = @today >> 1
     next_specific_day = Date.new(next_month.year, next_month.month, specific_day)
-  
+
     # Verify that the next specific day folder is created
     expected_folder = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.specific-day-folder.1m-15")
     assert Dir.exist?(expected_folder), "Specific day monthly repeating folder was not created."
@@ -434,6 +440,8 @@ class RepeatingTaskTest < Minitest::Test
     # Add a strict specific day monthly repeating folder
     strict_specific_day_folder = File.join(@root_dir, "#{@today.strftime('%Y-%m-%d')}.strict-specific-day-folder.@1m-20")
     FileUtils.mkdir_p(strict_specific_day_folder)
+
+    run_extension
   
     # Calculate the next occurrence of the 20th day next month
     specific_day = 20
