@@ -40,25 +40,8 @@ def parse_push_directory(dir_name)
   end
 end
 
-def calculate_new_date(task_date, increment_days)
-  case increment_days
-  when Integer
-    task_date + increment_days
-  when Hash
-    if increment_days[:months]
-      task_date >> increment_days[:months]
-    elsif increment_days[:years]
-      task_date.next_year(increment_days[:years])
-    else
-      task_date
-    end
-  else
-    task_date
-  end
-end
-
 # Process a file and move it to _later with the date incremented
-def process_file(file_path, increment_days, later_dir)
+def process_file(file_path, increment_days, later_dir, is_directory=false)
   filename = File.basename(file_path)
   components = filename.split('.')
   
@@ -124,77 +107,37 @@ def process_file(file_path, increment_days, later_dir)
   FileUtils.mv(file_path, new_path)
 end
 
-# Process a file/dir and move it to _later with the date incremented
-def process_entry(entry_path, increment_days, later_dir)
-  entry_name = File.basename(entry_path)
-
-  if File.directory?(entry_path)
-    # Process folder tasks
-    components = entry_name.split('.')
-    date_time_str = components[0]
-    time_str = nil
-
-    # Parse the date as usual
-    begin
-      if date_time_str.match?(/^\d{4}-\d{2}-\d{2}/)
-        if date_time_str.include?('+')
-          date_str, time_str = date_time_str.split('+')
-        else
-          date_str = date_time_str
-        end
-        task_date = Date.strptime(date_str, '%Y-%m-%d')
-      else
-        task_date = Date.today
-      end
-    rescue ArgumentError
-      task_date = Date.today
-    end
-
-    # Increment the date
-    new_date = calculate_new_date(task_date, increment_days)
-
-    # Create new folder name
-    new_date_str = new_date.strftime('%Y-%m-%d')
-    new_folder_name = if time_str
-                        "#{new_date_str}+#{time_str}.#{components[1..-1].join('.')}"
-                      else
-                        entry_name.sub(date_time_str, new_date_str)
-                      end
-
-    new_folder_path = File.join(later_dir, new_folder_name)
-    FileUtils.mv(entry_path, new_folder_path)
-  else
-    # Process files
-    process_file(entry_path, increment_days, later_dir)
-  end
-end
-
 # Main processing logic
 def process_push_directories(root_dir)
   later_dir = File.join(root_dir, LATER)
   Dir.mkdir(later_dir) unless Dir.exist?(later_dir)
 
+  # Find all _push-* directories
   Dir.foreach(root_dir) do |entry|
     next unless entry.start_with?('_push-')
     dir_path = File.join(root_dir, entry)
     next unless Dir.exist?(dir_path)
 
+    # Parse increment from directory name
     increment_days = parse_push_directory(entry)
-    next unless increment_days
+    next unless increment_days # Skip invalid directories
 
-    Dir.foreach(dir_path) do |entry_name|
-      next if entry_name == '.' || entry_name == '..'
-      entry_path = File.join(dir_path, entry_name)
-      process_entry(entry_path, increment_days, later_dir)
+    # Process files in the directory
+    Dir.foreach(dir_path) do |file|
+      next if file == '.' || file == '..'
+      file_path = File.join(dir_path, file)
+      is_directory = File.directory?(file_path)
+      process_file(file_path, increment_days, later_dir, is_directory)
     end
   end
 
+  # Handle _push-rand as a special case
   rand_dir = File.join(root_dir, PUSH_RAND)
   if Dir.exist?(rand_dir)
-    Dir.foreach(rand_dir) do |entry_name|
-      next if entry_name == '.' || entry_name == '..'
-      entry_path = File.join(rand_dir, entry_name)
-      process_entry(entry_path, rand(1..10), later_dir)
+    Dir.foreach(rand_dir) do |file|
+      next if file == '.' || file == '..'
+      file_path = File.join(rand_dir, file)
+      process_file(file_path, rand(1..10), later_dir)
     end
   end
 end
