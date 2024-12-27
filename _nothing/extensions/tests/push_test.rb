@@ -317,4 +317,92 @@ class PushExtensionTest < Minitest::Test
   
     assert Dir.exist?(expected_folder_path), "Directory with reminder was not rescheduled to _later with today's date at 23:59."
   end
+
+  def test_push_xh_for_file_without_date_and_time
+    filename = "no-date-and-time-task.txt"
+    file_path = File.join(@push_5h_dir, filename)
+    File.write(file_path, "Test content")
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.now + 5 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_filename = "#{expected_time}.no-date-and-time-task.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+    
+    assert File.exist?(expected_file_path), "File without date and time was not processed correctly for _push-5h."
+  end
+  
+  def test_push_xh_for_file_with_date_but_no_time
+    date = Date.today.strftime('%Y-%m-%d')
+    filename = "#{date}.date-only-task.txt"
+    file_path = File.join(@push_3h_dir, filename)
+    File.write(file_path, "Test content")
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_filename = "#{expected_time}.date-only-task.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+    
+    assert File.exist?(expected_file_path), "File with date but no time was not processed correctly for _push-3h."
+  end
+  
+  def test_push_xh_for_file_with_date_and_time
+    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0800"
+    filename = "#{date_and_time}.date-and-time-task.txt"
+    file_path = File.join(@push_2h_dir, filename)
+    File.write(file_path, "Test content")
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.parse("#{Date.today} 08:00") + 2 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_filename = "#{expected_time}.date-and-time-task.txt"
+    expected_file_path = File.join(@later_dir, expected_filename)
+    
+    assert File.exist?(expected_file_path), "File with date and time was not processed correctly for _push-2h."
+  end
+
+  def test_push_xh_for_directory_without_date_and_time
+    directory_name = "no-date-and-time-task"
+    directory_path = File.join(@push_5h_dir, directory_name)
+    FileUtils.mkdir_p(directory_path)
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.now + 5 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_directory_name = "#{expected_time}.no-date-and-time-task"
+    expected_directory_path = File.join(@later_dir, expected_directory_name)
+    
+    assert Dir.exist?(expected_directory_path), "Directory without date and time was not processed correctly for _push-5h."
+  end
+  
+  def test_push_xh_for_directory_with_date_but_no_time
+    date = Date.today.strftime('%Y-%m-%d')
+    directory_name = "#{date}.date-only-task"
+    directory_path = File.join(@push_3h_dir, directory_name)
+    FileUtils.mkdir_p(directory_path)
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_directory_name = "#{expected_time}.date-only-task"
+    expected_directory_path = File.join(@later_dir, expected_directory_name)
+    
+    assert Dir.exist?(expected_directory_path), "Directory with date but no time was not processed correctly for _push-3h."
+  end
+  
+  def test_push_xh_for_directory_with_date_and_time
+    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0800"
+    directory_name = "#{date_and_time}.date-and-time-task"
+    directory_path = File.join(@push_2h_dir, directory_name)
+    FileUtils.mkdir_p(directory_path)
+    
+    system("ruby #{@extension_path} #{@test_root}")
+    
+    expected_time = (Time.parse("#{Date.today} 08:00") + 2 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_directory_name = "#{expected_time}.date-and-time-task"
+    expected_directory_path = File.join(@later_dir, expected_directory_name)
+    
+    assert Dir.exist?(expected_directory_path), "Directory with date and time was not processed correctly for _push-2h."
+  end
 end
