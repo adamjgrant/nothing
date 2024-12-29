@@ -17,7 +17,7 @@ class NameParser
     @domain = split.shift
     
     # Repeat Logic
-    if split[0].match?(/\d+[dwmy]/)
+    if split.length > 0
       @repeat_logic = split.shift
     end
   end
@@ -41,6 +41,7 @@ class NameParser
     without_the_former = @subdomain.split("+")
     without_the_former.shift
     _time = without_the_former.join
+    return nil if _time == ""
     return _time
   end
 
@@ -61,14 +62,15 @@ class NameParser
   end
 
   def name
-    return "Not Implemented"
+    # Return the domain minus the name_decorators
+    return @domain.chars.select { |char| !self.name_decorators.include?(char) }.join
   end
 
   def repeat_logic
-    return "Not Implemented"
+    return @repeat_logic
   end
 
-  def extensions
-    return "Not Implemented"
+  def extension
+    return @extension
   end
 end
