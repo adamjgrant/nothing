@@ -22,6 +22,7 @@ Encoding.default_internal = Encoding::UTF_8
 require 'fileutils'
 require 'date'
 require 'time'
+require_relative '../name_parser'
 
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
