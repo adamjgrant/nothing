@@ -360,4 +360,42 @@ class NameParserTest < Minitest::Test
     expected_date = (Date.today + 7).strftime('%Y-%m-%d')
     assert_equal "#{expected_date}+1200.my-task.txt", new_filename, "Adding 7 days and setting time to 12:00 for a file without date failed"
   end
+
+  def test_modify_filename_with_hours
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("3h")
+    assert_equal "■2024-01-01+0300.my-task.txt", new_filename, "Adding 3 hours to a file with a date but no time failed"
+  end
+  
+  def test_modify_filename_with_hours_and_existing_time
+    parser = NameParser.new(@filename_with_time)
+    new_filename = parser.modify_filename_with_time("5h")
+    assert_equal "■2024-01-01+2000.my-task.txt", new_filename, "Adding 5 hours to a file with an existing time failed"
+  end
+  
+  def test_modify_filename_with_hours_and_no_date_or_time
+    parser = NameParser.new(@filename_without_date)
+    new_filename = parser.modify_filename_with_time("7h")
+    expected_date = Date.today.strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}+0700.my-task.txt", new_filename, "Adding 7 hours to a file with no date or time failed"
+  end
+  
+  def test_modify_filename_with_hours_and_midnight_default
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("2h")
+    assert_equal "■2024-01-01+0200.my-task.txt", new_filename, "Adding 2 hours with default midnight time failed"
+  end
+  
+  def test_modify_filename_with_hours_and_complex_modification
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("1d+3h")
+    assert_equal "■2024-01-02+0300.my-task.txt", new_filename, "Adding 1 day and 3 hours failed"
+  end
+  
+  def test_modify_filename_with_hours_no_time_no_date
+    parser = NameParser.new(@filename_without_date)
+    new_filename = parser.modify_filename_with_time("0h")
+    expected_date = Date.today.strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}+0000.my-task.txt", new_filename, "Adding 0 hours with no date or time failed"
+  end
 end
