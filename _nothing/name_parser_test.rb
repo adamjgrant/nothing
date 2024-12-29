@@ -679,4 +679,10 @@ class NameParserTest < Minitest::Test
     new_filename = parser.filename
     assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
   end
+
+  def test_adding_twenty_four_hours_moves_to_next_day
+    parser = NameParser.new("2024-01-01+1500.my-task.txt")
+    new_filename = parser.modify_filename_with_time("24h")
+    assert_equal "2024-01-02+1500.my-task.txt", new_filename, "Adding 24 hours should move to the next day"
+  end
 end
