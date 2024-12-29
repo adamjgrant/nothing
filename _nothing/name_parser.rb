@@ -29,6 +29,7 @@ class NameParser
   end
 
   def date
+    return nil if @subdomain == nil
     without_the_rest = @subdomain.split("+")[0]
     
     # Remove date_decorators
@@ -112,32 +113,36 @@ class NameParser
   end
 
   def modify_filename_with_time(modification_string)
-    # The modification string matches /\d+[dwmy]/
-    # Based on what is passed in, we should first calculate what the new date should be after adding
-    # the number of days, weeks, months, or years specified in the modification string.
-    # If there is no date, we assume today's date as a starting point.
+    # Parse the modification string
+    match = modification_string.match(/^(\d+)([dwmy])(?:\+(\d{4}))?$/)
+    raise ArgumentError, "Invalid modification string: #{modification_string}" unless match
+  
+    amount = match[1].to_i
+    unit = match[2]
+    new_time = match[3] # Optional military time
+  
+    # Determine the starting date
+    starting_date = self.date ? Date.parse(self.date) : Date.today
+  
+    # Increment the date based on the unit
+    new_date = case unit
+               when 'd' then starting_date + amount
+               when 'w' then starting_date + (amount * 7)
+               when 'm' then starting_date >> amount
+               when 'y' then starting_date.next_year(amount)
+               else
+                 raise ArgumentError, "Unknown time unit: #{unit}"
+               end
+  
+    # Create the new date string
+    new_date_str = new_date.strftime('%Y-%m-%d')
+  
+    # Include the new time if provided
+    new_time_str = new_time || self.time
+  
+    # Construct the new filename
+    new_date_component = new_time_str ? "#{new_date_str}+#{new_time_str}" : new_date_str
 
-    starting_date = Date.parse(self.date) rescue Date.today
-    if modification_string.match?(/\d+[dwmy]/)
-      number = modification_string.match(/\d+/).to_s.to_i
-      unit = modification_string.match(/[dwmy]/).to_s
-      date = Date.today
-      case unit
-              when 'd'
-                date = starting_date + number
-              when 'w'
-                date = starting_date + (number * 7)
-              when 'm'
-                date = starting_date >> number # Add months
-              when 'y'
-                date = starting_date >> (number * 12) # Add years
-              end
-      date_string = date.strftime('%Y-%m-%d')
-
-      # Return the new filename
-      return "#{self.date_decorators.join}#{date_string}#{"+" if self.time}#{self.time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}.#{self.extension}"
-    else
-      raise ArgumentError, "Unrecognized modification string"
-    end
+    return "#{self.date_decorators.join}#{new_date_component}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}.#{self.extension}"
   end
 end
