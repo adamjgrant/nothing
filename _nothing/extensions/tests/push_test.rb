@@ -257,7 +257,7 @@ class PushExtensionTest < Minitest::Test
     expected_filename = "#{Date.today.strftime('%Y-%m-%d')}+2359.never-to-today-afternoon.txt"
     expected_file_path = File.join(@later_dir, expected_filename)
   
-    assert File.exist?(expected_file_path), "File was not pushed to _later with today's date at 23:59."
+    assert File.exist?(expected_file_path), "File was not pushed to _later with today's date at 23:59. (#{filename}/#{expected_filename})"
   end
 
   def test_push_0d_2359_for_today_to_today_afternoon
