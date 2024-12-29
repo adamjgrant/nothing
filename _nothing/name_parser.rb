@@ -55,6 +55,8 @@ class NameParser
     
     # Remove date_decorators
     without_decorators = without_the_rest.chars.select { |char| !self.date_decorators.include?(char) }.join
+    # Extra assurance that no special characters still exist
+    without_decorators.gsub!(/[^a-zA-Z0-9\-\+]/, "")
     if without_decorators.match?(@standard_regex)
       return without_decorators
     end
@@ -199,6 +201,10 @@ class NameParser
 
   def subdomain_date_and_time=(new_date_and_time)
     @subdomain_date_and_time = new_date_and_time
+  end
+
+  def remove_date_decorators(decorators)
+    @date_decorators = self.date_decorators - decorators
   end
 
   def filename

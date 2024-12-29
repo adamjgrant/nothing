@@ -38,6 +38,47 @@ def process_directory(directory)
     # Skip directories that start with an underscore
     is_directory = File.directory?(file_path)
     next if is_directory && filename.start_with?('_')
+
+    parser = NameParser.new(filename)
+    due_date = Date.strptime(parser.date, '%Y-%m-%d') rescue nil
+    next unless due_date # Skip if the date cannot be parsed
+
+    assumed_time_suffix = parser.time ? "+#{parser.time}" : "+2359"
+    due_time = Time.strptime(assumed_time_suffix, '+%H%M')
+
+    due_date = Time.new(due_date.year, due_date.month, due_date.day, due_time.hour, due_time.min, due_time.sec, due_time.utc_offset)
+
+    # Determine if the task is overdue
+    current_time = Time.now
+    is_overdue = due_date.to_date < current_time.to_date
+
+    if !is_overdue && parser.name.start_with?('■')
+      new_task_name = task_name.sub(/^■/, '') # Remove the ■ emoji
+      new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
+      new_file_path = File.join(directory, new_filename)
+
+      # Rename the file
+      begin
+        File.rename(file_path, new_file_path)
+        # puts "Removed ■ from #{filename} -> #{new_filename}" # Debugging output
+      rescue => e
+        puts "Error renaming file: #{e.message}" # Log errors during renaming
+      end
+      next
+    end
+  end
+end
+
+def _process_directory(directory)
+  Dir.foreach(directory) do |filename|
+    next if filename == '.' || filename == '..'
+    next if filename.start_with?('.') # Skip hidden files
+
+    file_path = File.join(directory, filename)
+
+    # Skip directories that start with an underscore
+    is_directory = File.directory?(file_path)
+    next if is_directory && filename.start_with?('_')
       
     # Match files with the format <YYYY-MM-DD[+HHMM]>.<task name>.<extension>
     if filename =~ /^(\d{4}-\d{2}-\d{2})(\+\d{4})?\.(.+)(\..+)?$/
