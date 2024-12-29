@@ -137,7 +137,7 @@ class NameParser
       # Return the new filename
       return "#{self.date_decorators.join}#{date_string}#{"+" if self.time}#{self.time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}.#{self.extension}"
     else
-      raise "Unrecognized modification string"
+      raise ArgumentError, "Unrecognized modification string"
     end
   end
 end
