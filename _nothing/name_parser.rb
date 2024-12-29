@@ -28,19 +28,36 @@ class NameParser
   end
 
   def date
-    return "Not Implemented"
+    without_the_rest = @subdomain.split("+")[0]
+    
+    # Remove date_decorators
+    without_decorators = without_the_rest.chars.select { |char| !self.date_decorators.include?(char) }.join
+    return without_decorators
+
+    # TODO convert human-readable dates to YYYY-MM-DD
   end
 
   def time
-    return "Not Implemented"
+    without_the_former = @subdomain.split("+")
+    without_the_former.shift
+    _time = without_the_former.join
+    return _time
   end
 
   def notify
-    return "Not Implemented"
+    # Return true if the last character of @subdomain is a "+"
+    return @subdomain[-1] == "+"
   end
 
   def name_decorators
-    return "Not Implemented"
+    decorators = []
+    chars = @domain.chars
+    next_character = chars.shift
+    while (!next_character.match?(/[a-zA-Z0-9\-\+]/) && chars.length > 0)
+      decorators << next_character
+      next_character = chars.shift
+    end
+    return decorators
   end
 
   def name
