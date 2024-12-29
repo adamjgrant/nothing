@@ -124,10 +124,6 @@ class NameParser
     amount = match[1].to_i
     unit = match[2]
 
-    if modification_string == "3h"
-      puts "DEBUG: amount: #{amount}, unit: #{unit}, new_time: #{new_time.inspect}, self.time: #{self.time}, self.date: #{self.date}"
-    end
-
     # new_time could be formatted as +1300 to set an explicit time
     # or +3h to set a time relative to the current time
     explicit_time = nil
@@ -139,13 +135,8 @@ class NameParser
       relative_time = (base_time + found_relative_time * 3600).strftime('%H%M')  # Add hours and format to HHMM
     elsif new_time && new_time.match?(/\+\d{4}/)
       found_explicit_time = new_time.match(/\d{4}/)[0]
-      explicit_time_obj = Time.strptime(found_explicit_time, "%H%M")
-      seconds_to_add = explicit_time_obj.hour * 3600 + explicit_time_obj.min * 60
-      explicit_time = (base_time + seconds_to_add).strftime("%H%M")
-    end
-
-    if modification_string == "3h"
-      puts "DEBUG: explicit_time: #{explicit_time}, relative_time: #{relative_time}"
+      base_time = Time.strptime(found_explicit_time, "%H%M") # Replace base_time with explicit time
+      explicit_time = base_time.strftime("%H%M")
     end
 
     new_time_str = explicit_time || relative_time || self.time
@@ -166,7 +157,7 @@ class NameParser
     if new_date.nil? && explicit_time.nil? && relative_time.nil?
       raise ArgumentError, "Unknown time unit: #{unit}"
     end
-  
+
     # Create the new date string
     if new_date.nil?
       new_date_str = self.date || Date.today.strftime('%Y-%m-%d')
@@ -174,10 +165,6 @@ class NameParser
       new_date_str = new_date.strftime('%Y-%m-%d')
     end
 
-    if modification_string == "3h"
-      puts "DEBUG: New Date str: #{new_date_str}"
-    end
-  
     # Construct the new filename
     new_date_component = new_time_str ? "#{new_date_str}+#{new_time_str}" : new_date_str
 
