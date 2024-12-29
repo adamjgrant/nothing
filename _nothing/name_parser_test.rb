@@ -478,6 +478,16 @@ class NameParserTest < Minitest::Test
         "name" => "my task",
         "repeat-logic" => nil,
         "extension" => nil
+      },
+      'never-to-today-afternoon' => {
+        "date-decorators" => [],
+        "date" => nil,
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "never-to-today-afternoon",
+        "repeat-logic" => nil,
+        "extension" => nil
       }
     }
 
