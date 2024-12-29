@@ -219,4 +219,27 @@ class TestDueDateMovement < Minitest::Test
     moved_future_directory_with_time = File.join(LATER_DIR, "#{future_date}+1300.my-folder-task")
     assert Dir.exist?(moved_future_directory_with_time), "Directory task with future date and time should have been moved to _later."
   end
+
+  def test_today_task_in_subfolder_moves_to_root_of_subfolder
+    # Setup: Define directory structure and file paths
+    project_dir = File.join(TEST_ROOT, 'My Project')
+    later_subfolder = File.join(project_dir, '_later')
+    FileUtils.mkdir_p(later_subfolder)
+  
+    # Create a task file for today in the subfolder
+    today_date = Date.today.strftime('%Y-%m-%d')
+    today_task = File.join(later_subfolder, "#{today_date}.should-not-be-in-later.txt")
+    File.write(today_task, "Task content for today")
+  
+    # Run the script
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+  
+    # Expected file path after the move
+    expected_task_path = File.join(project_dir, "#{today_date}.should-not-be-in-later.txt")
+  
+    # Assertions
+    assert File.exist?(expected_task_path), "Task for today should have been moved to the root of the subfolder."
+    refute File.exist?(today_task), "Task for today should no longer be in '_later' subfolder."
+  end
 end
