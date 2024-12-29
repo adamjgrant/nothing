@@ -1,3 +1,6 @@
+require "date"
+require "time"
+
 class NameParser
   def initialize(filename)
     @filename = filename
@@ -115,22 +118,30 @@ class NameParser
   def modify_filename_with_time(modification_string)
     # Parse the modification string
     match = modification_string.match(/^(\d+)?([dwmy])?/)
-    new_time = modification_string.match(/(\+?\d+h?)$/)
+    new_time = modification_string.match(/(\+?\d+h?)$/)[1] if modification_string.match?(/(\+?\d+h?)$/)
     raise ArgumentError, "Invalid modification string: #{modification_string}" unless match || new_time
   
     amount = match[1].to_i
     unit = match[2]
+
+    if modification_string == "1d+1830"
+      puts "DEBUG: amount: #{amount}, unit: #{unit}, new_time: #{new_time.inspect}"
+    end
 
     # new_time could be formatted as +1300 to set an explicit time
     # or +3h to set a time relative to the current time
     explicit_time = nil
     relative_time = nil
     if new_time && new_time.match?(/\+?\d+h/)
-      found_relative_time = new_time.match(/\d+h/)[0].to_i  # Extract the number of hours
+      found_relative_time = new_time.match(/(\d)+h/)[1].to_i  # Extract the number of hours
       base_time = Time.strptime(self.time || "0000", "%H%M") # Parse self.time or default to midnight
       relative_time = (base_time + found_relative_time * 3600).strftime('%H%M')  # Add hours and format to HHMM
     elsif new_time && new_time.match?(/\+\d{4}/)
       explicit_time = new_time.match(/\d{4}/)[0]
+    end
+
+    if modification_string == "1d+1830"
+      puts "DEBUG: explicit_time: #{explicit_time}, relative_time: #{relative_time}"
     end
 
     new_time_str = explicit_time || relative_time || self.time
