@@ -685,4 +685,18 @@ class NameParserTest < Minitest::Test
     new_filename = parser.modify_filename_with_time("24h")
     assert_equal "2024-01-02+1500.my-task.txt", new_filename, "Adding 24 hours should move to the next day"
   end
+
+  def test_modify_filename_to_today
+    parser = NameParser.new("#{(Date.today - 2).strftime('%Y-%m-%d')}.my-task.txt") # Two days ago
+    new_filename = parser.modify_filename_with_time("today")
+    expected_date = Date.today.strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}.my-task.txt", new_filename, "Moving task explicitly to today failed"
+  end
+  
+  def test_modify_filename_to_tomorrow
+    parser = NameParser.new("#{(Date.today - 2).strftime('%Y-%m-%d')}.my-task.txt") # Two days ago
+    new_filename = parser.modify_filename_with_time("tomorrow")
+    expected_date = (Date.today + 1).strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}.my-task.txt", new_filename, "Moving task explicitly to tomorrow failed"
+  end
 end
