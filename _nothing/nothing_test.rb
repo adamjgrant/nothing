@@ -1,4 +1,5 @@
 require 'minitest/autorun'
+require 'date'
 
 class TestDueDateMovement < Minitest::Test
   def fuzzy_file_exists?(directory, base_filename)

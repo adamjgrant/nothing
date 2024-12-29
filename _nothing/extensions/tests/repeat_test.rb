@@ -453,4 +453,72 @@ class RepeatingTaskTest < Minitest::Test
     expected_strict_folder = File.join(@later_dir, "#{next_specific_day.strftime('%Y-%m-%d')}.strict-specific-day-folder.@1m-20")
     assert Dir.exist?(expected_strict_folder), "Strict specific day monthly repeating folder was not created."
   end
+
+  def test_six_hour_repeat_file
+    # Create a file with a 6-hour repeat rule
+    file_name = "#{@today.strftime('%Y-%m-%d')}+0600.task-six-hours.6h.txt"
+    file_path = File.join(@done_dir, file_name)
+    File.write(file_path, "Test content for #{file_name}")
+  
+    # Run the extension
+    run_extension
+  
+    # Calculate the next occurrence 6 hours from now
+    next_occurrence = Time.strptime("06:00", "%H:%M") + (6 * 3600)
+    expected_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+#{next_occurrence.strftime('%H%M')}.task-six-hours.6h.txt")
+  
+    # Assert that the next occurrence file exists
+    assert File.exist?(expected_file), "6-hour repeating file was not created (#{expected_file})."
+  end
+
+  def test_six_hour_repeat_folder
+    # Create a folder with a 6-hour repeat rule
+    folder_name = "#{@today.strftime('%Y-%m-%d')}+0600.folder-six-hours.6h"
+    folder_path = File.join(@done_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    # Run the extension
+    run_extension
+  
+    # Calculate the next occurrence 6 hours from now
+    next_occurrence = Time.strptime("06:00", "%H:%M") + (6 * 3600)
+    expected_folder = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+#{next_occurrence.strftime('%H%M')}.folder-six-hours.6h")
+  
+    # Assert that the next occurrence folder exists
+    assert Dir.exist?(expected_folder), "6-hour repeating folder was not created (#{expected_folder})."
+  end
+
+  def test_six_hour_strict_repeat_file
+    # Create a file with a strict 6-hour repeat rule
+    file_name = "#{@today.strftime('%Y-%m-%d')}+0600.task-six-hours-strict.@6h.txt"
+    file_path = File.join(@root_dir, file_name)
+    File.write(file_path, "Test content for #{file_name}")
+  
+    # Run the extension
+    run_extension
+  
+    # Calculate the next strict occurrence 6 hours from now
+    next_occurrence = Time.strptime("06:00", "%H:%M") + (6 * 3600)
+    expected_file = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+#{next_occurrence.strftime('%H%M')}.task-six-hours-strict.@6h.txt")
+  
+    # Assert that the next strict occurrence file exists
+    assert File.exist?(expected_file), "Strict 6-hour repeating file was not created (#{expected_file})."
+  end
+
+  def test_six_hour_strict_repeat_folder
+    # Create a folder with a strict 6-hour repeat rule
+    folder_name = "#{@today.strftime('%Y-%m-%d')}+0600.folder-six-hours-strict.@6h"
+    folder_path = File.join(@root_dir, folder_name)
+    FileUtils.mkdir_p(folder_path)
+  
+    # Run the extension
+    run_extension
+  
+    # Calculate the next strict occurrence 6 hours from now
+    next_occurrence = Time.strptime("06:00", "%H:%M") + (6 * 3600)
+    expected_folder = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+#{next_occurrence.strftime('%H%M')}.folder-six-hours-strict.@6h")
+  
+    # Assert that the next strict occurrence folder exists
+    assert Dir.exist?(expected_folder), "Strict 6-hour repeating folder was not created (#{expected_folder})."
+  end
 end
