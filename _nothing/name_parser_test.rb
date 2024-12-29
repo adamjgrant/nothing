@@ -5,11 +5,13 @@ require "date"
 class NameParserTest < Minitest::Test
   def setup
     today = Date.today
-    this_week_monday = today - today.wday + 1 # Start of the week (Monday)
 
+    # Calculate the next Monday (future Monday)
+    next_monday = today + (1 - today.wday + 7) % 7
+    
     # Example dynamic date calculations
     @computed_dates = {
-      "monday" => this_week_monday.strftime('%Y-%m-%d'),
+      "monday" => next_monday.strftime('%Y-%m-%d'),
       "today" => today.strftime('%Y-%m-%d'),
       "tomorrow" => (today + 1).strftime('%Y-%m-%d'),
       "3d" => (today + 3).strftime('%Y-%m-%d')
@@ -224,27 +226,27 @@ class NameParserTest < Minitest::Test
         "notify" => false,
         "name-decorators" => [],
         "name" => "my task",
-        "repeat-logic" => "1w-mo-we",
+        "repeat-logic" => nil,
         "extension" => "txt"
       },
       'today.my task.txt' => {
         "date-decorators" => [],
-        "date" => @computed_dates["3d"],
+        "date" => @computed_dates["today"],
         "time" => nil,
         "notify" => false,
         "name-decorators" => [],
         "name" => "my task",
-        "repeat-logic" => "1w-mo-we",
+        "repeat-logic" => nil,
         "extension" => "txt"
       },
       'tomorrow.my task.txt' => {
         "date-decorators" => [],
-        "date" => @computed_dates["3d"],
+        "date" => @computed_dates["tomorrow"],
         "time" => nil,
         "notify" => false,
         "name-decorators" => [],
         "name" => "my task",
-        "repeat-logic" => "1w-mo-we",
+        "repeat-logic" => nil,
         "extension" => "txt"
       },
     }
@@ -271,6 +273,7 @@ class NameParserTest < Minitest::Test
       else
         assert_equal expected_output["repeat-logic"], parser.repeat_logic, "Failed on #{filename} (repeat-logic)"
       end
+
       assert_equal expected_output["extension"], parser.extension, "Failed on #{filename} (extension)"
     end
   end
