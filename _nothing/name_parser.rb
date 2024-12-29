@@ -73,6 +73,7 @@ class NameParser
   end
 
   def time
+    return nil if @subdomain == nil
     without_the_former = @subdomain.split("+")
     without_the_former.shift
     _time = without_the_former.join
@@ -82,6 +83,7 @@ class NameParser
 
   def notify
     # Return true if the last character of @subdomain is a "+"
+    return false if @subdomain == nil
     return @subdomain[-1] == "+"
   end
 
@@ -110,6 +112,32 @@ class NameParser
   end
 
   def modify_filename_with_time(modification_string)
-    return "Not implemented"
+    # The modification string matches /\d+[dwmy]/
+    # Based on what is passed in, we should first calculate what the new date should be after adding
+    # the number of days, weeks, months, or years specified in the modification string.
+    # If there is no date, we assume today's date as a starting point.
+
+    starting_date = Date.parse(self.date) rescue Date.today
+    if modification_string.match?(/\d+[dwmy]/)
+      number = modification_string.match(/\d+/).to_s.to_i
+      unit = modification_string.match(/[dwmy]/).to_s
+      date = Date.today
+      case unit
+              when 'd'
+                date = starting_date + number
+              when 'w'
+                date = starting_date + (number * 7)
+              when 'm'
+                date = starting_date >> number # Add months
+              when 'y'
+                date = starting_date >> (number * 12) # Add years
+              end
+      date_string = date.strftime('%Y-%m-%d')
+
+      # Return the new filename
+      return "#{self.date_decorators.join}#{date_string}#{"+" if self.time}#{self.time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}.#{self.extension}"
+    else
+      raise "Unrecognized modification string"
+    end
   end
 end
