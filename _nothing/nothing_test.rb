@@ -234,7 +234,6 @@ class TestDueDateMovement < Minitest::Test
     # Run the script twice
     nothing_script_path = File.expand_path('./nothing.rb', __dir__)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
   
     # Expected file path after the move
