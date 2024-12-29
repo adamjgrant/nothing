@@ -138,7 +138,7 @@ def process_file(file_path, increment_days, later_dir, is_directory=false)
 end
 
 # Main processing logic
-def process_push_directories(root_dir)
+def _process_push_directories(root_dir)
   later_dir = File.join(root_dir, LATER)
   Dir.mkdir(later_dir) unless Dir.exist?(later_dir)
 
@@ -163,6 +163,34 @@ def process_push_directories(root_dir)
       file_path = File.join(dir_path, file)
       is_directory = File.directory?(file_path)
       process_file(file_path, increment_days, later_dir, is_directory)
+    end
+  end
+end
+
+def process_push_directories(root_dir)
+  later_dir = File.join(root_dir, LATER)
+  Dir.mkdir(later_dir) unless Dir.exist?(later_dir)
+
+  # Find all _push-* directories
+  Dir.foreach(root_dir) do |entry|
+    next unless entry.start_with?('_push-')
+    dir_path = File.join(root_dir, entry)
+    next unless Dir.exist?(dir_path)
+
+    random = true if entry == PUSH_RAND
+    modification_string = entry.gsub("_push-", "")
+
+    # Process files in the directory
+    Dir.foreach(dir_path) do |file|
+      next if file == '.' || file == '..'
+      file_path = File.join(dir_path, file)
+      is_directory = File.directory?(file_path)
+      filename = File.basename(file_path)
+      parser = NameParser.new(filename)
+      modification_string = "#{rand(1..10)}d" if random
+      new_filename = parser.modify_filename_with_time(modification_string)
+      new_path = file_path.gsub(filename, new_filename)
+      FileUtils.mv(file_path, new_path) 
     end
   end
 end

@@ -249,6 +249,236 @@ class NameParserTest < Minitest::Test
         "repeat-logic" => nil,
         "extension" => "txt"
       },
+      '■2024-01-01+1800+.■my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => "2024-01-01",
+        "time" => "1800",
+        "notify" => true,
+        "name-decorators" => ["■"],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■2024-01-01+.my task' => {
+        "date-decorators" => ["■"],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■2024-01-01.my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■2024-01-01.my task' => {
+        "date-decorators" => ["■"],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■monday+.my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■monday+.my task' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■monday+.■my task' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => ["■"],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■monday.my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■monday.my task' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■3d+.my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■3d+.my task' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '■3d.my task.1w-mo-we' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '■3d.my task' => {
+        "date-decorators" => ["■"],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '2024-01-01+.my task.1w-mo-we' => {
+        "date-decorators" => [],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '2024-01-01+.my task' => {
+        "date-decorators" => [],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '2024-01-01.my task.1w-mo-we' => {
+        "date-decorators" => [],
+        "date" => "2024-01-01",
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      'monday.my task' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["monday"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '3d+.my task.1w-mo-we' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '3d+.my task' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      '3d.my task.1w-mo-we' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => nil
+      },
+      '3d.my task' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      'today.my task' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["today"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      },
+      'tomorrow.my task' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["tomorrow"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => nil,
+        "extension" => nil
+      }
     }
 
     @filename_with_date = "■2024-01-01.my-task.txt"
