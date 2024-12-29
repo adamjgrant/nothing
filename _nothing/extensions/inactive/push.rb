@@ -44,12 +44,11 @@ def process_push_directories(root_dir)
       filename = File.basename(file_path)
       parser = NameParser.new(filename)
       modification_string = "#{rand(1..10)}d" if random
-
       new_filename = parser.modify_filename_with_time(modification_string)
-      new_path = File.join(dir_path, new_filename)
-      if filename == "2024-12-28.test-task-rand.txt"
-        puts "DEBUG: #{modification_string}"
-        puts "DEBUG: #{new_path}"
+      new_path = File.join(later_dir, new_filename)
+      if filename == "2024-12-28+1300.test-task.txt"
+        puts "DEBUG: new: #{new_filename}"
+        puts "DEBUG: ms: #{modification_string}"
       end
       FileUtils.mv(file_path, new_path) if new_path != file_path
     end

@@ -79,7 +79,7 @@ class PushExtensionTest < Minitest::Test
     # Validate _push-1d file
     expected_filename_1d = "#{(@today + 1).strftime('%Y-%m-%d')}+1300.test-task.txt"
     expected_file_path_1d = File.join(@later_dir, expected_filename_1d)
-    assert File.exist?(expected_file_path_1d), "File with time value was not pushed to _later with +1 day."
+    assert File.exist?(expected_file_path_1d), "File with time value was not pushed to _later with +1 day (expected: #{expected_filename_1d}, from: #{filename_1d})."
 
     # Validate _push-1w file
     expected_filename_1w = "#{(@today + 7).strftime('%Y-%m-%d')}+0930.test-task.txt"
