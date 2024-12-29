@@ -391,8 +391,9 @@ class PushExtensionTest < Minitest::Test
     
     system("ruby #{@extension_path} #{@test_root}")
     
-    expected_time = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d+%H%M')
-    expected_directory_name = "#{expected_time}.date-only-task"
+    expected_date = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d')
+    expected_time = (Time.now + 3 * 3600).strftime("%H%M")
+    expected_directory_name = "#{expected_date}+#{expected_time}.date-only-task"
     expected_directory_path = File.join(@later_dir, expected_directory_name)
     
     assert Dir.exist?(expected_directory_path), "Directory with date but no time was not processed correctly for _push-3h."

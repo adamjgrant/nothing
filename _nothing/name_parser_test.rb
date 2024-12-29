@@ -633,7 +633,8 @@ class NameParserTest < Minitest::Test
   def test_modify_filename_with_hours_and_complex_modification
     parser = NameParser.new(@filename_with_date)
     new_filename = parser.modify_filename_with_time("1d+3h")
-    assert_equal "■2024-01-02+0300.my-task.txt", new_filename, "Adding 1 day and 3 hours failed"
+    new_time = (Time.now + 3 * 3600).strftime("%H%M")
+    assert_equal "■2024-01-02+#{new_time}.my-task.txt", new_filename, "Adding 1 day and 3 hours failed"
   end
   
   def test_modify_filename_with_hours_no_time_no_date
