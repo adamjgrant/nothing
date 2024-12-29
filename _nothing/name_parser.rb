@@ -108,4 +108,8 @@ class NameParser
   def extension
     return @extension
   end
+
+  def modify_filename_with_time(modification_string)
+    return "Not implemented"
+  end
 end

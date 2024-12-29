@@ -250,6 +250,10 @@ class NameParserTest < Minitest::Test
         "extension" => "txt"
       },
     }
+
+    @filename_with_date = "■2024-01-01.my-task.txt"
+    @filename_with_time = "■2024-01-01+1500.my-task.txt"
+    @filename_without_date = "my-task.txt"
   end
 
   def test_filename_parsing
@@ -276,5 +280,53 @@ class NameParserTest < Minitest::Test
 
       assert_equal expected_output["extension"], parser.extension, "Failed on #{filename} (extension)"
     end
+  end
+
+  def test_modify_filename_with_days
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("3d")
+    assert_equal "■2024-01-04.my-task.txt", new_filename, "Adding 3 days failed"
+  end
+
+  def test_modify_filename_with_weeks
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("2w")
+    assert_equal "■2024-01-15.my-task.txt", new_filename, "Adding 2 weeks failed"
+  end
+
+  def test_modify_filename_with_months
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("1m")
+    assert_equal "■2024-02-01.my-task.txt", new_filename, "Adding 1 month failed"
+  end
+
+  def test_modify_filename_with_years
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("1y")
+    assert_equal "■2025-01-01.my-task.txt", new_filename, "Adding 1 year failed"
+  end
+
+  def test_modify_filename_without_date
+    parser = NameParser.new(@filename_without_date)
+    new_filename = parser.modify_filename_with_time("7d")
+    expected_date = (Date.today + 7).strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}.my-task.txt", new_filename, "Adding 7 days to a file without a date failed"
+  end
+
+  def test_modify_filename_with_date_and_time
+    parser = NameParser.new(@filename_with_time)
+    new_filename = parser.modify_filename_with_time("1w")
+    assert_equal "■2024-01-08+1500.my-task.txt", new_filename, "Adding 1 week to a file with date and time failed"
+  end
+
+  def test_modify_filename_invalid_modification_string
+    parser = NameParser.new(@filename_with_date)
+    assert_raises(ArgumentError) { parser.modify_filename_with_time("invalid") }
+  end
+
+  def test_modify_filename_no_change
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("0d")
+    assert_equal @filename_with_date, new_filename, "Adding 0 days should not modify the filename"
   end
 end
