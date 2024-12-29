@@ -38,6 +38,10 @@ setup_test_environment
 nothing_test_file = File.expand_path('nothing_test.rb', __dir__)
 require nothing_test_file
 
+# Explicitly load `name_parser_test.rb`
+name_parser_test_file = File.expand_path('name_parser_test.rb', __dir__)
+require name_parser_test_file
+
 # Dynamically load only active _test.rb files in the extensions directory
 Dir.glob(File.join(TEST_EXTENSIONS_DIR, '**', '*_test.rb')).each do |extension_test_file|
   # Skip test files in the inactive directory
