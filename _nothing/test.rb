@@ -18,8 +18,9 @@ def setup_test_environment
   FileUtils.rm_rf(TEST_ROOT)
   FileUtils.mkdir_p([TEST_ROOT, LATER_DIR, DONE_DIR, TEST_EXTENSIONS_DIR])
 
-  # Copy name_parser.rb to the nothing directory
+  # Copy nothing to the test/nothing directory
   FileUtils.cp(File.join(ROOT_DIR, '_nothing', 'name_parser.rb'), File.join(TEST_ROOT, '_nothing'))
+  FileUtils.cp(File.join(ROOT_DIR, '_nothing', 'nothing.rb'), File.join(TEST_ROOT, '_nothing'))
 
   # Copy active extensions
   FileUtils.cp_r(Dir.glob(File.join(EXTENSIONS_SRC_DIR, '*')), TEST_EXTENSIONS_DIR)
