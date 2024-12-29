@@ -336,7 +336,7 @@ class PushExtensionTest < Minitest::Test
     expected_filename = "#{expected_time}.no-date-and-time-task.txt"
     expected_file_path = File.join(@later_dir, expected_filename)
     
-    assert File.exist?(expected_file_path), "File without date and time was not processed correctly for _push-5h."
+    assert File.exist?(expected_file_path), "File without date and time was not processed correctly for _push-5h. (#{filename}/#{expected_filename})"
   end
   
   def test_push_xh_for_file_with_date_but_no_time
@@ -347,11 +347,11 @@ class PushExtensionTest < Minitest::Test
     
     system("ruby #{@extension_path} #{@test_root}")
     
-    expected_time = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_time = (Time.now + 3 * 3600).strftime('%Y-%m-%d+%H%M')
     expected_filename = "#{expected_time}.date-only-task.txt"
     expected_file_path = File.join(@later_dir, expected_filename)
     
-    assert File.exist?(expected_file_path), "File with date but no time was not processed correctly for _push-3h."
+    assert File.exist?(expected_file_path), "File with date but no time was not processed correctly for _push-3h. (#{filename}/#{expected_filename})"
   end
   
   def test_push_xh_for_file_with_date_and_time

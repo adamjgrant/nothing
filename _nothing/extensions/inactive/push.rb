@@ -46,7 +46,7 @@ def process_push_directories(root_dir)
       modification_string = "#{rand(1..10)}d" if random
       new_filename = parser.modify_filename_with_time(modification_string)
       new_path = File.join(later_dir, new_filename)
-      if filename == "never-to-today-afternoon.txt"
+      if filename == "no-date-and-time-task.txt"
         puts "DEBUG: new: #{new_filename}<"
         puts "DEBUG: ms: #{modification_string}<"
       end

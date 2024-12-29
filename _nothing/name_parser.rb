@@ -138,7 +138,7 @@ class NameParser
     # or +3h to set a time relative to the current time
     explicit_time = nil
     relative_time = nil
-    base_time = Time.strptime(self.time || "0000", "%H%M") # Parse self.time or default to midnight
+    base_time = self.time ? Time.strptime(self.time, "%H%M") : Time.now # Parse self.time or default to midnight
     
     if new_time && new_time.match?(/\+?\d+h/)
       found_relative_time = new_time.match(/(\d+)h/)[1].to_i  # Extract the number of hours
