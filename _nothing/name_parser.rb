@@ -177,6 +177,6 @@ class NameParser
     # Construct the new filename
     new_date_component = new_time_str ? "#{new_date_str}+#{new_time_str}" : new_date_str
 
-    return "#{self.date_decorators.join}#{new_date_component}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}.#{self.extension}"
+    return "#{self.date_decorators.join}#{new_date_component}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
   end
 end

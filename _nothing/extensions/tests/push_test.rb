@@ -186,16 +186,16 @@ class PushExtensionTest < Minitest::Test
   end
   
   def test_push_1w_for_folder
-    folder_name = "#{(Date.today - 7).strftime('%Y-%m-%d')}.folder-task"
+    folder_name = "#{(Date.today - 6).strftime('%Y-%m-%d')}.folder-task"
     folder_path = File.join(@push_1w_dir, folder_name)
     FileUtils.mkdir_p(folder_path)
   
     system("ruby #{@extension_path} #{@test_root}")
   
     # Verify folder is moved to _later with date incremented by 7 days
-    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_name = "#{(Date.today+1).strftime('%Y-%m-%d')}.folder-task"
     expected_folder_path = File.join(@later_dir, expected_folder_name)
-    assert Dir.exist?(expected_folder_path), "Folder in _push-1w was not processed correctly."
+    assert Dir.exist?(expected_folder_path), "Folder in _push-1w was not processed correctly. (#{folder_name}/#{expected_folder_name})"
   end
   
   def test_push_rand_for_folder
