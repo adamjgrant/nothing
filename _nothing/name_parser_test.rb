@@ -500,7 +500,12 @@ class NameParserTest < Minitest::Test
     @test_cases.each do |filename, expected_output|
       parser = NameParser.new(filename)
       assert_equal expected_output["date-decorators"], parser.date_decorators, "Failed on #{filename} (date-decorators)"
-      assert_equal expected_output["date"], parser.date, "Failed on #{filename} (date)"
+
+      if expected_output["date"] == nil
+        assert_nil parser.date, "Failed on #{filename} (date)"
+      else
+        assert_equal expected_output["date"], parser.date, "Failed on #{filename} (date)"
+      end
 
       if expected_output["time"] == nil
         assert_nil parser.time, "Failed on #{filename} (time)"

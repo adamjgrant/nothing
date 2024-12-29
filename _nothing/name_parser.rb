@@ -12,7 +12,8 @@ class NameParser
     split = @filename.split(".")
 
     # Subdomain
-    if split[0].match?(/\d{4}-\d{2}-\d{2}/) || split[0].match?(/today/) || split[0].match?(/tomorrow/) || split[0].match?(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/) || split[0].match?(/\d+[dwmy]/)
+    next_part_is_date_like = split[0].match?(/\d{4}-\d{2}-\d{2}/) || split[0].match?(/today/) || split[0].match?(/tomorrow/) || split[0].match?(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/) || split[0].match?(/\d+[dwmy]/) 
+    if next_part_is_date_like && split.length > 1
       @subdomain = split.shift
     else
       @subdomain = nil
