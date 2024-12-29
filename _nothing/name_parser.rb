@@ -124,23 +124,27 @@ class NameParser
     amount = match[1].to_i
     unit = match[2]
 
-    if modification_string == "1d+1830"
-      puts "DEBUG: amount: #{amount}, unit: #{unit}, new_time: #{new_time.inspect}"
+    if modification_string == "3h"
+      puts "DEBUG: amount: #{amount}, unit: #{unit}, new_time: #{new_time.inspect}, self.time: #{self.time}, self.date: #{self.date}"
     end
 
     # new_time could be formatted as +1300 to set an explicit time
     # or +3h to set a time relative to the current time
     explicit_time = nil
     relative_time = nil
+    base_time = Time.strptime(self.time || "0000", "%H%M") # Parse self.time or default to midnight
+    
     if new_time && new_time.match?(/\+?\d+h/)
-      found_relative_time = new_time.match(/(\d)+h/)[1].to_i  # Extract the number of hours
-      base_time = Time.strptime(self.time || "0000", "%H%M") # Parse self.time or default to midnight
+      found_relative_time = new_time.match(/(\d+)h/)[1].to_i  # Extract the number of hours
       relative_time = (base_time + found_relative_time * 3600).strftime('%H%M')  # Add hours and format to HHMM
     elsif new_time && new_time.match?(/\+\d{4}/)
-      explicit_time = new_time.match(/\d{4}/)[0]
+      found_explicit_time = new_time.match(/\d{4}/)[0]
+      explicit_time_obj = Time.strptime(found_explicit_time, "%H%M")
+      seconds_to_add = explicit_time_obj.hour * 3600 + explicit_time_obj.min * 60
+      explicit_time = (base_time + seconds_to_add).strftime("%H%M")
     end
 
-    if modification_string == "1d+1830"
+    if modification_string == "3h"
       puts "DEBUG: explicit_time: #{explicit_time}, relative_time: #{relative_time}"
     end
 
@@ -165,9 +169,13 @@ class NameParser
   
     # Create the new date string
     if new_date.nil?
-      new_date_str = Date.today.strftime('%Y-%m-%d')
+      new_date_str = self.date || Date.today.strftime('%Y-%m-%d')
     else
       new_date_str = new_date.strftime('%Y-%m-%d')
+    end
+
+    if modification_string == "3h"
+      puts "DEBUG: New Date str: #{new_date_str}"
     end
   
     # Construct the new filename
