@@ -53,19 +53,18 @@ def process_directory(directory)
     is_overdue = due_date.to_date < current_time.to_date
 
     if !is_overdue && parser.name.start_with?('■')
-      new_task_name = task_name.sub(/^■/, '') # Remove the ■ emoji
-      new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
-      new_file_path = File.join(directory, new_filename)
-
-      # Rename the file
-      begin
-        File.rename(file_path, new_file_path)
-        # puts "Removed ■ from #{filename} -> #{new_filename}" # Debugging output
-      rescue => e
-        puts "Error renaming file: #{e.message}" # Log errors during renaming
-      end
-      next
+      parser.remove_date_decorators(['■'])
+    elsif is_overdue && !parser.name.start_with?('■')
+      parser.add_date_decorators(['■'])
     end
+    new_file_path = File.join(directory, parser.filename)
+    # Rename the file
+    begin
+      File.rename(file_path, new_file_path)
+    rescue => e
+      puts "Error renaming file: #{e.message}" # Log errors during renaming
+    end
+    next
   end
 end
 
@@ -116,7 +115,6 @@ def _process_directory(directory)
         new_task_name = task_name.sub(/^■/, '') # Remove the ■ emoji
         new_filename = "#{date_prefix}#{time_suffix}.#{new_task_name}#{extension}"
         new_file_path = File.join(directory, new_filename)
-
         # Rename the file
         begin
           File.rename(file_path, new_file_path)

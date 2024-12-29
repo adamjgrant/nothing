@@ -670,4 +670,13 @@ class NameParserTest < Minitest::Test
     new_filename = parser.filename
     assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
   end
+
+  def test_add_date_decorators
+    starting_filename = "»2024-01-01.hello.txt"
+    expected_filename = "■»2024-01-01.hello.txt"
+    parser = NameParser.new(starting_filename)
+    parser.add_date_decorators(["■"])
+    new_filename = parser.filename
+    assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
+  end
 end

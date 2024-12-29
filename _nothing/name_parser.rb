@@ -207,6 +207,10 @@ class NameParser
     @date_decorators = self.date_decorators - decorators
   end
 
+  def add_date_decorators(decorators)
+    @date_decorators = decorators + self.date_decorators
+  end
+
   def filename
     return "#{self.date_decorators.join}#{self.subdomain_date_and_time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
   end
