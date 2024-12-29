@@ -508,7 +508,11 @@ class NameParserTest < Minitest::Test
         assert_equal expected_output["repeat-logic"], parser.repeat_logic, "Failed on #{filename} (repeat-logic)"
       end
 
-      assert_equal expected_output["extension"], parser.extension, "Failed on #{filename} (extension)"
+      if expected_output["extension"] == nil
+        assert_nil parser.extension, "Failed on #{filename} (extension)"
+      else
+        assert_equal expected_output["extension"], parser.extension, "Failed on #{filename} (extension)"
+      end
     end
   end
 

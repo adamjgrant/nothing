@@ -5,9 +5,11 @@ class NameParser
   def initialize(filename)
     @filename = filename
 
-    # Extension
+    @dow_regex = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
+    @standard_regex = /\d{4}-\d{2}-\d{2}/
+    @relative_regex = /\d+[dwmy]/
+
     split = @filename.split(".")
-    @extension = split.pop
 
     # Subdomain
     if split[0].match?(/\d{4}-\d{2}-\d{2}/) || split[0].match?(/today/) || split[0].match?(/tomorrow/) || split[0].match?(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/) || split[0].match?(/\d+[dwmy]/)
@@ -20,8 +22,14 @@ class NameParser
     @domain = split.shift
     
     # Repeat Logic
-    if split.length > 0
+    if split.length > 0 && split[0].match?(@relative_regex)
       @repeat_logic = split.shift
+    end
+
+    if split.length > 0
+      @extension = split.pop
+    else
+      @extension = nil
     end
   end
 
@@ -37,7 +45,7 @@ class NameParser
     
     # Remove date_decorators
     without_decorators = without_the_rest.chars.select { |char| !self.date_decorators.include?(char) }.join
-    return without_decorators if without_decorators.match?(/\d{4}-\d{2}-\d{2}/)
+    return without_decorators if without_decorators.match?(@standard_regex)
 
     # If without_decorators is "today" or "tomorrow", return the appropriate date
     if without_decorators == "today"
@@ -47,7 +55,7 @@ class NameParser
     end
 
     # If without_decorators is a day of the week, return the appropriate date
-    if without_decorators.match?(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)
+    if without_decorators.match?(@dow_regex)
       day_name = without_decorators
       target_wday = %w[sunday monday tuesday wednesday thursday friday saturday].index(day_name)
       today = Date.today
@@ -58,7 +66,7 @@ class NameParser
     end
 
     # If date is relative (number + d/w/m/y), calculate the date
-    if without_decorators.match?(/\d+[dwmy]/)
+    if without_decorators.match?(@relative_regex)
       prefix = without_decorators
       number = prefix.match(/\d+/).to_s.to_i
       unit = prefix.match(/[dwmy]/).to_s
