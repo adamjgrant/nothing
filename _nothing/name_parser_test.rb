@@ -643,4 +643,40 @@ class NameParserTest < Minitest::Test
     expected_date = (Time.now).strftime('%Y-%m-%d+%H%M')
     assert_equal "#{expected_date}.my-task.txt", new_filename, "Adding 0 hours with no date or time failed"
   end
+
+  def test_set_date_decorators
+    starting_filename = "2024-01-01.hello.txt"
+    expected_filename = "■2024-01-01.hello.txt"
+    parser = NameParser.new(starting_filename)
+    parser.date_decorators = ["■"]
+    new_filename = parser.filename
+    assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
+  end
+
+  def test_remove_date_decorators
+    starting_filename = "■»2024-01-01.hello.txt"
+    expected_filename = "»2024-01-01.hello.txt"
+    parser = NameParser.new(starting_filename)
+    parser.remove_date_decorators(["■"])
+    new_filename = parser.filename
+    assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
+  end
+
+  def test_remove_date_decorators_alt
+    starting_filename = "»■2024-01-01.hello.txt"
+    expected_filename = "»2024-01-01.hello.txt"
+    parser = NameParser.new(starting_filename)
+    parser.remove_date_decorators(["■"])
+    new_filename = parser.filename
+    assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
+  end
+
+  def test_add_date_decorators
+    starting_filename = "»2024-01-01.hello.txt"
+    expected_filename = "■»2024-01-01.hello.txt"
+    parser = NameParser.new(starting_filename)
+    parser.add_date_decorators(["■"])
+    new_filename = parser.filename
+    assert_equal expected_filename, new_filename, "Setting date decorators failed (#{starting_filename} → #{new_filename}, expected #{expected_filename})"
+  end
 end

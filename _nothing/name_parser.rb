@@ -33,12 +33,20 @@ class NameParser
     else
       @extension = nil
     end
+
+    @subdomain_date_and_time = nil
+    @date_decorators = nil
   end
 
   def date_decorators
     # Iterate through and shift each character off the @subdomain and collect all that are not alphanumeric
+    return @date_decorators if @date_decorators
     return [] if (@subdomain == nil || @subdomain == "")
     return @subdomain.chars.select { |char| !char.match?(/[a-zA-Z0-9\-\+]/) }
+  end
+
+  def date_decorators=(new_decorators)
+    @date_decorators = new_decorators
   end
 
   def date
@@ -47,7 +55,11 @@ class NameParser
     
     # Remove date_decorators
     without_decorators = without_the_rest.chars.select { |char| !self.date_decorators.include?(char) }.join
-    return without_decorators if without_decorators.match?(@standard_regex)
+    # Extra assurance that no special characters still exist
+    without_decorators.gsub!(/[^a-zA-Z0-9\-\+]/, "")
+    if without_decorators.match?(@standard_regex)
+      return without_decorators
+    end
 
     # If without_decorators is "today" or "tomorrow", return the appropriate date
     if without_decorators == "today"
@@ -178,6 +190,28 @@ class NameParser
     # Construct the new filename
     new_date_component = new_time_str ? "#{new_date_str}+#{new_time_str}" : new_date_str
 
-    return "#{self.date_decorators.join}#{new_date_component}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
+    self.subdomain_date_and_time = new_date_component
+    return self.filename
+  end
+
+  def subdomain_date_and_time
+    return @subdomain_date_and_time if @subdomain_date_and_time
+    return "#{self.date}#{"+" if self.time}#{self.time}"
+  end
+
+  def subdomain_date_and_time=(new_date_and_time)
+    @subdomain_date_and_time = new_date_and_time
+  end
+
+  def remove_date_decorators(decorators)
+    @date_decorators = self.date_decorators - decorators
+  end
+
+  def add_date_decorators(decorators)
+    @date_decorators = decorators + self.date_decorators
+  end
+
+  def filename
+    return "#{self.date_decorators.join}#{self.subdomain_date_and_time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
   end
 end
