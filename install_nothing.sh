@@ -82,6 +82,16 @@ if [[ ! -f "nothing.rb" ]]; then
   exit 1
 fi
 
+# Download the name_parser.rb script
+echo "Downloading name_parser.rb..."
+curl -o name_parser.rb https://raw.githubusercontent.com/adamjgrant/nothing/refs/heads/main/_nothing/name_parser.rb
+
+# Verify the download
+if [[ ! -f "name_parser.rb" ]]; then
+  echo "Failed to download nothing.rb. Please check your connection and try again."
+  exit 1
+fi
+
 # Download extensions
 EXTENSIONS=("push" "repeat" "nlp" "overdue" "amnesia" "housekeeper")
 echo "Downloading extensions..."
