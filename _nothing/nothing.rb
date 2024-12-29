@@ -115,11 +115,6 @@ Dir.foreach(BASE_DIR) do |filename|
   # Parse the optional date prefix
   due_date = parse_yyyymmdd_prefix(filename)
 
-  if filename == "2024-01-01.my-folder-task"
-    puts "DEBUG: #{entry_path} - #{due_date}"
-    puts "DEBUG: old? #{due_date && due_date > Time.now}"
-  end
-
   if due_date && due_date > Time.now
     if File.directory?(entry_path)
       to_path = File.join(LATER_DIR, filename)

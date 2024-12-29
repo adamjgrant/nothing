@@ -231,7 +231,9 @@ class TestDueDateMovement < Minitest::Test
     today_task = File.join(later_subfolder, "#{today_date}.should-not-be-in-later.txt")
     File.write(today_task, "Task content for today")
   
-    # Run the script
+    # Run the script twice
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
     nothing_script_path = File.expand_path('./nothing.rb', __dir__)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
   
