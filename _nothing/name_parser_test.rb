@@ -10,6 +10,8 @@ class NameParserTest < Minitest::Test
     # Example dynamic date calculations
     @computed_dates = {
       "monday" => this_week_monday.strftime('%Y-%m-%d'),
+      "today" => today.strftime('%Y-%m-%d'),
+      "tomorrow" => (today + 1).strftime('%Y-%m-%d'),
       "3d" => (today + 3).strftime('%Y-%m-%d')
     }
     
@@ -216,6 +218,26 @@ class NameParserTest < Minitest::Test
         "extension" => "txt"
       },
       '3d.my task.txt' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => "txt"
+      },
+      'today.my task.txt' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["3d"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "my task",
+        "repeat-logic" => "1w-mo-we",
+        "extension" => "txt"
+      },
+      'tomorrow.my task.txt' => {
         "date-decorators" => [],
         "date" => @computed_dates["3d"],
         "time" => nil,
