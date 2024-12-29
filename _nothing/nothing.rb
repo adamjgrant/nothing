@@ -154,7 +154,7 @@ def process_non_underscored_dirs(base_dir)
       nothing_script_path = File.join(target_nothing_dir, 'nothing.rb')
 
       if File.exist?(nothing_script_path)
-        system("ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
+        system("LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
       end
     end
   end
