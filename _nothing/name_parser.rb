@@ -114,12 +114,26 @@ class NameParser
 
   def modify_filename_with_time(modification_string)
     # Parse the modification string
-    match = modification_string.match(/^(\d+)([dwmy])(?:\+(\d{4}))?$/)
-    raise ArgumentError, "Invalid modification string: #{modification_string}" unless match
+    match = modification_string.match(/^(\d+)?([dwmy])?/)
+    new_time = modification_string.match(/(\+?\d+h?)$/)
+    raise ArgumentError, "Invalid modification string: #{modification_string}" unless match || new_time
   
     amount = match[1].to_i
     unit = match[2]
-    new_time = match[3] # Optional military time
+
+    # new_time could be formatted as +1300 to set an explicit time
+    # or +3h to set a time relative to the current time
+    explicit_time = nil
+    relative_time = nil
+    if new_time && new_time.match?(/\+?\d+h/)
+      found_relative_time = new_time.match(/\d+h/)[0].to_i  # Extract the number of hours
+      base_time = Time.strptime(self.time || "0000", "%H%M") # Parse self.time or default to midnight
+      relative_time = (base_time + found_relative_time * 3600).strftime('%H%M')  # Add hours and format to HHMM
+    elsif new_time && new_time.match?(/\+\d{4}/)
+      explicit_time = new_time.match(/\d{4}/)[0]
+    end
+
+    new_time_str = explicit_time || relative_time || self.time
   
     # Determine the starting date
     starting_date = self.date ? Date.parse(self.date) : Date.today
@@ -131,14 +145,19 @@ class NameParser
                when 'm' then starting_date >> amount
                when 'y' then starting_date.next_year(amount)
                else
-                 raise ArgumentError, "Unknown time unit: #{unit}"
+                 nil
                end
+
+    if new_date.nil? && explicit_time.nil? && relative_time.nil?
+      raise ArgumentError, "Unknown time unit: #{unit}"
+    end
   
     # Create the new date string
-    new_date_str = new_date.strftime('%Y-%m-%d')
-  
-    # Include the new time if provided
-    new_time_str = new_time || self.time
+    if new_date.nil?
+      new_date_str = Date.today.strftime('%Y-%m-%d')
+    else
+      new_date_str = new_date.strftime('%Y-%m-%d')
+    end
   
     # Construct the new filename
     new_date_component = new_time_str ? "#{new_date_str}+#{new_time_str}" : new_date_str
