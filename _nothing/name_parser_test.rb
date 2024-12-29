@@ -329,4 +329,35 @@ class NameParserTest < Minitest::Test
     new_filename = parser.modify_filename_with_time("0d")
     assert_equal @filename_with_date, new_filename, "Adding 0 days should not modify the filename"
   end
+
+  def test_modify_filename_with_days_and_time
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("3d+1400")
+    assert_equal "■2024-01-04+1400.my-task.txt", new_filename, "Adding 3 days and setting time to 14:00 failed"
+  end
+  
+  def test_modify_filename_with_weeks_and_time
+    parser = NameParser.new(@filename_with_date)
+    new_filename = parser.modify_filename_with_time("2w+0930")
+    assert_equal "■2024-01-15+0930.my-task.txt", new_filename, "Adding 2 weeks and setting time to 09:30 failed"
+  end
+  
+  def test_modify_filename_with_date_and_modification_time
+    parser = NameParser.new(@filename_with_time)
+    new_filename = parser.modify_filename_with_time("1d+1830")
+    assert_equal "■2024-01-02+1830.my-task.txt", new_filename, "Adding 1 day and changing time to 18:30 failed"
+  end
+  
+  def test_modify_filename_with_no_time_in_modification
+    parser = NameParser.new(@filename_with_time)
+    new_filename = parser.modify_filename_with_time("1w")
+    assert_equal "■2024-01-08+1500.my-task.txt", new_filename, "Adding 1 week without changing time failed"
+  end
+  
+  def test_modify_filename_without_date_and_time_modification
+    parser = NameParser.new(@filename_without_date)
+    new_filename = parser.modify_filename_with_time("7d+1200")
+    expected_date = (Date.today + 7).strftime('%Y-%m-%d')
+    assert_equal "#{expected_date}+1200.my-task.txt", new_filename, "Adding 7 days and setting time to 12:00 for a file without date failed"
+  end
 end
