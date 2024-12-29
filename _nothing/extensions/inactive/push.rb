@@ -9,6 +9,7 @@
 
 require 'fileutils'
 require 'date'
+require_relative '../name_parser'
 
 # Constants for directory names
 PUSH_1D = '_push-1d'
