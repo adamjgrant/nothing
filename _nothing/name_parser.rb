@@ -139,6 +139,14 @@ class NameParser
 
   def modify_filename_with_time(modification_string)
     # Parse the modification string
+    # If they passed in xh, convert it into a xd+yh format
+    if modification_string.match?(/\d+h/)
+      hours = modification_string.match(/(\d+)h/)[1].to_i
+      days = hours / 24
+      hours = hours % 24
+      modification_string = "#{days}d+#{hours}h"
+    end
+
     match = modification_string.match(/^(\d+)?([dwmy])?/)
     day_match = modification_string.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)
     today_tomorrow_match = modification_string.match(/^(today|tomorrow)/)
@@ -154,11 +162,11 @@ class NameParser
       if today_tomorrow_match[1] == "today"
         # Calculate the amount of days today is from self.date or if it doesn't exist, make it 0.
         starting_date = self.date ? Date.parse(self.date) : Date.today
-        amount = starting_date - Date.today
+        amount = Date.today - starting_date
       elsif today_tomorrow_match[1] == "tomorrow"
         # Calculate the amount of days tomorrow is from self.date or if it doesn't exist, make it 1.
         starting_date = self.date ? Date.parse(self.date) : Date.today
-        amount = starting_date - Date.today + 1
+        amount = Date.today + 1 - starting_date
       end
       unit = "d"
     else
