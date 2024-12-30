@@ -148,11 +148,6 @@ def process_non_underscored_dirs(base_dir)
       # Run nothing.rb if it exists
       nothing_script_path = File.join(target_nothing_dir, 'nothing.rb')
       
-      if entry == "My Project"
-        puts "DEBUG: running script #{nothing_script_path}"
-        puts "DEBUG: " + `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 ruby \"#{nothing_script_path}\" \"#{entry_path}\"` 
-      end
-
       if File.exist?(nothing_script_path)
         system("LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 ruby \"#{nothing_script_path}\" \"#{entry_path}\"")
       elsif entry == "My Project" && !File.exist?(nothing_script_path)

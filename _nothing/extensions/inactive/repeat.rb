@@ -36,6 +36,7 @@
 
 require 'fileutils'
 require 'date'
+require_relative '../name_parser'
 
 # Accept the root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
@@ -46,26 +47,70 @@ later_dir = File.join(root_dir, '_later')
 FileUtils.mkdir_p(done_dir)
 FileUtils.mkdir_p(later_dir)
 
+def calculate_modification_string(current_date, rule)
+  if rule =~ /^(\d+)([hdwmy])$/i
+    return rule
+  elsif rule =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i 
+    return rule 
+  elsif rule =~ /^(\d+)m-(\d+)$/
+    number = $1.to_i
+    specific_day = $2.to_i
+    target_month = current_date >> number
+    target_date = Date.new(target_month.year, target_month.month, specific_day) rescue nil
+    if target_date
+      # calculate the number of days between the current date and the target date
+      days_difference = (target_date - current_date).to_i
+      return "#{days_difference}d"
+    end
+  elsif rule =~ /^(\d+)w-((?:su|mo|tu|we|th|fr|sa)(?:-(?:su|mo|tu|we|th|fr|sa))*)$/i 
+    number = $1.to_i
+    weekdays = $2.split('-').map { |day| %w[su mo tu we th fr sa].index(day.downcase) }
+
+    # Calculate next dates for all specified weekdays
+    next_dates = weekdays.map do |target_weekday|
+      days_ahead = (target_weekday - current_date.wday + 7) % 7
+      days_ahead = 7 if days_ahead.zero? # Move to next week if today is the target weekday
+      current_date + days_ahead
+    end
+
+    # Return the earliest next date
+    target_date = next_dates.min
+    if target_date
+      # calculate the number of days between the current date and the target date
+      days_difference = (target_date - current_date).to_i
+      return "#{days_difference}d"
+    end
+  elsif rule =~ /^(\d+)m-(\d*)(su|mo|tu|we|th|fr|sa)$/i
+    number = $1.to_i
+    nth = $2.empty? ? 1 : $2.to_i # Default to 1 if nth is missing
+    weekday = %w[su mo tu we th fr sa].index($3.downcase)
+  
+    target_month = current_date >> number
+    first_day = Date.new(target_month.year, target_month.month, 1)
+    first_weekday = first_day + ((weekday - first_day.wday + 7) % 7)
+    target_date = first_weekday + ((nth - 1) * 7) rescue nil
+    if target_date
+      # calculate the number of days between the current date and the target date
+      days_difference = (target_date - current_date).to_i
+      return "#{days_difference}d"
+    end
+  else
+    # Invalid rule
+    return nil
+  end
+end
+
 # Method to calculate the next date based on the repetition rule
 def calculate_next_date(current_date, parsed)
   rule = parsed[:rule]
   task_name = parsed[:name]
   extension = parsed[:extension]
 
-  if rule =~ /^(\d+)([dwmy])$/i
-    number = $1.to_i
-    unit = $2.downcase
-
-    case unit
-    when 'd' # Days
-      return current_date + number
-    when 'w' # Weeks
-      return current_date + (number * 7)
-    when 'm' # Months
-      return current_date >> number
-    when 'y' # Years
-      return current_date >> (number * 12)
-    end
+  if rule =~ /^(\d+)([hdwmy])$/i
+    parser = NameParser.new("#{current_date}.doesntmatter.txt")
+    new_filename = parser.modify_filename_with_time(rule)
+    new_filename_parser = NameParser.new(new_filename)
+    return Date.strptime(new_filename_parser.date, '%Y-%m-%d') rescue nil
   elsif rule =~ /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i
     target_weekday = Date::DAYNAMES.index($1.capitalize)
     days_ahead = (target_weekday - current_date.wday) % 7
@@ -196,12 +241,17 @@ def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   return unless current_date # Skip invalid dates
 
   # Calculate the next date
-  next_date = calculate_next_date(current_date, parsed)
-  return unless next_date # Skip invalid rules
+  modification_string = calculate_modification_string(current_date, parsed[:rule])
+  return unless modification_string # Skip invalid rules
+  filename_parser = NameParser.new(filename)
+  new_filename = filename_parser.modify_filename_with_time(modification_string)
+
+  # if task_name == "folder-six-hours-strict"
+  #   puts "DEBUG: next_date: #{next_date}"
+  # end
 
   # Create the next instance
-  next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.@#{rule}#{extension ? ".#{extension}" : ''}"
-  next_file_path = File.join(to_dir, next_filename)
+  next_file_path = File.join(to_dir, new_filename)
   unless File.exist?(next_file_path)
     FileUtils.cp_r(file_path, next_file_path)
   end
