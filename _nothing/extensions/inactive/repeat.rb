@@ -245,14 +245,7 @@ def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   modification_string = calculate_modification_string(current_date, parsed[:rule])
   return unless modification_string # Skip invalid rules
   filename_parser = NameParser.new(filename)
-  if filename == "2024-12-29+0600.task-six-hours-strict.@6h.txt"
-    puts "DEBUG: repeat_logic: #{filename_parser.repeat_logic}"
-  end
   new_filename = filename_parser.modify_filename_with_time(modification_string)
-
-  if filename == "2024-12-29+0600.task-six-hours-strict.@6h.txt"
-    puts "DEBUG: modification_string: #{modification_string}, filename: #{filename}, new_filename: #{new_filename}, repeat_logic: #{filename_parser.repeat_logic}"
-  end
 
   # Create the next instance
   next_file_path = File.join(to_dir, new_filename)
