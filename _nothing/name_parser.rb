@@ -138,6 +138,12 @@ class NameParser
   end
 
   def modify_filename_with_time(modification_string)
+    debug = false
+    if @filename == "my-task.txt" && modification_string == "7h"
+      debug = true
+      puts "DEBUG: ping"
+      puts "DEBUG: #{modification_string.match?(/^\d+h$/)}"
+    end
     # Parse the modification string
     # If they passed in xh, convert it into a xd+yh format
     if modification_string.match?(/^\d+h$/)
@@ -145,6 +151,27 @@ class NameParser
       days = hours / 24
       hours = hours % 24
       modification_string = "#{days}d+#{hours}h"
+      if @filename == "my-task.txt" && debug
+        puts "DEBUG: modification_string: #{modification_string}"
+      end
+    end
+
+    # If the modification string is in the format of xd+yh, we need to find out if the change
+    # would cause us to pass midnight. If it does, we need to increment the date by one day and
+    # change the yh value to be the number of hours after midnight.
+    # So this should change the modification string.
+    if modification_string.match?(/^\d+d\+\d+h$/)
+      current_days = modification_string.match(/^(\d+)d/)[1].to_i
+      current_hours = modification_string.match(/\+(\d+)h$/)[1].to_i
+      base_time = self.time ? Time.strptime(self.time, "%H%M") : Time.now
+      hours_until_midnight = 24 - base_time.hour
+      if current_hours > hours_until_midnight
+        current_days += 1
+      end
+      modification_string = "#{current_days}d+#{current_hours}h"
+      if @filename == "my-task.txt" && debug
+        puts "DEBUG: modification_string: #{modification_string}"
+      end
     end
 
     match = modification_string.match(/^(\d+)?([dwmy])?/)
