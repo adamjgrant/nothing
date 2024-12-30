@@ -4,6 +4,7 @@ require "time"
 class NameParser
   def initialize(filename)
     @filename = filename
+    @time = nil
 
     @dow_regex = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
     @standard_regex = /\d{4}-\d{2}-\d{2}/
@@ -103,11 +104,16 @@ class NameParser
 
   def time
     return nil if @subdomain == nil
+    return @time if @time
     without_the_former = @subdomain.split("+")
     without_the_former.shift
     _time = without_the_former.join
     return nil if _time == ""
     return _time
+  end
+
+  def time=(new_time)
+    @time = new_time
   end
 
   def notify
