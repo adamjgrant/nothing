@@ -24,7 +24,10 @@ class NameParser
     @domain = split.shift
     
     # Repeat Logic
-    if split.length > 0 && (split[0].match?(@relative_regex) || split[0].match?(@dow_regex))
+    optional_at_regex = /^@?/
+    optional_at_dow_regex = Regexp.new(optional_at_regex.source + @dow_regex.source)
+    optional_at_relative_regex = /^@?\d+[hdwmy]/
+    if split.length > 0 && (split[0].match?(optional_at_relative_regex) || split[0].match?(optional_at_dow_regex)) 
       @repeat_logic = split.shift
     end
 
@@ -154,7 +157,8 @@ class NameParser
     if modification_string.match?(/^\d+d\+\d+h$/)
       current_days = modification_string.match(/^(\d+)d/)[1].to_i
       current_hours = modification_string.match(/\+(\d+)h$/)[1].to_i
-      base_time = self.time ? Time.strptime(self.time, "%H%M") : Time.now
+      default_time = self.date == Date.today.strftime('%Y-%m-%d') ? Time.now : Time.strptime("0000", "%H%M")
+      base_time = self.time ? Time.strptime(self.time, "%H%M") : default_time
       hours_until_midnight = 24 - base_time.hour
       if current_hours > hours_until_midnight
         current_days += 1
