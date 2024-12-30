@@ -213,9 +213,12 @@ def handle_default_repeating_task(file_path, filename, parsed, from_dir, to_dir)
     FileUtils.cp_r(file_path, next_file_path)
   end
 
+  if task_name == "mytask-sunday"
+    puts "DEBUG: filename_parser.inspect: #{filename_parser.inspect}, repeat_logic: #{filename_parser.repeat_logic}, extension: #{filename_parser.extension}"
+  end
+
   # Rename the current file to remove the repetition rule
-  newfilename_parser = NameParser.new(new_filename)
-  renamed_file = newfilename_parser.filename.gsub(".#{newfilename_parser.repeat_logic}", '')
+  renamed_file = filename_parser.filename.gsub(".#{filename_parser.repeat_logic}#{"." if filename_parser.extension}#{filename_parser.extension}", "#{"." if filename_parser.extension}#{filename_parser.extension}")
   File.rename(file_path, File.join(from_dir, renamed_file))
 end
 

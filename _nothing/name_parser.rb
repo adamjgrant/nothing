@@ -24,7 +24,7 @@ class NameParser
     @domain = split.shift
     
     # Repeat Logic
-    if split.length > 0 && split[0].match?(@relative_regex)
+    if split.length > 0 && (split[0].match?(@relative_regex) || split[0].match?(@dow_regex))
       @repeat_logic = split.shift
     end
 
@@ -172,6 +172,7 @@ class NameParser
     if day_match
       # Calculate the amount by counting when the next occurence of the day would be from today.
       amount = %w[sunday monday tuesday wednesday thursday friday saturday].index(day_match[1]) - Date.today.wday
+      amount = 7 if amount == 0
       unit = "d"
     elsif today_tomorrow_match
       if today_tomorrow_match[1] == "today"
