@@ -498,6 +498,26 @@ class NameParserTest < Minitest::Test
         "name" => "repeat-on-sundays",
         "repeat-logic" => "sunday",
         "extension" => "txt"
+      },
+      'today.repeat-on-sundays.@sunday.txt' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["today"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "repeat-on-sundays",
+        "repeat-logic" => "@sunday",
+        "extension" => "txt"
+      },
+      'today.repeat-6h.@6h.txt' => {
+        "date-decorators" => [],
+        "date" => @computed_dates["today"],
+        "time" => nil,
+        "notify" => false,
+        "name-decorators" => [],
+        "name" => "repeat-6h",
+        "repeat-logic" => "@6h",
+        "extension" => "txt"
       }
     }
 
