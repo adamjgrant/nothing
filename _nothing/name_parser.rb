@@ -140,7 +140,7 @@ class NameParser
   def modify_filename_with_time(modification_string)
     # Parse the modification string
     # If they passed in xh, convert it into a xd+yh format
-    if modification_string.match?(/\d+h/)
+    if modification_string.match?(/^\d+h$/)
       hours = modification_string.match(/(\d+)h/)[1].to_i
       days = hours / 24
       hours = hours % 24
