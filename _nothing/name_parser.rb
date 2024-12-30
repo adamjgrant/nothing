@@ -150,6 +150,12 @@ class NameParser
       modification_string = "#{days}d+#{hours}h"
     end
 
+    # If there is no explicit time in the filename, Go based off the current time if the task is for today or
+    # if it has both no date or time.
+    # If it's explicitly not today, assume the non-today date at midnight.
+    default_time = Time.now if self.date == Date.today.strftime('%Y-%m-%d') || self.date.nil? && self.time.nil?
+    default_time = Time.strptime("0000", "%H%M") if !self.date.nil? && self.date != Date.today.strftime('%Y-%m-%d')
+
     # If the modification string is in the format of xd+yh, we need to find out if the change
     # would cause us to pass midnight. If it does, we need to increment the date by one day and
     # change the yh value to be the number of hours after midnight.
@@ -157,7 +163,6 @@ class NameParser
     if modification_string.match?(/^\d+d\+\d+h$/)
       current_days = modification_string.match(/^(\d+)d/)[1].to_i
       current_hours = modification_string.match(/\+(\d+)h$/)[1].to_i
-      default_time = self.date == Date.today.strftime('%Y-%m-%d') ? Time.now : Time.strptime("0000", "%H%M")
       base_time = self.time ? Time.strptime(self.time, "%H%M") : default_time
       hours_until_midnight = 24 - base_time.hour
       if current_hours > hours_until_midnight
@@ -198,7 +203,7 @@ class NameParser
     # or +3h to set a time relative to the current time
     explicit_time = nil
     relative_time = nil
-    base_time = self.time ? Time.strptime(self.time, "%H%M") : Time.now # Parse self.time or default to midnight
+    base_time = self.time ? Time.strptime(self.time, "%H%M") : default_time # Parse self.time or default to midnight
     
     if new_time && new_time.match?(/\+?\d+h/)
       found_relative_time = new_time.match(/(\d+)h/)[1].to_i  # Extract the number of hours
