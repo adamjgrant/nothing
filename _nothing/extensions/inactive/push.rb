@@ -43,7 +43,25 @@ def process_push_directories(root_dir)
       is_directory = File.directory?(file_path)
       filename = File.basename(file_path)
       parser = NameParser.new(filename)
+      # Push should always add to dates that are today/now or in the future
+      # so we need to check if the date is in the past. If it is, let's set it to today.
+      parser_date = Date.parse(parser.date) if parser.date
+      if parser_date && parser_date < Date.today
+        # Use a modification string to add the appropriate number of days based on the current parser.date value
+        days_to_add = (Date.today - parser_date).to_i
+        _modification_string = "#{days_to_add}d"
+        parser = NameParser.new(parser.modify_filename_with_time(_modification_string))
+      end
+      
       modification_string = "#{rand(1..10)}d" if random
+
+      # Similarly, we should make sure the time is in the future if the date is also set to today and the modification is for hours
+      # without days.
+      parser_time = Time.parse(parser.time.insert(2, ":")) if parser.time
+      if parser_date == Date.today && parser_time && parser_time < Time.now && modification_string.match?(/\d+h/)
+        parser.time = Time.now.strftime("%H%M")
+      end
+
       new_filename = parser.modify_filename_with_time(modification_string)
       new_path = File.join(later_dir, new_filename)
       FileUtils.mv(file_path, new_path)

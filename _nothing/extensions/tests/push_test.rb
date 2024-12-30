@@ -57,7 +57,7 @@ class PushExtensionTest < Minitest::Test
 
   def test_push_with_time_value
     # Test for _push-1d
-    filename_1d = "#{@today.strftime('%Y-%m-%d')}+1300.test-task.txt"
+    filename_1d = "#{@today.strftime('%Y-%m-%d')}+2359.test-task.txt"
     file_path_1d = File.join(@push_1d_dir, filename_1d)
     FileUtils.mkdir_p(@push_1d_dir) # Ensure the directory exists
     File.write(file_path_1d, "Test content")
@@ -77,7 +77,7 @@ class PushExtensionTest < Minitest::Test
     system("ruby #{@extension_path} #{@test_root}")
 
     # Validate _push-1d file
-    expected_filename_1d = "#{(@today + 1).strftime('%Y-%m-%d')}+1300.test-task.txt"
+    expected_filename_1d = "#{(@today + 1).strftime('%Y-%m-%d')}+2359.test-task.txt"
     expected_file_path_1d = File.join(@later_dir, expected_filename_1d)
     assert File.exist?(expected_file_path_1d), "File with time value was not pushed to _later with +1 day (expected: #{expected_filename_1d}, from: #{filename_1d})."
 
@@ -180,7 +180,7 @@ class PushExtensionTest < Minitest::Test
     system("ruby #{@extension_path} #{@test_root}")
   
     # Verify folder is moved to _later with date incremented by 1 day
-    expected_folder_name = "#{Date.today.strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_name = "#{(Date.today + 1).strftime('%Y-%m-%d')}.folder-task"
     expected_folder_path = File.join(@later_dir, expected_folder_name)
     assert Dir.exist?(expected_folder_path), "Folder in _push-1d was not processed correctly."
   end
@@ -193,7 +193,7 @@ class PushExtensionTest < Minitest::Test
     system("ruby #{@extension_path} #{@test_root}")
   
     # Verify folder is moved to _later with date incremented by 7 days
-    expected_folder_name = "#{(Date.today+1).strftime('%Y-%m-%d')}.folder-task"
+    expected_folder_name = "#{(Date.today+7).strftime('%Y-%m-%d')}.folder-task"
     expected_folder_path = File.join(@later_dir, expected_folder_name)
     assert Dir.exist?(expected_folder_path), "Folder in _push-1w was not processed correctly. (#{folder_name}/#{expected_folder_name})"
   end
@@ -355,18 +355,18 @@ class PushExtensionTest < Minitest::Test
   end
   
   def test_push_xh_for_file_with_date_and_time
-    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0800"
+    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0001"
     filename = "#{date_and_time}.date-and-time-task.txt"
     file_path = File.join(@push_2h_dir, filename)
     File.write(file_path, "Test content")
     
     system("ruby #{@extension_path} #{@test_root}")
     
-    expected_time = (Time.parse("#{Date.today} 08:00") + 2 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_time = (Time.now + 2 * 3600).strftime('%Y-%m-%d+%H%M')
     expected_filename = "#{expected_time}.date-and-time-task.txt"
     expected_file_path = File.join(@later_dir, expected_filename)
     
-    assert File.exist?(expected_file_path), "File with date and time was not processed correctly for _push-2h."
+    assert File.exist?(expected_file_path), "File with date and time was not processed correctly for _push-2h. (Expected: #{expected_filename})"
   end
 
   def test_push_xh_for_directory_without_date_and_time
@@ -400,14 +400,14 @@ class PushExtensionTest < Minitest::Test
   end
   
   def test_push_xh_for_directory_with_date_and_time
-    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0800"
+    date_and_time = "#{Date.today.strftime('%Y-%m-%d')}+0001"
     directory_name = "#{date_and_time}.date-and-time-task"
     directory_path = File.join(@push_2h_dir, directory_name)
     FileUtils.mkdir_p(directory_path)
     
     system("ruby #{@extension_path} #{@test_root}")
     
-    expected_time = (Time.parse("#{Date.today} 08:00") + 2 * 3600).strftime('%Y-%m-%d+%H%M')
+    expected_time = (Time.now + 2 * 3600).strftime('%Y-%m-%d+%H%M')
     expected_directory_name = "#{expected_time}.date-and-time-task"
     expected_directory_path = File.join(@later_dir, expected_directory_name)
     
