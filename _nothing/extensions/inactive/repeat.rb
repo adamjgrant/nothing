@@ -202,18 +202,20 @@ def handle_default_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   return unless current_date # Skip invalid dates
 
   # Calculate the next date
-  next_date = calculate_next_date(current_date, parsed)
-  return unless next_date # Skip invalid rules
+  modification_string = calculate_modification_string(current_date, parsed[:rule])
+  return unless modification_string # Skip invalid rules
+  filename_parser = NameParser.new(filename)
+  new_filename = filename_parser.modify_filename_with_time(modification_string)
 
   # Create the next instance
-  next_filename = "#{next_date.strftime('%Y-%m-%d')}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}.#{rule}#{extension ? ".#{extension}" : ''}"
-  next_file_path = File.join(to_dir, next_filename)
+  next_file_path = File.join(to_dir, new_filename)
   unless File.exist?(next_file_path)
     FileUtils.cp_r(file_path, next_file_path)
   end
 
   # Rename the current file to remove the repetition rule
-  renamed_file = "#{date_prefix}#{parsed[:time] ? "+#{parsed[:time]}" : ''}.#{task_name}#{extension ? ".#{extension}" : ''}"
+  newfilename_parser = NameParser.new(new_filename)
+  renamed_file = newfilename_parser.filename.gsub(".#{newfilename_parser.repeat_logic}", '')
   File.rename(file_path, File.join(from_dir, renamed_file))
 end
 
@@ -245,10 +247,6 @@ def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   return unless modification_string # Skip invalid rules
   filename_parser = NameParser.new(filename)
   new_filename = filename_parser.modify_filename_with_time(modification_string)
-
-  # if task_name == "folder-six-hours-strict"
-  #   puts "DEBUG: next_date: #{next_date}"
-  # end
 
   # Create the next instance
   next_file_path = File.join(to_dir, new_filename)
