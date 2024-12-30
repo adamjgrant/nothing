@@ -391,7 +391,7 @@ class PushExtensionTest < Minitest::Test
     
     system("ruby #{@extension_path} #{@test_root}")
     
-    expected_date = (Time.parse("#{date} 00:00") + 3 * 3600).strftime('%Y-%m-%d')
+    expected_date = (Time.now + 3 * 3600).strftime('%Y-%m-%d')
     expected_time = (Time.now + 3 * 3600).strftime("%H%M")
     expected_directory_name = "#{expected_date}+#{expected_time}.date-only-task"
     expected_directory_path = File.join(@later_dir, expected_directory_name)

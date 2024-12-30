@@ -95,7 +95,10 @@ Dir.foreach(LATER_DIR) do |filename|
   if due_date && due_date <= Time.now
     if File.directory?(entry_path)
       to_path = File.join(BASE_DIR, filename)
-      FileUtils.mv(entry_path, to_path)
+      if filename == "2024-12-29.should-not-be-in-later.txt"
+        puts "DEBUG: #{entry_path} -> #{to_path}"
+      end
+      FileUtils.mv(entry_path, to_path) if !Dir.exist?(to_path)
     else
       from_path = entry_path
       to_path = File.join(BASE_DIR, filename)
