@@ -140,12 +140,32 @@ class NameParser
   def modify_filename_with_time(modification_string)
     # Parse the modification string
     match = modification_string.match(/^(\d+)?([dwmy])?/)
+    day_match = modification_string.match(/^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/)
+    today_tomorrow_match = modification_string.match(/^(today|tomorrow)/)
     new_time = modification_string.match(/(\+?\d+h?)$/)[1] if modification_string.match?(/(\+?\d+h?)$/)
-    raise ArgumentError, "Invalid modification string: #{modification_string}" unless match || new_time
-  
-    amount = match[1].to_i
-    unit = match[2]
+    raise ArgumentError, "Invalid modification string: #{modification_string}" unless match || new_time || day_match || today_tomorrow_match
 
+    # If it matches a day of the week, set the amount and unit accordingly
+    if day_match
+      # Calculate the amount by counting when the next occurence of the day would be from today.
+      amount = %w[sunday monday tuesday wednesday thursday friday saturday].index(day_match[1]) - Date.today.wday
+      unit = "d"
+    elsif today_tomorrow_match
+      if today_tomorrow_match[1] == "today"
+        # Calculate the amount of days today is from self.date or if it doesn't exist, make it 0.
+        starting_date = self.date ? Date.parse(self.date) : Date.today
+        amount = starting_date - Date.today
+      elsif today_tomorrow_match[1] == "tomorrow"
+        # Calculate the amount of days tomorrow is from self.date or if it doesn't exist, make it 1.
+        starting_date = self.date ? Date.parse(self.date) : Date.today
+        amount = starting_date - Date.today + 1
+      end
+      unit = "d"
+    else
+      amount = match[1].to_i
+      unit = match[2]
+    end
+  
     # new_time could be formatted as +1300 to set an explicit time
     # or +3h to set a time relative to the current time
     explicit_time = nil
