@@ -93,9 +93,10 @@ class TestDueDateMovement < Minitest::Test
 
     # Run the script
     system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    expected_file = "#{today}+1300+.Patrick.1d.md"
 
-    assert fuzzy_file_exists?(TEST_ROOT, "#{today}+1300+.Patrick.1d.md"), "File from earlier today should be in root"
-    refute fuzzy_file_exists?(LATER_DIR, "#{today}+1300+.Patrick.1d.md"), "File from earlier today should not be in later"
+    assert File.exist?(File.join(TEST_ROOT, expected_file)), "File (#{expected_file}) from earlier today should be in root"
+    refute File.exist?(File.join(LATER_DIR, expected_file)), "File (#{expected_file}) from earlier today should not be in later"
   end
 
   def test_time_based_movement
