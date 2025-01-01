@@ -85,16 +85,7 @@ Dir.foreach(LATER_DIR) do |filename|
       from_path = entry_path
       to_path = File.join(BASE_DIR, filename)
 
-      if filename == "2024-12-31+0001+.Patrick.1d.md"
-        puts "DEBUG: #{from_path} #{to_path}"
-      end
-
       FileUtils.mv(from_path, to_path)
-
-      if filename == "2024-12-31+0001+.Patrick.1d.md"
-        # Debug that the file now exists in the BASE_DIR
-        puts "DEBUG: #{to_path} exists: #{File.exist?(to_path)}"
-      end
     end
     moved_tasks = true
   end
@@ -117,10 +108,6 @@ Dir.foreach(BASE_DIR) do |filename|
     due_date = Time.new(due_date_as_date.year, due_date_as_date.month, due_date_as_date.day, time.hour, time.min)
   else
     due_date = nil
-  end
-
-  if filename == "2024-12-31+0001+.Patrick.1d.md"
-    puts "DEBUG: Shouldn't happen here #{entry_path} #{due_date} #{due_date > Time.now}"
   end
 
   if due_date && due_date > Time.now
