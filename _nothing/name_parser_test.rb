@@ -518,6 +518,16 @@ class NameParserTest < Minitest::Test
         "name" => "repeat-6h",
         "repeat-logic" => "@6h",
         "extension" => "txt"
+      },
+      '2024-12-31+1300+.Patrick.1d.md' => {
+        "date-decorators" => [],
+        "date" => "2024-12-31",
+        "time" => "1300",
+        "notify" => true,
+        "name-decorators" => [],
+        "name" => "Patrick",
+        "repeat-logic" => "1d",
+        "extension" => "md"
       }
     }
 

@@ -86,6 +86,17 @@ class TestDueDateMovement < Minitest::Test
            "Future-dated task should no longer be in the root directory."
   end
 
+  def test_patrick_file
+    today = Date.today.strftime('%Y-%m-%d')
+    patrick_file = File.join(LATER_DIR, "#{today}+0001+.Patrick.1d.md")
+
+    # Run the script
+    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+
+    assert fuzzy_file_exists?(TEST_ROOT, "#{today}+1300+.Patrick.1d.md"), "File from earlier today should be in root"
+    refute fuzzy_file_exists?(LATER_DIR, "#{today}+1300+.Patrick.1d.md"), "File from earlier today should not be in later"
+  end
+
   def test_time_based_movement
     # Set up a task with a date and time in the future
     future_time = Time.now + (2 * 60 * 60) # 2 hours from now
