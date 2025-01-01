@@ -6,6 +6,7 @@ Encoding.default_internal = Encoding::UTF_8
 
 require 'fileutils'
 require 'date'
+require_relative './name_parser'
 
 # Set the root directory to the provided argument or default to the current directory
 root_dir = ARGV[0] || File.expand_path('..', __dir__)
@@ -45,7 +46,7 @@ today = Date.today
 # Parse date prefix in new format YYYY-MM-DD or YYYY-MM-DD@HHMM
 def parse_yyyymmdd_prefix(filename)
   match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?\./)
-  if filename == "2024-01-01.my-folder-task"
+  if filename == "2024-12-31+0001+.Patrick.1d.md"
     puts "DEBUG: #{match}"
   end
   return nil unless match
@@ -90,14 +91,26 @@ Dir.foreach(LATER_DIR) do |filename|
   entry_path = File.join(LATER_DIR, filename)
 
   # Parse the optional date prefix
-  due_date = parse_yyyymmdd_prefix(filename)
+  parser = NameParser.new(filename)
+  due_date_as_date = Date.strptime(parser.date, '%Y-%m-%d') unless parser.date.nil?
+  time = Time.strptime(parser.time, '%H%M') unless parser.time.nil?
+  if time.nil? && due_date_as_date
+    due_date = Time.new(due_date_as_date.year, due_date_as_date.month, due_date_as_date.day)
+  elsif due_date_as_date
+    due_date = Time.new(due_date_as_date.year, due_date_as_date.month, due_date_as_date.day, time.hour, time.min)
+  else
+    due_date = nil
+  end
+
+  if filename == "2024-12-31+0001+.Patrick.1d.md"
+    puts "DEBUG: #{due_date}"
+  else
+    # puts "DEBUG: #{filename}"
+  end
 
   if due_date && due_date <= Time.now
     if File.directory?(entry_path)
       to_path = File.join(BASE_DIR, filename)
-      if filename == "2024-12-29.should-not-be-in-later.txt"
-        puts "DEBUG: #{entry_path} -> #{to_path}"
-      end
       FileUtils.mv(entry_path, to_path) if !Dir.exist?(to_path)
     else
       from_path = entry_path

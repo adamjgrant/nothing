@@ -89,6 +89,7 @@ class TestDueDateMovement < Minitest::Test
   def test_patrick_file
     today = Date.today.strftime('%Y-%m-%d')
     patrick_file = File.join(LATER_DIR, "#{today}+0001+.Patrick.1d.md")
+    File.write(patrick_file, "Task content for a now task")
 
     # Run the script
     system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
