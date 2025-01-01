@@ -43,31 +43,6 @@ File.delete(install_script) if File.exist?(install_script)
 # Set the current date
 today = Date.today
 
-# Parse date prefix in new format YYYY-MM-DD or YYYY-MM-DD@HHMM
-def parse_yyyymmdd_prefix(filename)
-  match = filename.match(/^(\d{4}-\d{2}-\d{2})(?:\+(\d{4}))?\./)
-  if filename == "2024-12-31+0001+.Patrick.1d.md"
-    puts "DEBUG: #{match}"
-  end
-  return nil unless match
-
-  date_part = match[1]
-  time_part = match[2]
-
-  begin
-    date = Date.strptime(date_part, '%Y-%m-%d')
-    if time_part
-      hour = time_part[0..1].to_i
-      minute = time_part[2..3].to_i
-      time = Time.new(date.year, date.month, date.day, hour, minute)
-      return time
-    end
-    Time.new(date.year, date.month, date.day)
-  rescue ArgumentError
-    nil
-  end
-end
-
 # Always run nlp.rb first if it exists
 nlp_script_path = File.join(EXTENSIONS_DIR, 'nlp.rb')
 if File.exist?(nlp_script_path)
@@ -104,8 +79,6 @@ Dir.foreach(LATER_DIR) do |filename|
 
   if filename == "2024-12-31+0001+.Patrick.1d.md"
     puts "DEBUG: #{due_date}"
-  else
-    # puts "DEBUG: #{filename}"
   end
 
   if due_date && due_date <= Time.now
@@ -129,7 +102,16 @@ Dir.foreach(BASE_DIR) do |filename|
   entry_path = File.join(BASE_DIR, filename)
 
   # Parse the optional date prefix
-  due_date = parse_yyyymmdd_prefix(filename)
+  parser = NameParser.new(filename)
+  due_date_as_date = Date.strptime(parser.date, '%Y-%m-%d') unless parser.date.nil?
+  time = Time.strptime(parser.time, '%H%M') unless parser.time.nil?
+  if time.nil? && due_date_as_date
+    due_date = Time.new(due_date_as_date.year, due_date_as_date.month, due_date_as_date.day)
+  elsif due_date_as_date
+    due_date = Time.new(due_date_as_date.year, due_date_as_date.month, due_date_as_date.day, time.hour, time.min)
+  else
+    due_date = nil
+  end
 
   if due_date && due_date > Time.now
     if File.directory?(entry_path)
