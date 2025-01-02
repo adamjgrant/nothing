@@ -10,6 +10,7 @@ require_relative './name_parser'
 
 # Set the root directory to the provided argument or default to the current directory
 root_dir = ARGV[0] || File.expand_path('..', __dir__)
+puts "DEBUG: ROOT DIR IS #{root_dir}"
 
 # Ensure the script is running inside a folder named '_nothing'
 unless File.basename(__dir__) == '_nothing'
@@ -81,11 +82,14 @@ Dir.foreach(LATER_DIR) do |filename|
     if File.directory?(entry_path)
       to_path = File.join(BASE_DIR, filename)
       FileUtils.mv(entry_path, to_path) if !Dir.exist?(to_path)
+      # Change modified time to now
+      FileUtils.touch(to_path)
     else
       from_path = entry_path
       to_path = File.join(BASE_DIR, filename)
-
       FileUtils.mv(from_path, to_path)
+      # Change modified time to now
+      FileUtils.touch(to_path)
     end
     moved_tasks = true
   end

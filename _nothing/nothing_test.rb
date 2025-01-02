@@ -37,7 +37,7 @@ class TestDueDateMovement < Minitest::Test
 
   def test_due_date_movement
     # Run the main script with the test root directory
-    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('_nothing/nothing.rb', TEST_ROOT)} #{TEST_ROOT}")
   
     # Verify overdue and due-today tasks were moved to the base directory
     assert fuzzy_file_exists?(TEST_ROOT, "#{(Date.today - 1).strftime('%Y-%m-%d')}.Task overdue.txt"),
@@ -75,7 +75,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(future_task, "Task content for a future task")
   
     # Run the script
-    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('_nothing/nothing.rb', TEST_ROOT)} #{TEST_ROOT}")
   
     # Verify the task is moved to '_later'
     assert fuzzy_file_exists?(LATER_DIR, "#{future_date}.Future task.txt"),
@@ -92,7 +92,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(patrick_file, "Task content for a now task")
 
     # Run the script
-    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('_nothing/nothing.rb', TEST_ROOT)} #{TEST_ROOT}")
     expected_file = "#{today}+0001+.Patrick.1d.md"
 
     assert File.exist?(File.join(TEST_ROOT, expected_file)), "File (#{expected_file}) from earlier today should be in root"
@@ -110,7 +110,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(future_task, "Task content for a future time task")
   
     # Run the script
-    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('_nothing/nothing.rb', TEST_ROOT)} #{TEST_ROOT}")
   
     # Verify the task remains in '_later' because its time has not yet passed
     assert fuzzy_file_exists?(LATER_DIR, "#{future_date_str}+#{future_time_str}.Task future with time.txt"),
@@ -124,7 +124,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(past_task, "Task content for a past time task")
   
     # Run the script again
-    system("ruby #{File.expand_path('./nothing.rb', __dir__)} #{TEST_ROOT}")
+    system("ruby #{File.expand_path('_nothing/nothing.rb', TEST_ROOT)} #{TEST_ROOT}")
   
     # Verify the past task is moved to the root because its time has passed
     assert fuzzy_file_exists?(TEST_ROOT, "#{past_date_str}+#{past_time_str}.Task past with time.txt"),
@@ -154,7 +154,7 @@ class TestDueDateMovement < Minitest::Test
     FileUtils.mkdir_p(File.join(old_project_dir, '_nothing'))
 
     # Run the script
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    nothing_script_path = File.expand_path('_nothing/nothing.rb', TEST_ROOT)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
 
     # Assertions
@@ -201,7 +201,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(task_file, "Task content")
 
     # Run the script
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    nothing_script_path = File.expand_path('_nothing/nothing.rb', TEST_ROOT)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
 
     # Assertions
@@ -224,7 +224,7 @@ class TestDueDateMovement < Minitest::Test
     directory_with_future_date_and_time = File.join(TEST_ROOT, "#{future_date}+1300.my-folder-task")
     FileUtils.mkdir_p(directory_with_future_date_and_time)
   
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    nothing_script_path = File.expand_path('_nothing/nothing.rb', TEST_ROOT)
     # Run nothing.rb script
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
   
@@ -249,7 +249,7 @@ class TestDueDateMovement < Minitest::Test
     File.write(today_task, "Task content for today")
   
     # Run the script twice
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    nothing_script_path = File.expand_path('_nothing/nothing.rb', TEST_ROOT)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
   
@@ -272,7 +272,7 @@ class TestDueDateMovement < Minitest::Test
     File.utime(Time.now - 86_400, Time.now - 86_400, file_path)
     
     # Run the script
-    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    nothing_script_path = File.expand_path('_nothing/nothing.rb', TEST_ROOT)
     system("ruby #{nothing_script_path} #{TEST_ROOT}")
     
     # Verify the file has been moved to the root directory
