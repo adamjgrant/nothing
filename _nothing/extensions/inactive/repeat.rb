@@ -218,19 +218,9 @@ def handle_default_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   File.rename(file_path, File.join(from_dir, renamed_file))
 end
 
-# Process files in _done for default repetition
-Dir.foreach(done_dir) do |filename|
-  next if filename == '.' || filename == '..'
-  next if filename.start_with?('.') # Skip hidden files
-
-  file_path = File.join(done_dir, filename)
-  directory = File.directory?(file_path)
-  parsed = parse_filename(filename, directory)
-
-  handle_default_repeating_task(file_path, filename, parsed, done_dir, later_dir)
-end
-
-def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
+def handle_strict_repeating_task(filename, from_dir, to_dir)
+  file_path = File.join(from_dir, filename)
+  parsed = parse_filename(filename, File.directory?(file_path))
   return unless parsed[:rule] && parsed[:strict] # Process only strict rules
 
   date_prefix = parsed[:date]
@@ -254,15 +244,24 @@ def handle_strict_repeating_task(file_path, filename, parsed, from_dir, to_dir)
   end
 end
 
-# Process files in root for strict repetition
+# Process files in _done for default and strict repetition
+Dir.foreach(done_dir) do |filename|
+  next if filename == '.' || filename == '..'
+  next if filename.start_with?('.') # Skip hidden files
+
+  file_path = File.join(done_dir, filename)
+  directory = File.directory?(file_path)
+  parsed = parse_filename(filename, directory)
+
+  handle_default_repeating_task(file_path, filename, parsed, done_dir, later_dir)
+  handle_strict_repeating_task(filename, done_dir, later_dir)
+end
+
+# Process files in root for strict repetition only
 Dir.foreach(root_dir) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('.') # Skip hidden files
 
-  file_path = File.join(root_dir, filename)
-  directory = File.directory?(file_path)
-  parsed = parse_filename(filename, directory)
-
   # Process files and directories
-  handle_strict_repeating_task(file_path, filename, parsed, root_dir, later_dir)
+  handle_strict_repeating_task(filename, root_dir, later_dir)
 end
