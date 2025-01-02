@@ -191,4 +191,22 @@ class AmnesiaTest < Minitest::Test
     skull_directory = File.join(@test_root, "#{(Date.today - 3).strftime('%Y-%m-%d')}+1200.»my-folder-task")
     assert Dir.exist?(skull_directory), "Directory with date and time did not have skull added correctly."
   end
+
+  def test_file_with_skull_modified_today_removes_skull
+    # Create a file with a skull character in the name and modified today
+    file_with_skull = File.join(@test_root, "»Task modified today.txt")
+    File.write(file_with_skull, "Task content")
+    FileUtils.touch(file_with_skull, mtime: Time.now) # Set modified time to today
+    
+    # Run the amnesia script
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+    
+    # Expected filename without the skull
+    expected_file = File.join(@test_root, "Task modified today.txt")
+    
+    # Assertions
+    assert File.exist?(expected_file), "File modified today with a skull should have the skull character removed."
+    refute File.exist?(file_with_skull), "Original file with skull character should no longer exist."
+  end
 end
