@@ -10,7 +10,6 @@ require_relative './name_parser'
 
 # Set the root directory to the provided argument or default to the current directory
 root_dir = ARGV[0] || File.expand_path('..', __dir__)
-puts "DEBUG: ROOT DIR IS #{root_dir}"
 
 # Ensure the script is running inside a folder named '_nothing'
 unless File.basename(__dir__) == '_nothing'
