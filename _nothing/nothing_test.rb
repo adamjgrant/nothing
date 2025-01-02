@@ -260,4 +260,30 @@ class TestDueDateMovement < Minitest::Test
     assert File.exist?(expected_task_path), "Task for today should have been moved to the root of the subfolder."
     refute File.exist?(today_task), "Task for today should no longer be in '_later' subfolder."
   end
+
+  def test_file_modified_yesterday_due_today_moves_to_root_and_updates_mod_time
+    # Create a file in _later with today's date but a modification time set to yesterday
+    today_date = Date.today.strftime('%Y-%m-%d')
+    file_name = "#{today_date}.task-modified-yesterday.txt"
+    file_path = File.join(LATER_DIR, file_name)
+    File.write(file_path, "Task content for a due task")
+    
+    # Set modification time to yesterday
+    File.utime(Time.now - 86_400, Time.now - 86_400, file_path)
+    
+    # Run the script
+    nothing_script_path = File.expand_path('./nothing.rb', __dir__)
+    system("ruby #{nothing_script_path} #{TEST_ROOT}")
+    
+    # Verify the file has been moved to the root directory
+    expected_path = File.join(TEST_ROOT, file_name)
+    assert File.exist?(expected_path), "File due today and modified yesterday should be moved to the root directory."
+    
+    # Verify the modification time is updated to today
+    mod_time = File.mtime(expected_path).to_date
+    assert_equal Date.today, mod_time, "Modification time should be updated to today for files moved to the root."
+    
+    # Verify the file is no longer in _later
+    refute File.exist?(file_path), "File due today and modified yesterday should no longer be in '_later'."
+  end
 end
