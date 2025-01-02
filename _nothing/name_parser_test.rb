@@ -737,4 +737,23 @@ class NameParserTest < Minitest::Test
     expected_date = (Date.today + 1).strftime('%Y-%m-%d')
     assert_equal "#{expected_date}.my-task.txt", new_filename, "Moving task explicitly to tomorrow failed"
   end
+
+  def test_add_name_decorators
+    parser = NameParser.new("2024-01-01.hello.txt")
+    parser.name_decorators = ["■"]
+    new_filename = parser.filename
+    assert_equal "2024-01-01.■hello.txt", new_filename, "Adding name decorators failed"
+  end
+
+  def test_remove_name_decorators
+    parser = NameParser.new("2024-01-01.■hello.txt")
+    parser.name_decorators = []
+    new_filename = parser.filename
+    assert_equal "2024-01-01.hello.txt", new_filename, "Removing name decorators failed"
+  end
+
+  def test_filename_should_not_start_with_dot
+    parser = NameParser.new("my task wo date.txt")
+    assert_equal "my task wo date.txt", parser.filename, "Filename should not start with a dot"
+  end
 end

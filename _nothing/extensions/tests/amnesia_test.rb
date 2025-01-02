@@ -35,8 +35,8 @@ class AmnesiaTest < Minitest::Test
     FileUtils.touch(@today_file, mtime: now)
 
     # Dynamically calculate a date that will result in a single skull
-    one_skull_date = (Date.today - 3).strftime('%Y-%m-%d') # 3 days ago
-    @file_with_date_and_task = File.join(@test_root, "#{one_skull_date}.my task with date.txt")
+    one_skull_date = (Date.today - 3) # 3 days ago
+    @file_with_date_and_task = File.join(@test_root, "#{one_skull_date.strftime('%Y-%m-%d')}.my task with date.txt")
     File.write(@file_with_date_and_task, "Task content")
     FileUtils.touch(@file_with_date_and_task, mtime: Time.now - (3 * 24 * 60 * 60)) # Set modified time to 3 days ago
 
@@ -51,6 +51,8 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
     skull_file = File.join(@test_root, "»Task three days old.txt")
+    # Set the modified time of the file to three days old
+    FileUtils.touch(skull_file, mtime: Time.now - (3 * 24 * 60 * 60))
     assert File.exist?(skull_file), "The file modified three days ago should have one skull emoji."
   end
 
@@ -60,6 +62,8 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
     skull_file = File.join(@test_root, "»»Task four days old.txt")
+    # Set the modified time of the file to four days ago
+    FileUtils.touch(skull_file, mtime: Time.now - (4 * 24 * 60 * 60))
     assert File.exist?(skull_file), "The file modified four days ago should have two skull emojis."
   end
 
@@ -69,6 +73,8 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
     skull_file = File.join(@test_root, "»»»Task five days old.txt")
+    # Set the modified time of skull_file to five days ago
+    FileUtils.touch(skull_file, mtime: Time.now - (5 * 24 * 60 * 60))
     assert File.exist?(skull_file), "The file modified five days ago should have three skull emojis."
   end
 
@@ -78,6 +84,8 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
 
     done_file = File.join(@test_root, '_done', "»»»»Task six days old.txt")
+    # Set the modified time of done_file to six days ago
+    FileUtils.touch(done_file, mtime: Time.now - (6 * 24 * 60 * 60))
     assert File.exist?(done_file), "The file modified six days ago should be archived with four skull emojis."
   end
 
@@ -95,8 +103,10 @@ class AmnesiaTest < Minitest::Test
     system("ruby #{amnesia_extension_path} #{@test_root}")
   
     # Dynamically calculate expected filenames
-    one_skull_date = (Date.today - 3).strftime('%Y-%m-%d')
-    expected_with_date = File.join(@test_root, "#{one_skull_date}.»my task with date.txt")
+    one_skull_date = (Date.today - 3)
+    expected_with_date = File.join(@test_root, "#{one_skull_date.strftime("%Y-%m-%d")}.»my task with date.txt")
+    # Set modified time of file to one_skull_date
+    FileUtils.touch(expected_with_date, mtime: one_skull_date.to_time)
     expected_without_date = File.join(@test_root, "»my task wo date.txt")
   
     # Assertions

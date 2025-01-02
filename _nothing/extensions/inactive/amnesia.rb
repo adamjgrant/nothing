@@ -3,6 +3,7 @@
 
 require 'fileutils'
 require 'date'
+require_relative '../name_parser'
 
 # Accept a root directory as a command-line argument, defaulting to the current directory
 root_dir = ARGV[0] || Dir.pwd
@@ -25,6 +26,7 @@ end
 Dir.foreach(BASE_DIR) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('.') # Skip hidden files (like `.keep`)
+  parser = NameParser.new(filename)
 
   file_path = File.join(BASE_DIR, filename)
 
@@ -39,30 +41,19 @@ Dir.foreach(BASE_DIR) do |filename|
   # Determine the number of skulls based on days_old
   skull_count = [0, days_old - 2].max # Start applying skulls at 3 days old
 
-  if skull_count > 0
+  # Found skull count in the filename
+  found_skull_count = parser.name_decorators.count { |decorator| decorator == '»' }
+
+  # If the file was modified today, ensure no skulls are applied
+
+  if skull_count > 0 || found_skull_count > 0
+    skull_count = 0 if days_old == 0
     skulls = '»' * [skull_count, 4].min # Cap the skull count at 4
 
-    # Split filename by "."
-    parent_array = filename.split('.')
-    first_part = parent_array[0]
-    second_part = parent_array[1]
-
-    if is_directory
-      extension = ""
-    else
-      extension = "." + parent_array[-1]
-    end
-
-    # Check if the first part matches any of the date conditions
-    if is_date_part?(first_part)
-      date_part = first_part + "."
-      task_part = second_part
-    else
-      # If not a date, apply skulls to the whole filename
-      task_part = first_part
-    end
-    base_name = task_part.gsub(/^(»+)/, '') # Remove any existing skulls
-    new_filename = "#{date_part}#{skulls}#{base_name}#{extension}"
+    # Remove existing skulls if days_old is 0
+    new_name_decorators = parser.name_decorators.select { |decorator| decorator != '»' } # Remove any existing skulls
+    parser.name_decorators = new_name_decorators + skulls.split("")
+    new_filename = parser.filename
 
     new_file_path = File.join(BASE_DIR, new_filename)
 

@@ -5,6 +5,7 @@ class NameParser
   def initialize(filename)
     @filename = filename
     @time = nil
+    @name_decorators = nil
 
     @dow_regex = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/
     @standard_regex = /\d{4}-\d{2}-\d{2}/
@@ -123,6 +124,7 @@ class NameParser
   end
 
   def name_decorators
+    return @name_decorators if !@name_decorators.nil?
     decorators = []
     chars = @domain.chars
     next_character = chars.shift
@@ -131,6 +133,12 @@ class NameParser
       next_character = chars.shift
     end
     return decorators
+  end
+
+  def name_decorators=(new_decorators)
+    name = self.name
+    @name_decorators = new_decorators || []
+    @domain = @name_decorators.join + name
   end
 
   def name
@@ -271,6 +279,7 @@ class NameParser
   end
 
   def filename
-    return "#{self.date_decorators.join}#{self.subdomain_date_and_time}#{"+" if self.notify}.#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
+    subdomain_date_and_time_exists = self.subdomain_date_and_time != nil && self.subdomain_date_and_time != ""
+    return "#{self.date_decorators.join}#{self.subdomain_date_and_time}#{"+" if self.notify}#{"." if subdomain_date_and_time_exists}#{self.name_decorators.join}#{self.name}#{"." if self.repeat_logic}#{self.repeat_logic}#{"." if self.extension}#{self.extension}"
   end
 end
