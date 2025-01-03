@@ -18,7 +18,7 @@ directories_to_process.each do |current_dir|
 
   # Process all files in the current directory
   Dir.foreach(current_dir) do |filename|
-    next if filename == '.' || filename == '..'
+    next if filename == '.' || filename == '..' || filename == '.DS_Store'
     next if filename.start_with?('.') # Skip hidden files
 
     file_path = File.join(current_dir, filename)

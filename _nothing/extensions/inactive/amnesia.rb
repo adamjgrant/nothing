@@ -24,7 +24,7 @@ end
 
 # Process all task files in the base directory
 Dir.foreach(BASE_DIR) do |filename|
-  next if filename == '.' || filename == '..'
+  next if filename == '.' || filename == '..' || filename == '.DS_Store'
   next if filename.start_with?('.') # Skip hidden files (like `.keep`)
   parser = NameParser.new(filename)
 

@@ -246,7 +246,7 @@ end
 
 # Process files in _done for default and strict repetition
 Dir.foreach(done_dir) do |filename|
-  next if filename == '.' || filename == '..'
+  next if filename == '.' || filename == '..' || filename == '.DS_Store'
   next if filename.start_with?('.') # Skip hidden files
 
   file_path = File.join(done_dir, filename)
@@ -258,7 +258,7 @@ end
 
 # Process files in root for strict repetition only
 Dir.foreach(root_dir) do |filename|
-  next if filename == '.' || filename == '..'
+  next if filename == '.' || filename == '..' || filename == '.DS_Store'
   next if filename.start_with?('.') # Skip hidden files
 
   # Process files and directories

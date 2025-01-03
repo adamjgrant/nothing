@@ -61,7 +61,7 @@ def process_directory(root_dir, test_mode = false)
   new_notifications = []
   
   Dir.foreach(root_dir) do |filename|
-    next if filename == '.' || filename == '..'
+    next if filename == '.' || filename == '..' || filename == '.DS_Store'
     next if filename.start_with?('.') # Skip hidden files
 
     # Skip directories that start with an underscore

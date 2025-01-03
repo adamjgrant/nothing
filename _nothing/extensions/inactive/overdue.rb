@@ -30,7 +30,7 @@ later_dir = File.join(root_dir, '_later')
 
 def process_directory(directory, root_dir)
   Dir.foreach(directory) do |filename|
-    next if filename == '.' || filename == '..'
+    next if filename == '.' || filename == '..' || filename == '.DS_Store'
     next if filename.start_with?('.') # Skip hidden files
 
     file_path = File.join(directory, filename)
