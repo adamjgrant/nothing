@@ -17,7 +17,7 @@ unless File.basename(__dir__) == '_nothing'
   exit 1
 end
 
-BASE_DIR = root_dir.force_encoding('UTF-8')
+BASE_DIR = root_dir
 LATER_DIR = File.join(BASE_DIR, '_later')
 DONE_DIR = File.join(BASE_DIR, '_done')
 NOTHING_DIR = File.join(BASE_DIR, '_nothing')
@@ -62,6 +62,7 @@ moved_tasks = false
 # Check tasks in _later for due tasks
 Dir.foreach(LATER_DIR) do |filename|
   next if filename == '.' || filename == '..' || filename == '.DS_Store'
+  next if filename.start_with?('.')
 
   entry_path = File.join(LATER_DIR, filename).force_encoding('UTF-8')
 
@@ -98,6 +99,7 @@ end
 Dir.foreach(BASE_DIR) do |filename|
   next if filename == '.' || filename == '..' || filename == '.DS_Store'
   next if filename.start_with?('_') # Skip special directories like _later, _done, _nothing
+  next if filename.start_with?('.')
 
   entry_path = File.join(BASE_DIR, filename).force_encoding('UTF-8')
 
@@ -132,7 +134,7 @@ run_extensions(BASE_DIR)
 # Recursively process non-underscored directories
 def process_non_underscored_dirs(base_dir)
   Dir.foreach(base_dir) do |entry|
-    next if entry.start_with?('_') || entry == '.' || entry == '..' || entry == '.DS_Store'
+    next if entry.start_with?('_') || entry.start_with?('.') || entry == '.' || entry == '..' || entry == '.DS_Store'
 
     entry_path = File.join(base_dir, entry).force_encoding('UTF-8')
 
