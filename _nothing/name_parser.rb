@@ -3,7 +3,7 @@ require "time"
 
 class NameParser
   def initialize(filename)
-    @filename = filename.force_encoding("UTF-8")
+    @filename = filename.force_encoding("UTF-8") rescue filename
     @time = nil
     @name_decorators = nil
 
