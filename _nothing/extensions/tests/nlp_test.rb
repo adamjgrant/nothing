@@ -260,4 +260,62 @@ class ConvertDayToDateTest < Minitest::Test
     expected_dir_path = File.join(@test_root, expected_dir_name)
     assert Dir.exist?(expected_dir_path), "Directory with relative date should be renamed correctly."
   end
+
+  def test_later_directory
+    # Test that a file called "today.mytask.txt" in the _later directory is processed
+    later_today_file = File.join(@later_dir, "today.mytask.txt")
+    File.write(later_today_file, "Test content for today.mytask.txt")
+    
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+    
+    # Verify the file is renamed correctly
+    expected_today_file = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}.mytask.txt")
+    assert File.exist?(expected_today_file), "File in _later directory should be renamed correctly."
+  end
+
+  def test_later_directory_with_directory
+    # Do the same test as above, but with a directory in the _later directory
+    later_today_dir = File.join(@later_dir, "today.project-folder")
+    FileUtils.mkdir_p(later_today_dir)
+
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify the directory is renamed correctly
+    expected_today_dir = File.join(@test_root, "#{Date.today.strftime('%Y-%m-%d')}.project-folder")
+    assert Dir.exist?(expected_today_dir), "Directory in _later directory should be renamed correctly."
+  end
+
+  def test_any_push_directory
+    # Test that in a folder called _push-5d, a file called "today.mytask.txt" is processed and scheduled for today + 5 days.
+    push_5d_dir = File.join(@test_root, "_push-5d")
+    FileUtils.mkdir_p(push_5d_dir)
+    
+    today_file = File.join(push_5d_dir, "today.mytask.txt")
+    File.write(today_file, "Test content for today.mytask.txt")
+    
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+    
+    # Verify the file is renamed correctly
+    expected_today_file = File.join(@test_root, "#{(Date.today + 5).strftime('%Y-%m-%d')}.mytask.txt")
+    assert File.exist?(expected_today_file), "File in _push-5d directory should be renamed correctly."
+  end
+
+  def test_any_push_directory_with_directory
+    # Do the same test as above, but with a directory in the _push-5d directory
+    push_5d_dir = File.join(@test_root, "_push-5d")
+    FileUtils.mkdir_p(push_5d_dir)
+
+    today_dir = File.join(push_5d_dir, "today.project-folder")
+    FileUtils.mkdir_p(today_dir)
+
+    extension_path = File.expand_path('../../extensions/nlp.rb', __dir__)
+    system("ruby #{extension_path} #{@test_root}")
+
+    # Verify the directory is renamed correctly
+    expected_today_dir = File.join(@test_root, "#{(Date.today + 5).strftime('%Y-%m-%d')}.project-folder")
+    assert Dir.exist?(expected_today_dir), "Directory in _push-5d directory should be renamed correctly."
+  end
 end
