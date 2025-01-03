@@ -17,7 +17,7 @@ unless File.basename(__dir__) == '_nothing'
   exit 1
 end
 
-BASE_DIR = root_dir
+BASE_DIR = root_dir.force_encoding('UTF-8')
 LATER_DIR = File.join(BASE_DIR, '_later')
 DONE_DIR = File.join(BASE_DIR, '_done')
 NOTHING_DIR = File.join(BASE_DIR, '_nothing')
@@ -63,7 +63,7 @@ moved_tasks = false
 Dir.foreach(LATER_DIR) do |filename|
   next if filename == '.' || filename == '..'
 
-  entry_path = File.join(LATER_DIR, filename)
+  entry_path = File.join(LATER_DIR, filename).force_encoding('UTF-8')
 
   # Parse the optional date prefix
   parser = NameParser.new(filename)
@@ -99,7 +99,7 @@ Dir.foreach(BASE_DIR) do |filename|
   next if filename == '.' || filename == '..'
   next if filename.start_with?('_') # Skip special directories like _later, _done, _nothing
 
-  entry_path = File.join(BASE_DIR, filename)
+  entry_path = File.join(BASE_DIR, filename).force_encoding('UTF-8')
 
   # Parse the optional date prefix
   parser = NameParser.new(filename)
@@ -134,8 +134,7 @@ def process_non_underscored_dirs(base_dir)
   Dir.foreach(base_dir) do |entry|
     next if entry.start_with?('_') || entry == '.' || entry == '..'
 
-    entry_path = File.join(base_dir, entry)
-    entry_path = entry_path.encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
+    entry_path = File.join(base_dir, entry).force_encoding('UTF-8')
 
     if File.directory?(entry_path)
       # Copy _nothing folder if it doesn't exist
