@@ -219,4 +219,21 @@ class AmnesiaTest < Minitest::Test
     assert File.exist?(expected_file), "File modified today with a skull should have the skull character removed."
     refute File.exist?(file_with_skull), "Original file with skull character should no longer exist."
   end
+
+  def test_single_skull_issue_i_found
+    # Test that a file called "2025-01-03.»check income.txt" that was created and modified today
+    # is renamed to 2025-01-03.check income.txt
+    file_with_skull = File.join(@test_root, "2025-01-03.»check income.txt")
+    File.write(file_with_skull, "Task content")
+    FileUtils.touch(file_with_skull, mtime: Time.now) # Set modified time to today
+
+    # Run the amnesia script
+    amnesia_extension_path = File.expand_path('../../extensions/amnesia.rb', __dir__)
+    # Intentionally using the wrong formatting to make sure it enforces UTF-8
+    system("ruby #{amnesia_extension_path} #{@test_root}")
+
+    # Expected filename without the skull
+    expected_file = File.join(@test_root, "2025-01-03.check income.txt")
+    assert File.exist?(expected_file), "File modified today with a skull should have the skull character removed."
+  end
 end
