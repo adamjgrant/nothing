@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'date'
+require 'timecop'
 
 class AddOverdueEmojiTest < Minitest::Test
   def setup
@@ -30,6 +31,15 @@ class AddOverdueEmojiTest < Minitest::Test
     File.write(@due_today_file, "Due today task content")
     File.write(@future_file, "Future task content")
     File.write(@non_date_file, "Non-date task content")
+
+    # Create a _push-12h directory
+    @push_12h_dir = File.join(@test_root, '_push-12h')
+    FileUtils.mkdir_p(@push_12h_dir)
+
+    # Create a file set to today at 11:00 AM
+    @today_at_11am_file = File.join(@push_12h_dir, "#{Date.today.strftime('%Y-%m-%d')}+1100.overnight-rescheduled-task.txt")
+    File.write(@today_at_11am_file, "Task content")
+    FileUtils.touch(@today_at_11am_file, mtime: Time.now) # Ensure file modified today
   end
 
   def test_add_overdue_emoji
@@ -173,5 +183,25 @@ class AddOverdueEmojiTest < Minitest::Test
     expected_dir = File.join(@test_root, "■#{(Date.today - 1).strftime('%Y-%m-%d')}.my-folder-task-overdue")
     assert Dir.exist?(expected_dir), "Overdue directory should be renamed to include the overdue mark."
     refute Dir.exist?(overdue_dir), "Original overdue directory should no longer exist."
+  end
+
+
+  def test_push_12h_changes_to_tomorrow_0030
+    # Freeze time at 12:30 PM today
+    Timecop.freeze(Time.parse("#{Date.today} 12:30")) do
+      # Run the extension
+      extension_path = File.expand_path('../../extensions/push.rb', __dir__)
+      system("ruby #{extension_path} #{@test_root}")
+
+      # Expected filename after moving
+      expected_file = File.join(@test_root, '_later', "#{(Date.today + 1).strftime('%Y-%m-%d')}+0030.overnight-rescheduled-task.txt")
+
+      # Assertions
+      assert File.exist?(expected_file), "File was not renamed correctly to tomorrow at 00:30."
+      refute File.exist?(@today_at_11am_file), "Original file still exists in the _push-12h directory."
+    end
+  ensure
+    # Reset time after test
+    Timecop.return
   end
 end

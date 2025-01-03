@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    minitest (5.25.4)
+    timecop (0.9.10)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  minitest
+  timecop
+
+BUNDLED WITH
+   1.17.2

@@ -8,3 +8,4 @@ test
 !/README.md          # Re-include README.md
 .DS_Store
 lazy_update.sh
+vendor/bundle

@@ -6,6 +6,10 @@ For technical documentation, quickstart, and expanded usage, see [the documentat
 
 # Run tests
 
+First `bundle install --path vendor/bundle` to install the necessary gems.
+
+The Gemfile is only needed for tests, not for Nothing itself.
+
 ```bash
-ruby _nothing/test.rb
+bundle exec ruby _nothing/test.rb
 ```
