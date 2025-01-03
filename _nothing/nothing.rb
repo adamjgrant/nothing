@@ -135,6 +135,7 @@ def process_non_underscored_dirs(base_dir)
     next if entry.start_with?('_') || entry == '.' || entry == '..'
 
     entry_path = File.join(base_dir, entry)
+    entry_path = entry_path.encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
 
     if File.directory?(entry_path)
       # Copy _nothing folder if it doesn't exist
