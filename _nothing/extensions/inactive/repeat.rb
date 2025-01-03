@@ -254,7 +254,6 @@ Dir.foreach(done_dir) do |filename|
   parsed = parse_filename(filename, directory)
 
   handle_default_repeating_task(file_path, filename, parsed, done_dir, later_dir)
-  handle_strict_repeating_task(filename, done_dir, later_dir)
 end
 
 # Process files in root for strict repetition only

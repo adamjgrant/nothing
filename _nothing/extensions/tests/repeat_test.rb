@@ -521,21 +521,4 @@ class RepeatingTaskTest < Minitest::Test
     # Assert that the next strict occurrence folder exists
     assert Dir.exist?(expected_folder), "Strict 6-hour repeating folder was not created (#{expected_folder})."
   end
-
-  def test_six_hour_strict_repeat_folder_in_done
-    # Create a folder with a strict 6-hour repeat rule
-    folder_name = "#{@today.strftime('%Y-%m-%d')}+0600.folder-six-hours-strict-in-done.@6h"
-    folder_path = File.join(@done_dir, folder_name)
-    FileUtils.mkdir_p(folder_path)
-  
-    # Run the extension
-    run_extension
-  
-    # Calculate the next strict occurrence 6 hours from now
-    next_occurrence = Time.strptime("06:00", "%H:%M") + (6 * 3600)
-    expected_folder = File.join(@later_dir, "#{@today.strftime('%Y-%m-%d')}+#{next_occurrence.strftime('%H%M')}.folder-six-hours-strict-in-done.@6h")
-  
-    # Assert that the next strict occurrence folder exists
-    assert Dir.exist?(expected_folder), "Strict 6-hour repeating folder was not created (#{expected_folder})."
-  end
 end
